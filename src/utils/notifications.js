@@ -19,9 +19,6 @@ export async function registerForPushNotifications() {
   let token = null;
 
   try {
-    // Check if running in Expo Go (which doesn't support push notifications in SDK 53+)
-    const isExpoGo = typeof navigator !== 'undefined' && navigator.product === 'ReactNative';
-
     const { status: existingStatus } = await Notifications.getPermissionsAsync();
     let finalStatus = existingStatus;
 
@@ -35,17 +32,28 @@ export async function registerForPushNotifications() {
       return null;
     }
 
-    // Only try to get push token if permissions are granted
+    // Only try to get push token in production/development builds
+    // Skip in Expo Go which doesn't support remote notifications in SDK 53+
     if (finalStatus === 'granted') {
       try {
-        token = (await Notifications.getExpoPushTokenAsync()).data;
+        // Attempt to get push token - will fail gracefully in Expo Go
+        const tokenData = await Notifications.getExpoPushTokenAsync();
+        token = tokenData.data;
         console.log('Push notification token:', token);
       } catch (error) {
-        console.log('Could not get push token (normal in Expo Go):', error.message);
+        // Expected error in Expo Go SDK 53+ - just log it
+        if (error.message.includes('Expo Go')) {
+          console.log(
+            'Skipping remote push notifications - not supported in Expo Go (use development build for full functionality)'
+          );
+        } else {
+          console.log('Could not get push token:', error.message);
+        }
       }
     }
   } catch (error) {
-    console.log('Push notification setup error (normal in Expo Go):', error.message);
+    // Catch any permission-related errors
+    console.log('Push notification setup error:', error.message);
     return null;
   }
 

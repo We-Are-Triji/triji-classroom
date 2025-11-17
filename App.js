@@ -3,6 +3,8 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { StatusBar } from 'expo-status-bar';
 import { View, Alert } from 'react-native';
+import * as Sentry from 'sentry-expo';
+import * as Updates from 'expo-updates';
 import {
   SplashScreen,
   LoginScreen,
@@ -32,6 +34,13 @@ import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from './src/config/firebaseConfig';
 // Import Firebase to ensure it's initialized before the app starts
 import './src/config/firebaseConfig';
+
+Sentry.init({
+  dsn: process.env.EXPO_PUBLIC_SENTRY_DSN,
+  enableInExpoDevelopment: false,
+  debug: false,
+  environment: __DEV__ ? 'development' : Updates?.channel || 'production',
+});
 
 const Stack = createStackNavigator();
 
@@ -66,6 +75,9 @@ export default function App() {
       const error = event.reason || event;
       console.error('Unhandled promise rejection:', error);
       logErrorToStorage(error, 'Unhandled Promise Rejection');
+      try {
+        Sentry.Native.captureException(error);
+      } catch {}
 
       if (__DEV__) {
         Alert.alert('Unhandled Error', error.message || String(error));
@@ -76,6 +88,9 @@ export default function App() {
     const handleGlobalError = (error, isFatal) => {
       console.error('Global error caught:', error, 'isFatal:', isFatal);
       logErrorToStorage(error, isFatal ? 'Fatal Error' : 'Non-Fatal Error');
+      try {
+        Sentry.Native.captureException(error);
+      } catch {}
 
       if (isFatal && !__DEV__) {
         // In production, log but don't crash the app
@@ -88,16 +103,9 @@ export default function App() {
       ErrorUtils.setGlobalHandler(handleGlobalError);
     }
 
-    // Add event listener for promise rejections (web/modern RN)
-    if (typeof window !== 'undefined') {
-      window.addEventListener('unhandledrejection', handleUnhandledRejection);
-    }
-
-    return () => {
-      if (typeof window !== 'undefined') {
-        window.removeEventListener('unhandledrejection', handleUnhandledRejection);
-      }
-    };
+    // Note: window.addEventListener for unhandledrejection only works on web
+    // React Native doesn't have window.addEventListener for Promise rejections
+    // ErrorUtils.setGlobalHandler will catch most errors in React Native
   }, []);
 
   // Listen to auth state changes and manage Firestore listeners
@@ -200,7 +208,12 @@ export default function App() {
         setLoadingMessage('Setting up notifications...');
         // Register for push notifications (will gracefully handle Expo Go limitations)
         try {
-          await registerForPushNotifications();
+          // Only set up notifications in development build, not Expo Go
+          if (!__DEV__ || process.env.EXPO_PUBLIC_BUILD_TYPE === 'development') {
+            await registerForPushNotifications();
+          } else {
+            console.log('Skipping push notification setup in Expo Go');
+          }
         } catch (error) {
           console.log('Push notification setup skipped:', error.message);
         }
