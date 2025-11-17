@@ -1,6 +1,6 @@
 import { Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import * as Sentry from 'sentry-expo';
+import * as Sentry from '@sentry/react-native';
 
 /**
  * Comprehensive error handling utility

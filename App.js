@@ -3,7 +3,6 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { StatusBar } from 'expo-status-bar';
 import { View, Alert } from 'react-native';
-import * as Sentry from 'sentry-expo';
 import * as Updates from 'expo-updates';
 import {
   SplashScreen,
@@ -34,15 +33,28 @@ import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from './src/config/firebaseConfig';
 // Import Firebase to ensure it's initialized before the app starts
 import './src/config/firebaseConfig';
+import * as Sentry from '@sentry/react-native';
 
 // Initialize Sentry only if DSN is configured
 if (process.env.EXPO_PUBLIC_SENTRY_DSN) {
   Sentry.init({
     dsn: process.env.EXPO_PUBLIC_SENTRY_DSN,
-    enableInExpoDevelopment: false,
     debug: __DEV__,
     environment: __DEV__ ? 'development' : Updates?.channel || 'production',
     tracesSampleRate: __DEV__ ? 1.0 : 0.2,
+    // Adds more context data to events (IP address, cookies, user, etc.)
+    sendDefaultPii: true,
+    // Enable Logs in development
+    enableLogs: __DEV__,
+    // Session Replay (optional - can be resource intensive)
+    _experiments: {
+      replaysSessionSampleRate: 0.1,
+      replaysOnErrorSampleRate: 1.0,
+    },
+    // Mobile replay and feedback integrations
+    integrations: [Sentry.mobileReplayIntegration(), Sentry.feedbackIntegration()],
+    // Uncomment the line below to enable Spotlight (https://spotlightjs.com)
+    // spotlight: __DEV__,
   });
   console.log('Sentry initialized');
 } else {

@@ -52,13 +52,6 @@
             "extraProguardRuleFiles": ["android/app/proguard-rules.pro"]
           }
         }
-      ],
-      [
-        "sentry-expo",
-        {
-          "organization": "elysium-05",
-          "project": "react-native"
-        }
       ]
     ],
     "assetBundlePatterns": ["assets/**/*"],

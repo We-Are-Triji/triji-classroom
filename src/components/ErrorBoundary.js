@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import * as Sentry from 'sentry-expo';
+import * as Sentry from '@sentry/react-native';
 
 class ErrorBoundary extends React.Component {
   constructor(props) {

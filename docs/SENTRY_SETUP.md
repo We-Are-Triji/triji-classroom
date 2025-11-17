@@ -2,6 +2,8 @@
 
 > **Purpose:** Complete guide to set up Sentry error tracking for crash monitoring and debugging
 
+> **⚠️ IMPORTANT:** This project uses `@sentry/react-native` (NOT `sentry-expo`). The `sentry-expo` package was deprecated and has been removed. All Sentry functionality is now handled through the native Sentry SDK with Expo compatibility.
+
 ---
 
 ## 📖 What is Sentry?
@@ -148,10 +150,12 @@ If you see `Sentry DSN not configured`, check your `.env` file.
 
 ### 2. Test Error Tracking
 
+### Test Error Tracking
+
 Add a test error button in your app (temporary):
 
 ```javascript
-import * as Sentry from 'sentry-expo';
+import * as Sentry from '@sentry/react-native';
 
 // In your component
 <TouchableOpacity
