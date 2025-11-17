@@ -70,6 +70,53 @@ export default function App() {
   const [isInitiallyOffline, setIsInitiallyOffline] = useState(false);
   const [authChecked, setAuthChecked] = useState(false);
 
+  // Check for updates when app comes to foreground (production only)
+  useEffect(() => {
+    if (__DEV__) return; // Skip in development
+
+    const checkForUpdatesOnResume = async () => {
+      try {
+        const update = await Updates.checkForUpdateAsync();
+        if (update.isAvailable) {
+          console.log('📦 Update available in background, fetching...');
+          await Updates.fetchUpdateAsync();
+
+          // Notify user about update
+          Alert.alert(
+            'Update Available',
+            'A new version of the app has been downloaded. Restart to apply?',
+            [
+              {
+                text: 'Later',
+                style: 'cancel',
+              },
+              {
+                text: 'Restart Now',
+                onPress: async () => {
+                  await Updates.reloadAsync();
+                },
+              },
+            ]
+          );
+        }
+      } catch (error) {
+        console.error('Background update check failed:', error);
+      }
+    };
+
+    // Set up update listener
+    const subscription = Updates.addListener(event => {
+      if (event.type === Updates.UpdateEventType.UPDATE_AVAILABLE) {
+        console.log('Update available event triggered');
+        checkForUpdatesOnResume();
+      }
+    });
+
+    return () => {
+      subscription.remove();
+    };
+  }, []);
+
   // Global error handler for unhandled promise rejections and errors
   useEffect(() => {
     const logErrorToStorage = async (error, context) => {
@@ -193,7 +240,39 @@ export default function App() {
       try {
         setLoadingMessage('Loading assets...');
 
-        // Check network connectivity first
+        // Check for OTA updates first (before anything else)
+        if (!__DEV__) {
+          try {
+            setLoadingMessage('Checking for updates...');
+            const update = await Updates.checkForUpdateAsync();
+
+            if (update.isAvailable) {
+              console.log('📦 Update available, fetching...');
+              setLoadingMessage('Downloading update...');
+              await Updates.fetchUpdateAsync();
+              console.log('✅ Update downloaded, reloading app...');
+
+              // Reload the app to apply the update
+              await Updates.reloadAsync();
+              // Note: Code after reloadAsync won't execute
+              return;
+            } else {
+              console.log('✅ App is up to date');
+            }
+          } catch (error) {
+            console.error('Update check failed:', error);
+            // Log but continue - don't block app startup
+            if (process.env.EXPO_PUBLIC_SENTRY_DSN) {
+              try {
+                Sentry.captureException(error, {
+                  tags: { context: 'OTA Update Check' },
+                });
+              } catch (e) {}
+            }
+          }
+        }
+
+        // Check network connectivity
         const NetInfo = await import('@react-native-community/netinfo');
         const netState = await NetInfo.default.fetch();
 

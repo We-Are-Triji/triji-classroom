@@ -59,13 +59,12 @@
       "assetExts": ["png", "jpg"]
     },
     "updates": {
+      "enabled": true,
+      "checkAutomatically": "ON_LOAD",
       "fallbackToCacheTimeout": 0,
-      "url": "https://u.expo.dev/6a07be86-55ad-4659-b9b8-2d8cbdf18131",
-      "channel": "production"
+      "url": "https://u.expo.dev/6a07be86-55ad-4659-b9b8-2d8cbdf18131"
     },
-    "runtimeVersion": {
-      "policy": "appVersion"
-    },
+    "runtimeVersion": "1.0.0",
     "extra": {
       "eas": {
         "projectId": "6a07be86-55ad-4659-b9b8-2d8cbdf18131"

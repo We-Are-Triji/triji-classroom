@@ -24,6 +24,7 @@
     },
     "production": {
       "channel": "production",
+      "autoIncrement": true,
       "android": {
         "buildType": "apk",
         "gradleCommand": ":app:assembleRelease"
@@ -31,6 +32,14 @@
       "ios": {
         "resourceClass": "m-medium"
       }
+    }
+  },
+  "update": {
+    "production": {
+      "channel": "production"
+    },
+    "preview": {
+      "channel": "preview"
     }
   },
   "submit": {
