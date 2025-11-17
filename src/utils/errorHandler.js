@@ -1,5 +1,6 @@
 import { Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as Sentry from 'sentry-expo';
 
 /**
  * Comprehensive error handling utility
@@ -102,8 +103,19 @@ export function logError(error, context = 'Unknown') {
     console.error('Failed to save error log:', e);
   });
 
-  // In production, you could send this to error tracking service
-  // e.g., Sentry, LogRocket, Firebase Crashlytics
+  // Send to Sentry if configured
+  if (process.env.EXPO_PUBLIC_SENTRY_DSN) {
+    try {
+      Sentry.captureException(error, {
+        tags: {
+          context,
+        },
+        extra: details,
+      });
+    } catch (e) {
+      console.error('Failed to send error to Sentry:', e);
+    }
+  }
 }
 
 /**

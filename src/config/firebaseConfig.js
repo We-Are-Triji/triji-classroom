@@ -35,14 +35,22 @@ const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
 // This ensures user stays logged in even after app restart
 let auth;
 try {
-  auth = initializeAuth(app, {
-    persistence: getReactNativePersistence(AsyncStorage),
-  });
-  console.log('Firebase Auth initialized with AsyncStorage persistence');
+  // Check if auth is already initialized to prevent conflicts
+  const existingAuth = getApps().length > 0 ? getAuth(app) : null;
+
+  if (existingAuth) {
+    auth = existingAuth;
+    console.log('Using existing Firebase Auth instance');
+  } else {
+    auth = initializeAuth(app, {
+      persistence: getReactNativePersistence(AsyncStorage),
+    });
+    console.log('Firebase Auth initialized with AsyncStorage persistence');
+  }
 } catch (error) {
-  // Auth already initialized, get existing instance
+  // If initializeAuth fails, auth might be already initialized
+  console.log('Auth initialization error, using existing instance:', error.message);
   auth = getAuth(app);
-  console.log('Using existing Firebase Auth instance');
 }
 
 export { auth };

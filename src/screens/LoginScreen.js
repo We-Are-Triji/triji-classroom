@@ -67,13 +67,16 @@ export default function LoginScreen({ navigation }) {
       const savedRememberMe = await AsyncStorage.getItem('remember_me');
       if (savedRememberMe === 'true') {
         const savedEmail = await AsyncStorage.getItem('saved_email');
-        const savedPassword = await AsyncStorage.getItem('saved_password');
-        if (savedEmail) setEmail(savedEmail);
-        if (savedPassword) setPassword(savedPassword);
-        setRememberMe(true);
+        if (savedEmail) {
+          setEmail(savedEmail);
+          setRememberMe(true);
+        }
+        // Remove any old saved passwords from previous versions (security cleanup)
+        AsyncStorage.removeItem('saved_password').catch(() => {});
+        AsyncStorage.removeItem('last_user_email').catch(() => {});
       }
     } catch (error) {
-      console.log('Error loading saved credentials:', error);
+      console.log('Error loading saved email:', error);
     }
   };
 
@@ -165,21 +168,16 @@ export default function LoginScreen({ navigation }) {
         return;
       }
 
-      // Save credentials in background (non-blocking)
+      // Save only email for "remember me" - never store passwords in plain text
+      // Firebase Auth handles session persistence automatically via AsyncStorage
       if (rememberMe) {
         AsyncStorage.multiSet([
           ['saved_email', email],
-          ['saved_password', password],
           ['remember_me', 'true'],
-          ['last_user_email', email], // For offline detection
-        ]).catch(err => console.log('Error saving credentials:', err));
+        ]).catch(err => console.log('Error saving email:', err));
       } else {
-        AsyncStorage.multiRemove(['saved_email', 'saved_password', 'remember_me']).catch(err =>
-          console.log('Error removing credentials:', err)
-        );
-        // Keep last_user_email for offline mode
-        AsyncStorage.setItem('last_user_email', email).catch(err =>
-          console.log('Error saving last user:', err)
+        AsyncStorage.multiRemove(['saved_email', 'remember_me']).catch(err =>
+          console.log('Error removing saved data:', err)
         );
       }
 

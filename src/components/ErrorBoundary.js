@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+import * as Sentry from 'sentry-expo';
 
 class ErrorBoundary extends React.Component {
   constructor(props) {
@@ -26,8 +27,20 @@ class ErrorBoundary extends React.Component {
       errorInfo,
     });
 
-    // In production, send to error tracking service
-    // e.g., Sentry.captureException(error);
+    // Send to Sentry if configured
+    if (process.env.EXPO_PUBLIC_SENTRY_DSN) {
+      try {
+        Sentry.captureException(error, {
+          contexts: {
+            react: {
+              componentStack: errorInfo.componentStack,
+            },
+          },
+        });
+      } catch (e) {
+        console.error('Failed to send error to Sentry:', e);
+      }
+    }
   }
 
   handleReset() {

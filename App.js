@@ -35,12 +35,19 @@ import { auth } from './src/config/firebaseConfig';
 // Import Firebase to ensure it's initialized before the app starts
 import './src/config/firebaseConfig';
 
-Sentry.init({
-  dsn: process.env.EXPO_PUBLIC_SENTRY_DSN,
-  enableInExpoDevelopment: false,
-  debug: false,
-  environment: __DEV__ ? 'development' : Updates?.channel || 'production',
-});
+// Initialize Sentry only if DSN is configured
+if (process.env.EXPO_PUBLIC_SENTRY_DSN) {
+  Sentry.init({
+    dsn: process.env.EXPO_PUBLIC_SENTRY_DSN,
+    enableInExpoDevelopment: false,
+    debug: __DEV__,
+    environment: __DEV__ ? 'development' : Updates?.channel || 'production',
+    tracesSampleRate: __DEV__ ? 1.0 : 0.2,
+  });
+  console.log('Sentry initialized');
+} else {
+  console.log('Sentry DSN not configured - error tracking disabled');
+}
 
 const Stack = createStackNavigator();
 
@@ -75,9 +82,13 @@ export default function App() {
       const error = event.reason || event;
       console.error('Unhandled promise rejection:', error);
       logErrorToStorage(error, 'Unhandled Promise Rejection');
-      try {
-        Sentry.Native.captureException(error);
-      } catch {}
+      if (process.env.EXPO_PUBLIC_SENTRY_DSN) {
+        try {
+          Sentry.captureException(error);
+        } catch (e) {
+          console.error('Sentry error:', e);
+        }
+      }
 
       if (__DEV__) {
         Alert.alert('Unhandled Error', error.message || String(error));
@@ -88,9 +99,13 @@ export default function App() {
     const handleGlobalError = (error, isFatal) => {
       console.error('Global error caught:', error, 'isFatal:', isFatal);
       logErrorToStorage(error, isFatal ? 'Fatal Error' : 'Non-Fatal Error');
-      try {
-        Sentry.Native.captureException(error);
-      } catch {}
+      if (process.env.EXPO_PUBLIC_SENTRY_DSN) {
+        try {
+          Sentry.captureException(error);
+        } catch (e) {
+          console.error('Sentry error:', e);
+        }
+      }
 
       if (isFatal && !__DEV__) {
         // In production, log but don't crash the app
@@ -173,15 +188,8 @@ export default function App() {
         if (!netState.isConnected) {
           console.log('App starting in offline mode');
           setIsInitiallyOffline(true);
-          // Check for cached auth state
-          const cachedUser = await AsyncStorage.getItem('last_user_email');
-          if (cachedUser) {
-            setInitialRouteName('MainApp');
-          } else {
-            setInitialRouteName('Login');
-          }
-          setIsReady(true);
-          return;
+          // Firebase Auth handles offline persistence automatically
+          // Just wait for auth check and let onAuthStateChanged handle routing
         }
 
         // Preload any critical resources here
@@ -192,7 +200,7 @@ export default function App() {
         // The onAuthStateChanged listener will set initialRouteName
         let authWaitTime = 0;
         const authCheckInterval = 100;
-        const maxAuthWait = 3000;
+        const maxAuthWait = 5000; // Increased to 5 seconds for slow connections
 
         while (!authChecked && authWaitTime < maxAuthWait) {
           await new Promise(resolve => setTimeout(resolve, authCheckInterval));
@@ -201,7 +209,7 @@ export default function App() {
 
         // If auth check timed out or no route set, default to Login
         if (!initialRouteName) {
-          console.log('No initial route set, defaulting to Login');
+          console.log('Auth check completed, defaulting to Login screen');
           setInitialRouteName('Login');
         }
 
