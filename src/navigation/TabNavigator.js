@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Feather } from '@expo/vector-icons';
 import { Platform, Animated } from 'react-native';
@@ -8,11 +8,27 @@ import TaskboardScreen from '../screens/TaskboardScreen';
 import AnnouncementsScreen from '../screens/AnnouncementsScreen';
 import FreedomWallScreen from '../screens/FreedomWallScreen';
 import GradeCalculatorScreen from '../screens/GradeCalculatorScreen';
+import { startAllListeners } from '../utils/firestoreListeners';
+import { auth } from '../config/firebaseConfig';
 
 const Tab = createBottomTabNavigator();
 
 export default function TabNavigator() {
   const insets = useSafeAreaInsets();
+
+  // Start notification listeners when user reaches the main app
+  useEffect(() => {
+    console.log('TabNavigator mounted - starting notification listeners');
+
+    // Only start listeners if user is authenticated
+    if (auth.currentUser) {
+      startAllListeners();
+    } else {
+      console.warn('User not authenticated, cannot start listeners');
+    }
+
+    // Listeners are cleaned up in App.js when user logs out
+  }, []);
 
   return (
     <Tab.Navigator

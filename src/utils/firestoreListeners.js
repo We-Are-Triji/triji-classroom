@@ -24,6 +24,7 @@ export function startTasksListener() {
   try {
     // Track the timestamp when listener starts
     const listenerStartTime = new Date();
+    let isFirstSnapshot = true;
 
     const tasksQuery = query(collection(db, 'tasks'), orderBy('createdAt', 'desc'), limit(10));
 
@@ -37,6 +38,13 @@ export function startTasksListener() {
             return;
           }
 
+          // Skip the first snapshot - it contains existing documents
+          if (isFirstSnapshot) {
+            isFirstSnapshot = false;
+            console.log('Tasks listener: Initial snapshot received, skipping notifications');
+            return;
+          }
+
           snapshot.docChanges().forEach(change => {
             if (change.type === 'added') {
               try {
@@ -44,23 +52,28 @@ export function startTasksListener() {
                 const currentUser = auth.currentUser;
 
                 // Don't notify user about their own tasks
-                if (task.authorId === currentUser?.uid) {
+                if (task.authorId === currentUser?.uid || task.createdBy === currentUser?.uid) {
                   return;
                 }
 
-                // Only notify about tasks created AFTER listener started
+                // Additional check: Only notify about tasks created after listener started
                 const taskCreatedAt = task.createdAt?.toDate
                   ? task.createdAt.toDate()
                   : new Date(task.createdAt);
 
-                if (taskCreatedAt <= listenerStartTime) {
+                if (taskCreatedAt < listenerStartTime) {
+                  console.log('Skipping old task notification:', task.title);
                   return;
                 }
 
                 const subject = task.subjectCode || task.subject || 'Task';
                 const title = task.title || 'New assignment';
 
-                console.log('🔔 Sending Task notification:', { subject, title });
+                console.log('🔔 Sending Task notification:', {
+                  subject,
+                  title,
+                  createdAt: taskCreatedAt,
+                });
 
                 schedulePushNotification(
                   '📋 New Task Added',
@@ -107,6 +120,7 @@ export function startAnnouncementsListener() {
   try {
     // Track the timestamp when listener starts
     const listenerStartTime = new Date();
+    let isFirstSnapshot = true;
 
     const announcementsQuery = query(
       collection(db, 'announcements'),
@@ -123,22 +137,35 @@ export function startAnnouncementsListener() {
             return;
           }
 
+          // Skip the first snapshot - it contains existing documents
+          if (isFirstSnapshot) {
+            isFirstSnapshot = false;
+            console.log(
+              'Announcements listener: Initial snapshot received, skipping notifications'
+            );
+            return;
+          }
+
           snapshot.docChanges().forEach(change => {
             if (change.type === 'added') {
               try {
                 const announcement = change.doc.data();
                 const currentUser = auth.currentUser;
 
-                if (announcement.authorId === currentUser?.uid) {
+                if (
+                  announcement.authorId === currentUser?.uid ||
+                  announcement.createdBy === currentUser?.uid
+                ) {
                   return;
                 }
 
-                // Only notify about announcements created AFTER listener started
+                // Additional check: Only notify about announcements created after listener started
                 const announcementCreatedAt = announcement.createdAt?.toDate
                   ? announcement.createdAt.toDate()
                   : new Date(announcement.createdAt);
 
-                if (announcementCreatedAt <= listenerStartTime) {
+                if (announcementCreatedAt < listenerStartTime) {
+                  console.log('Skipping old announcement notification:', announcement.title);
                   return;
                 }
 
@@ -210,6 +237,7 @@ export function startFreedomWallListener() {
   try {
     // Track the timestamp when listener starts to only notify about NEW posts
     const listenerStartTime = new Date();
+    let isFirstSnapshot = true;
 
     const freedomWallQuery = query(
       collection(db, 'freedom-wall-posts'),
@@ -226,6 +254,13 @@ export function startFreedomWallListener() {
             return;
           }
 
+          // Skip the first snapshot - it contains existing documents
+          if (isFirstSnapshot) {
+            isFirstSnapshot = false;
+            console.log('Freedom Wall listener: Initial snapshot received, skipping notifications');
+            return;
+          }
+
           snapshot.docChanges().forEach(change => {
             if (change.type === 'added') {
               try {
@@ -233,16 +268,17 @@ export function startFreedomWallListener() {
                 const currentUser = auth.currentUser;
 
                 // Don't notify about own posts
-                if (post.authorId === currentUser?.uid) {
+                if (post.authorId === currentUser?.uid || post.userId === currentUser?.uid) {
                   return;
                 }
 
-                // Only notify about posts created AFTER listener started
+                // Additional check: Only notify about posts created after listener started
                 const postCreatedAt = post.createdAt?.toDate
                   ? post.createdAt.toDate()
                   : new Date(post.createdAt);
 
-                if (postCreatedAt <= listenerStartTime) {
+                if (postCreatedAt < listenerStartTime) {
+                  console.log('Skipping old Freedom Wall post notification');
                   return; // Post existed before listener started
                 }
 

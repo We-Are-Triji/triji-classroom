@@ -133,9 +133,9 @@ export default function App() {
         console.log('Auth state changed:', user ? 'Logged in' : 'Logged out');
 
         if (user) {
-          // User is signed in, start listeners
-          console.log('User authenticated, starting listeners');
-          startAllListeners();
+          // User is signed in
+          // Note: Listeners will be started after app is fully ready and user reaches MainApp
+          console.log('User authenticated');
 
           // Set initial route if not already set
           if (!hasSetInitialRoute && !isReady) {
@@ -214,16 +214,11 @@ export default function App() {
         }
 
         setLoadingMessage('Setting up notifications...');
-        // Register for push notifications (will gracefully handle Expo Go limitations)
+        // Register for push notifications (local notifications work in Expo Go)
         try {
-          // Only set up notifications in development build, not Expo Go
-          if (!__DEV__ || process.env.EXPO_PUBLIC_BUILD_TYPE === 'development') {
-            await registerForPushNotifications();
-          } else {
-            console.log('Skipping push notification setup in Expo Go');
-          }
+          await registerForPushNotifications();
         } catch (error) {
-          console.log('Push notification setup skipped:', error.message);
+          console.log('Push notification setup error:', error.message);
         }
 
         setLoadingMessage('Finalizing...');
