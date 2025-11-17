@@ -2,7 +2,7 @@
   "expo": {
     "name": "Triji",
     "slug": "triji-app",
-    "version": "1.5.1",
+    "version": "1.6.0",
     "orientation": "portrait",
     "userInterfaceStyle": "dark",
     "backgroundColor": "#1B2845",
@@ -15,7 +15,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.triji.app",
-      "buildNumber": "1.5.1"
+      "buildNumber": "1.6.0"
     },
     "android": {
       "adaptiveIcon": {
@@ -23,7 +23,7 @@
         "backgroundColor": "#1B2845"
       },
       "package": "com.triji.app",
-      "versionCode": 10501,
+      "versionCode": 10600,
       "permissions": [
         "RECEIVE_BOOT_COMPLETED",
         "VIBRATE",

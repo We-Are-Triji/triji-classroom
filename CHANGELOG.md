@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- semantic-release-insert-here -->
 
+## [1.6.0](https://github.com/gauciv/triji-app/compare/v1.5.1...v1.6.0) (2025-11-17)
+
+
+### ✨ Features
+
+* add sentry to automate crash report ([73627be](https://github.com/gauciv/triji-app/commit/73627be1d083ef8c16813e4b6bf89bc0c2c28afa))
+
+
+### 🐛 Bug Fixes
+
+* apply graceful error handling for sentry ([194c3d5](https://github.com/gauciv/triji-app/commit/194c3d50d235b217a726d8279c8d97edb240d29a))
+* resolve abrupt crush and utilize sentry ([d2249ec](https://github.com/gauciv/triji-app/commit/d2249ec29e260b194294d11f101c439571b7de66))
+* resolve duplicate sentry setup ([2d309a9](https://github.com/gauciv/triji-app/commit/2d309a9dfba61aaed50a178f12e24e29b0220dd8))
+* unresponsive notifications ([7099d06](https://github.com/gauciv/triji-app/commit/7099d06741120bb3bb728fc1f0420d471599aabc))
+
 ## [1.5.1](https://github.com/gauciv/triji-app/compare/v1.5.0...v1.5.1) (2025-11-15)
 
 
