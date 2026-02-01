@@ -15,20 +15,10 @@ import {
   Inter_500Medium,
   Inter_600SemiBold,
 } from '@expo-google-fonts/inter';
-import { Feather, MaterialCommunityIcons } from '@expo/vector-icons';
+import { Feather } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { db, auth } from '../config/firebaseConfig';
-import {
-  collection,
-  query,
-  orderBy,
-  limit,
-  getDocs,
-  getCountFromServer,
-  where,
-  doc,
-  getDoc,
-} from 'firebase/firestore';
+import { collection, query, orderBy, limit, getDocs, doc, getDoc } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
 
 const { width, height } = Dimensions.get('window');

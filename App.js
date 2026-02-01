@@ -22,7 +22,7 @@ import {
 } from './src/screens';
 import TabNavigator from './src/navigation/TabNavigator';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { NetworkProvider, useNetwork } from './src/context/NetworkContext';
+import { NetworkProvider } from './src/context/NetworkContext';
 import { ErrorBoundary, OfflineBanner, OfflineScreen } from './src/components';
 import {
   setupNotificationListeners,
@@ -67,7 +67,6 @@ export default function App() {
   const [isReady, setIsReady] = useState(false);
   const [initialRouteName, setInitialRouteName] = useState(null);
   const [loadingMessage, setLoadingMessage] = useState('Initializing...');
-  const [isInitiallyOffline, setIsInitiallyOffline] = useState(false);
   const [authChecked, setAuthChecked] = useState(false);
 
   // Check for updates when app comes to foreground (production only)
@@ -267,7 +266,7 @@ export default function App() {
                 Sentry.captureException(error, {
                   tags: { context: 'OTA Update Check' },
                 });
-              } catch (e) {}
+              } catch (e) { }
             }
           }
         }
@@ -278,7 +277,6 @@ export default function App() {
 
         if (!netState.isConnected) {
           console.log('App starting in offline mode');
-          setIsInitiallyOffline(true);
           // Firebase Auth handles offline persistence automatically
           // Just wait for auth check and let onAuthStateChanged handle routing
         }
@@ -320,7 +318,6 @@ export default function App() {
           },
           response => {
             console.log('Notification tapped:', response);
-            // TODO: Navigate to appropriate screen based on notification data
           }
         );
 
