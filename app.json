@@ -49,14 +49,22 @@
           "android": {
             "enableProguardInReleaseBuilds": true,
             "enableShrinkResourcesInReleaseBuilds": true,
-            "extraProguardRuleFiles": ["android/app/proguard-rules.pro"]
+            "extraProguardRuleFiles": [
+              "android/app/proguard-rules.pro"
+            ]
           }
         }
-      ]
+      ],
+      "expo-updates"
     ],
-    "assetBundlePatterns": ["assets/**/*"],
+    "assetBundlePatterns": [
+      "assets/**/*"
+    ],
     "packagerOpts": {
-      "assetExts": ["png", "jpg"]
+      "assetExts": [
+        "png",
+        "jpg"
+      ]
     },
     "updates": {
       "enabled": true,
@@ -64,7 +72,9 @@
       "fallbackToCacheTimeout": 0,
       "url": "https://u.expo.dev/6a07be86-55ad-4659-b9b8-2d8cbdf18131"
     },
-    "runtimeVersion": "1.0.0",
+    "runtimeVersion": {
+      "policy": "fingerprint"
+    },
     "extra": {
       "eas": {
         "projectId": "6a07be86-55ad-4659-b9b8-2d8cbdf18131"
