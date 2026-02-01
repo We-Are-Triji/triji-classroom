@@ -16,7 +16,6 @@ import {
   Image,
   ScrollView,
 } from 'react-native';
-import { BlurView } from 'expo-blur';
 import {
   useFonts,
   Inter_400Regular,
@@ -72,8 +71,8 @@ export default function LoginScreen({ navigation }) {
           setRememberMe(true);
         }
         // Remove any old saved passwords from previous versions (security cleanup)
-        AsyncStorage.removeItem('saved_password').catch(() => {});
-        AsyncStorage.removeItem('last_user_email').catch(() => {});
+        AsyncStorage.removeItem('saved_password').catch(() => { });
+        AsyncStorage.removeItem('last_user_email').catch(() => { });
       }
     } catch (error) {
       console.log('Error loading saved email:', error);
