@@ -33,6 +33,7 @@ import {
   doc,
   runTransaction,
   deleteDoc,
+  limit,
 } from 'firebase/firestore';
 import { auth } from '../config/firebaseConfig';
 import { onAuthStateChanged } from 'firebase/auth';
@@ -125,19 +126,19 @@ export default function FreedomWallScreen({ navigation }) {
 
       switch (sortBy) {
         case 'Newest to Oldest':
-          q = query(collection(db, 'freedom-wall-posts'), orderBy('createdAt', 'desc'));
+          q = query(collection(db, 'freedom-wall-posts'), orderBy('createdAt', 'desc'), limit(50));
           break;
         case 'Oldest to Newest':
-          q = query(collection(db, 'freedom-wall-posts'), orderBy('createdAt', 'asc'));
+          q = query(collection(db, 'freedom-wall-posts'), orderBy('createdAt', 'asc'), limit(50));
           break;
         case 'Most Hearts':
-          q = query(collection(db, 'freedom-wall-posts'), orderBy('likeCount', 'desc'));
+          q = query(collection(db, 'freedom-wall-posts'), orderBy('likeCount', 'desc'), limit(50));
           break;
         case 'Fewest Hearts':
-          q = query(collection(db, 'freedom-wall-posts'), orderBy('likeCount', 'asc'));
+          q = query(collection(db, 'freedom-wall-posts'), orderBy('likeCount', 'asc'), limit(50));
           break;
         default:
-          q = query(collection(db, 'freedom-wall-posts'), orderBy('createdAt', 'asc'));
+          q = query(collection(db, 'freedom-wall-posts'), orderBy('createdAt', 'asc'), limit(50));
       }
 
       const unsubscribe = onSnapshot(
@@ -677,7 +678,7 @@ export default function FreedomWallScreen({ navigation }) {
                     }}
                     timestamp="Just now"
                     rotation="2deg"
-                    onLike={() => {}}
+                    onLike={() => { }}
                     isLiked={false}
                     textColor={getTextColor(selectedColor)}
                   />

@@ -19,7 +19,7 @@ import {
 } from '@expo-google-fonts/inter';
 import { Feather } from '@expo/vector-icons';
 import { auth, db } from '../config/firebaseConfig';
-import { collection, query, orderBy, where, onSnapshot, doc, getDoc } from 'firebase/firestore';
+import { collection, query, orderBy, where, onSnapshot, doc, getDoc, limit } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
 import AnnouncementCardSkeleton from '../components/AnnouncementCardSkeleton';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -59,7 +59,7 @@ export default function AnnouncementsScreen({ navigation }) {
 
     try {
       // Set up announcements listener
-      const q = query(collection(db, 'announcements'), orderBy('createdAt', 'desc'));
+      const q = query(collection(db, 'announcements'), orderBy('createdAt', 'desc'), limit(30));
 
       const unsubscribe = onSnapshot(
         q,

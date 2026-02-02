@@ -19,7 +19,7 @@ import { Feather } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { db, auth } from '../config/firebaseConfig';
-import { collection, query, onSnapshot, orderBy } from 'firebase/firestore';
+import { collection, query, onSnapshot, orderBy, limit } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
 import TaskCardSkeleton from '../components/TaskCardSkeleton';
 
@@ -55,7 +55,7 @@ export default function TaskboardScreen({ navigation }) {
     setError(null);
 
     try {
-      const q = query(collection(db, 'tasks'), orderBy('deadline', sortOrder));
+      const q = query(collection(db, 'tasks'), orderBy('deadline', sortOrder), limit(50));
 
       const unsubscribe = onSnapshot(
         q,
