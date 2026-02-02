@@ -2,7 +2,9 @@
   "compilerOptions": {
     "target": "esnext",
     "module": "commonjs",
-    "lib": ["es2021"],
+    "lib": [
+      "es2021"
+    ],
     "jsx": "react-native",
     "noEmit": true,
     "isolatedModules": true,
@@ -12,12 +14,24 @@
     "esModuleInterop": true,
     "skipLibCheck": true,
     "resolveJsonModule": true,
+    "allowJs": true,
+    "checkJs": false,
     "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": [
+        "src/*"
+      ]
     }
   },
-  "include": ["src/**/*", "App.js", "*.js"],
-  "exclude": ["node_modules", "babel.config.js", "metro.config.js", "jest.config.js"],
-  "extends": "expo/tsconfig.base"
+  "include": [
+    "src/**/*",
+    "App.js",
+    "*.js"
+  ],
+  "exclude": [
+    "node_modules",
+    "babel.config.js",
+    "metro.config.js",
+    "jest.config.js"
+  ]
 }
