@@ -20,6 +20,25 @@ jest.mock('./src/config/firebaseConfig', () => ({
   db: {},
 }));
 
+// Mock Sentry
+jest.mock('@sentry/react-native', () => ({
+  init: jest.fn(),
+  captureException: jest.fn(),
+  captureMessage: jest.fn(),
+  setUser: jest.fn(),
+  setContext: jest.fn(),
+  setTag: jest.fn(),
+  setTags: jest.fn(),
+  setExtra: jest.fn(),
+  setExtras: jest.fn(),
+  addBreadcrumb: jest.fn(),
+  configureScope: jest.fn(),
+  withScope: jest.fn(),
+  wrap: jest.fn((component) => component),
+  ReactNavigationInstrumentation: jest.fn(),
+  ReactNativeTracing: jest.fn(),
+}));
+
 // Mock Expo modules
 jest.mock('expo-font', () => ({
   loadAsync: jest.fn(() => Promise.resolve()),
