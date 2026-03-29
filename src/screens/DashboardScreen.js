@@ -8,6 +8,7 @@ import {
   Platform,
   Dimensions,
   RefreshControl,
+  Modal,
 } from 'react-native';
 import {
   useFonts,
@@ -22,6 +23,7 @@ import { db, auth } from '../config/firebaseConfig';
 import { collection, query, orderBy, limit, getDocs, doc, getDoc } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
 import { RecentUpdatesSkeleton } from '../components';
+import { getNotificationInbox, markInboxAsRead } from '../utils/notificationInbox';
 import { brutalCard, brutalShadow, palette, screenAccents } from '../theme/neoBrutal';
 
 const { width, height } = Dimensions.get('window');
@@ -49,6 +51,10 @@ export default function DashboardScreen({ navigation }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [lastFetchTime, setLastFetchTime] = useState(0);
   const [usingCachedContent, setUsingCachedContent] = useState(false);
+  const [lastSyncedAt, setLastSyncedAt] = useState(null);
+  const [showInbox, setShowInbox] = useState(false);
+  const [notificationInbox, setNotificationInbox] = useState([]);
+  const [unreadInboxCount, setUnreadInboxCount] = useState(0);
   let [fontsLoaded] = useFonts({
     Inter_400Regular,
     Inter_500Medium,
@@ -70,6 +76,8 @@ export default function DashboardScreen({ navigation }) {
         if (isMounted && cachedDashboard) {
           applyCachedDashboard(cachedDashboard);
         }
+
+        await refreshInboxState();
 
         // Fetch user's first name from Firestore
         try {
@@ -124,6 +132,14 @@ export default function DashboardScreen({ navigation }) {
       unsubscribeAuth();
     };
   }, []);
+
+  useEffect(() => {
+    const unsubscribeFocus = navigation.addListener('focus', () => {
+      refreshInboxState();
+    });
+
+    return unsubscribeFocus;
+  }, [navigation]);
 
   const fetchRecentData = async (forceRefresh = false) => {
     // Only fetch if user is authenticated
@@ -273,6 +289,7 @@ export default function DashboardScreen({ navigation }) {
       const trimmedUpdates = combined.slice(0, 5);
       setRecentUpdates(trimmedUpdates);
       setUsingCachedContent(false);
+      setLastSyncedAt(new Date().toISOString());
 
       await saveDashboardCache({
         recentUpdates: trimmedUpdates,
@@ -280,6 +297,7 @@ export default function DashboardScreen({ navigation }) {
         totalAnnouncements: activeAnnouncementsCount,
         totalPosts: activePostsCount,
         userName,
+        lastSyncedAt: new Date().toISOString(),
       });
 
       // Update cache timestamp
@@ -350,6 +368,22 @@ export default function DashboardScreen({ navigation }) {
     if (diffMins > 0) return `${diffMins}m ago`;
     if (diffSecs > 0) return `${diffSecs}s ago`;
     return 'Just now';
+  };
+
+  const formatSyncTimestamp = timestamp => {
+    if (!timestamp) return 'Not synced yet';
+    const date = new Date(timestamp);
+    return `Last synced ${date.toLocaleTimeString([], {
+      hour: '2-digit',
+      minute: '2-digit',
+    })}`;
+  };
+
+  const openInbox = async () => {
+    const inbox = await markInboxAsRead();
+    setNotificationInbox(inbox);
+    setUnreadInboxCount(0);
+    setShowInbox(true);
   };
 
   const renderUpdateItem = item => {
@@ -457,13 +491,24 @@ export default function DashboardScreen({ navigation }) {
           <Text style={styles.subGreeting}>
             {usingCachedContent ? "You're viewing your cached home feed" : "Here's what's new"}
           </Text>
+          <Text style={styles.syncText}>{formatSyncTimestamp(lastSyncedAt)}</Text>
         </View>
-        <TouchableOpacity
-          style={styles.settingsButton}
-          onPress={() => navigation.navigate('AccountSettings')}
-        >
-          <Feather name="settings" size={24} color={palette.text} />
-        </TouchableOpacity>
+        <View style={styles.headerButtons}>
+          <TouchableOpacity style={styles.inboxButton} onPress={openInbox}>
+            <Feather name="bell" size={22} color={palette.text} />
+            {unreadInboxCount > 0 ? (
+              <View style={styles.inboxBadge}>
+                <Text style={styles.inboxBadgeText}>{Math.min(unreadInboxCount, 9)}</Text>
+              </View>
+            ) : null}
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.settingsButton}
+            onPress={() => navigation.navigate('AccountSettings')}
+          >
+            <Feather name="settings" size={24} color={palette.text} />
+          </TouchableOpacity>
+        </View>
       </View>
 
       {/* Quick Stats */}
@@ -515,6 +560,41 @@ export default function DashboardScreen({ navigation }) {
           </View>
         )}
       </ScrollView>
+
+      <Modal
+        visible={showInbox}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowInbox(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.inboxModal}>
+            <View style={styles.inboxHeader}>
+              <Text style={styles.inboxTitle}>Alert Inbox</Text>
+              <TouchableOpacity style={styles.inboxClose} onPress={() => setShowInbox(false)}>
+                <Feather name="x" size={20} color={palette.text} />
+              </TouchableOpacity>
+            </View>
+
+            <ScrollView showsVerticalScrollIndicator={false}>
+              {notificationInbox.length === 0 ? (
+                <View style={styles.inboxEmpty}>
+                  <Feather name="bell-off" size={26} color={palette.textMuted} />
+                  <Text style={styles.inboxEmptyText}>No alerts saved yet</Text>
+                </View>
+              ) : (
+                notificationInbox.map(item => (
+                  <View key={item.id} style={styles.inboxItem}>
+                    <Text style={styles.inboxItemTitle}>{item.title}</Text>
+                    {!!item.body && <Text style={styles.inboxItemBody}>{item.body}</Text>}
+                    <Text style={styles.inboxItemTime}>{formatTimestamp(item.timestamp)}</Text>
+                  </View>
+                ))
+              )}
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 
@@ -544,6 +624,7 @@ export default function DashboardScreen({ navigation }) {
 
       return {
         ...parsedCache,
+        lastSyncedAt: parsedCache.lastSyncedAt || null,
         recentUpdates: Array.isArray(parsedCache.recentUpdates)
           ? parsedCache.recentUpdates.map(restoreUpdate).filter(Boolean)
           : [],
@@ -562,8 +643,15 @@ export default function DashboardScreen({ navigation }) {
     if (cache.userName) {
       setUserName(cache.userName);
     }
+    setLastSyncedAt(cache.lastSyncedAt || null);
     setUsingCachedContent(true);
     setLoading(false);
+  }
+
+  async function refreshInboxState() {
+    const inbox = await getNotificationInbox();
+    setNotificationInbox(inbox);
+    setUnreadInboxCount(inbox.filter(item => !item.isRead).length);
   }
 }
 
@@ -599,6 +687,47 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontFamily: 'Inter_400Regular',
     color: palette.textMuted,
+  },
+  syncText: {
+    marginTop: 6,
+    fontSize: 12,
+    fontFamily: 'Inter_500Medium',
+    color: palette.textMuted,
+  },
+  headerButtons: {
+    flexDirection: 'row',
+    gap: 10,
+    marginLeft: 12,
+  },
+  inboxButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 16,
+    backgroundColor: palette.mustard,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 3,
+    borderColor: palette.border,
+    ...brutalShadow(),
+  },
+  inboxBadge: {
+    position: 'absolute',
+    top: -4,
+    right: -4,
+    minWidth: 22,
+    height: 22,
+    borderRadius: 11,
+    borderWidth: 3,
+    borderColor: palette.border,
+    backgroundColor: palette.coral,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 4,
+  },
+  inboxBadgeText: {
+    fontSize: 10,
+    fontFamily: 'Inter_600SemiBold',
+    color: palette.text,
   },
   settingsButton: {
     width: 44,
@@ -721,5 +850,75 @@ const styles = StyleSheet.create({
     color: palette.text,
     fontSize: 16,
     fontFamily: 'Inter_500Medium',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(43, 43, 43, 0.3)',
+    justifyContent: 'center',
+    paddingHorizontal: 18,
+  },
+  inboxModal: {
+    ...brutalCard('#F7E4D8'),
+    maxHeight: '72%',
+    padding: 18,
+  },
+  inboxHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 14,
+  },
+  inboxTitle: {
+    fontSize: 20,
+    fontFamily: 'Inter_600SemiBold',
+    color: palette.text,
+    textTransform: 'uppercase',
+  },
+  inboxClose: {
+    width: 38,
+    height: 38,
+    borderRadius: 14,
+    borderWidth: 3,
+    borderColor: palette.border,
+    backgroundColor: palette.white,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  inboxEmpty: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 28,
+    gap: 10,
+  },
+  inboxEmptyText: {
+    fontSize: 14,
+    fontFamily: 'Inter_500Medium',
+    color: palette.textMuted,
+  },
+  inboxItem: {
+    borderWidth: 3,
+    borderColor: palette.border,
+    borderRadius: 18,
+    backgroundColor: palette.white,
+    padding: 14,
+    marginBottom: 10,
+  },
+  inboxItemTitle: {
+    fontSize: 14,
+    fontFamily: 'Inter_600SemiBold',
+    color: palette.text,
+    marginBottom: 4,
+  },
+  inboxItemBody: {
+    fontSize: 13,
+    lineHeight: 18,
+    fontFamily: 'Inter_400Regular',
+    color: palette.text,
+    marginBottom: 8,
+  },
+  inboxItemTime: {
+    fontSize: 11,
+    fontFamily: 'Inter_500Medium',
+    color: palette.textMuted,
   },
 });

@@ -26,6 +26,7 @@ import { NetworkProvider } from './src/context/NetworkContext';
 import { ErrorBoundary, OfflineBanner } from './src/components';
 import { setupNotificationListeners, registerForPushNotifications } from './src/utils/notifications';
 import { stopAllListeners } from './src/utils/firestoreListeners';
+import { addNotificationToInbox } from './src/utils/notificationInbox';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from './src/config/firebaseConfig';
 import { palette } from './src/theme/neoBrutal';
@@ -250,11 +251,17 @@ export default function App() {
         setLoadingMessage('Finalizing...');
         // Set up notification listeners
         const listeners = setupNotificationListeners(
-          notification => {
+          async notification => {
             console.log('Received notification:', notification);
+            await addNotificationToInbox(notification?.request?.content, 'received', false);
           },
-          response => {
+          async response => {
             console.log('Notification tapped:', response);
+            await addNotificationToInbox(
+              response?.notification?.request?.content,
+              'opened',
+              true
+            );
           }
         );
 

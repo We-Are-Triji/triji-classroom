@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { useFonts, Inter_400Regular, Inter_500Medium } from '@expo-google-fonts/inter';
 import { Feather } from '@expo/vector-icons';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { brutalShadow, palette } from '../theme/neoBrutal';
 
 export default function PostCard({
@@ -79,7 +80,9 @@ export default function PostCard({
     >
       <View style={styles.cardContent}>
         <View style={styles.personaContainer}>
-          <View style={[styles.personaDot, { backgroundColor: post.personaColor || '#34C759' }]} />
+          <View style={[styles.avatarBadge, { backgroundColor: `${dynamicTextColor}18` }]}>
+            <MaterialCommunityIcons name="account-circle-outline" size={15} color={dynamicTextColor} />
+          </View>
           <Text style={[styles.personaText, { color: dynamicTextColor }]}>
             {post.persona || 'Anonymous'}
           </Text>
@@ -101,7 +104,11 @@ export default function PostCard({
               onLike();
             }}
           >
-            <Text style={[styles.heartIcon, isLiked && styles.heartLiked]}>♥</Text>
+            <MaterialCommunityIcons
+              name={isLiked ? 'heart' : 'heart-outline'}
+              size={16}
+              color={isLiked ? palette.coral : dynamicTextColor}
+            />
             <Text style={[styles.likeCount, { color: dynamicTextColor, opacity: 0.7 }]}>
               {post.likeCount || 0}
             </Text>
@@ -166,13 +173,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 8,
   },
-  personaDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
+  avatarBadge: {
+    width: 18,
+    height: 18,
+    borderRadius: 9,
     marginRight: 6,
-    borderWidth: 1,
+    borderWidth: 1.5,
     borderColor: palette.border,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   personaText: {
     fontSize: 9,
@@ -184,14 +193,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     padding: 4,
-  },
-  heartIcon: {
-    fontSize: 16,
-    color: palette.textMuted,
-    marginRight: 4,
-  },
-  heartLiked: {
-    color: palette.coral,
+    gap: 4,
   },
   likeCount: {
     fontSize: 11,

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   View,
   Text,
@@ -19,7 +19,17 @@ import { Feather } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { db, auth } from '../config/firebaseConfig';
-import { collection, query, onSnapshot, orderBy, limit } from 'firebase/firestore';
+import {
+  collection,
+  query,
+  onSnapshot,
+  orderBy,
+  limit,
+  doc,
+  updateDoc,
+  arrayUnion,
+  arrayRemove,
+} from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
 import TaskCardSkeleton from '../components/TaskCardSkeleton';
 import { brutalButton, brutalCard, brutalShadow, palette, screenAccents } from '../theme/neoBrutal';
@@ -33,6 +43,8 @@ export default function TaskboardScreen({ navigation }) {
   const [refreshing, setRefreshing] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [sortOrder, setSortOrder] = useState('asc'); // 'asc' or 'desc'
+  const [pinnedTaskIds, setPinnedTaskIds] = useState([]);
+  const [lastSyncedAt, setLastSyncedAt] = useState(null);
   const ITEMS_PER_PAGE = 10;
 
   const windowWidth = Dimensions.get('window').width;
@@ -42,6 +54,26 @@ export default function TaskboardScreen({ navigation }) {
     Inter_500Medium,
     Inter_600SemiBold,
   });
+
+  const sortedTasks = useMemo(() => {
+    return [...tasks].sort((a, b) => {
+      const aPinned = pinnedTaskIds.includes(a.id);
+      const bPinned = pinnedTaskIds.includes(b.id);
+
+      if (aPinned !== bPinned) {
+        return aPinned ? -1 : 1;
+      }
+
+      const aDate = a.deadline?.toDate ? a.deadline.toDate() : new Date(a.deadline);
+      const bDate = b.deadline?.toDate ? b.deadline.toDate() : new Date(b.deadline);
+
+      if (sortOrder === 'desc') {
+        return bDate - aDate;
+      }
+
+      return aDate - bDate;
+    });
+  }, [tasks, pinnedTaskIds, sortOrder]);
 
   const fetchTasks = () => {
     // Only fetch if user is authenticated
@@ -79,6 +111,7 @@ export default function TaskboardScreen({ navigation }) {
           });
 
           setTasks(tasksList);
+          setLastSyncedAt(new Date().toISOString());
           setLoading(false);
           setInitialLoad(false);
         },
@@ -102,20 +135,31 @@ export default function TaskboardScreen({ navigation }) {
 
   useEffect(() => {
     let unsubscribeTasks = null;
+    let unsubscribeUser = null;
 
     // Wait for auth state before fetching
     const unsubscribeAuth = onAuthStateChanged(auth, user => {
       if (user) {
         setIsAuthenticated(true);
         unsubscribeTasks = fetchTasks();
+        unsubscribeUser = onSnapshot(doc(db, 'users', user.uid), snapshot => {
+          const userData = snapshot.data() || {};
+          setPinnedTaskIds(Array.isArray(userData.pinnedTaskIds) ? userData.pinnedTaskIds : []);
+        });
       } else {
         // User logged out, cleanup listener
         if (unsubscribeTasks) {
           unsubscribeTasks();
           unsubscribeTasks = null;
         }
+        if (unsubscribeUser) {
+          unsubscribeUser();
+          unsubscribeUser = null;
+        }
         setIsAuthenticated(false);
         setTasks([]);
+        setPinnedTaskIds([]);
+        setLastSyncedAt(null);
         setLoading(false);
         setError('Please log in to view tasks');
       }
@@ -124,6 +168,9 @@ export default function TaskboardScreen({ navigation }) {
     return () => {
       if (unsubscribeTasks) {
         unsubscribeTasks();
+      }
+      if (unsubscribeUser) {
+        unsubscribeUser();
       }
       unsubscribeAuth();
     };
@@ -166,8 +213,29 @@ export default function TaskboardScreen({ navigation }) {
   // Paginated tasks
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
   const endIndex = startIndex + ITEMS_PER_PAGE;
-  const paginatedTasks = tasks.slice(startIndex, endIndex);
-  const totalPages = Math.ceil(tasks.length / ITEMS_PER_PAGE);
+  const paginatedTasks = sortedTasks.slice(startIndex, endIndex);
+  const totalPages = Math.ceil(sortedTasks.length / ITEMS_PER_PAGE);
+
+  const togglePinTask = async taskId => {
+    if (!auth.currentUser) return;
+
+    const userRef = doc(db, 'users', auth.currentUser.uid);
+    const isPinned = pinnedTaskIds.includes(taskId);
+
+    try {
+      await updateDoc(userRef, {
+        pinnedTaskIds: isPinned ? arrayRemove(taskId) : arrayUnion(taskId),
+      });
+    } catch (pinError) {
+      console.error('Error pinning task:', pinError);
+    }
+  };
+
+  const formatSyncLabel = timestamp => {
+    if (!timestamp) return 'Sync pending';
+    const date = new Date(timestamp);
+    return `Last synced ${date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+  };
 
   const isOverdue = deadline => {
     if (!deadline) return false;
@@ -194,6 +262,7 @@ export default function TaskboardScreen({ navigation }) {
   const renderTaskCard = task => {
     const overdue = isOverdue(task.deadline);
     const isCompleted = auth.currentUser && task.completedBy?.includes(auth.currentUser.uid);
+    const isPinned = pinnedTaskIds.includes(task.id);
 
     return (
       <TouchableOpacity
@@ -209,6 +278,19 @@ export default function TaskboardScreen({ navigation }) {
             </Text>
           </View>
           <View style={styles.taskCardBadges}>
+            <TouchableOpacity
+              style={[styles.pinButton, isPinned && styles.pinButtonActive]}
+              onPress={event => {
+                event.stopPropagation();
+                togglePinTask(task.id);
+              }}
+            >
+              <MaterialCommunityIcons
+                name={isPinned ? 'star' : 'star-outline'}
+                size={14}
+                color={palette.text}
+              />
+            </TouchableOpacity>
             {isCompleted ? (
               <View style={styles.completedBadge}>
                 <Feather name="check-circle" size={13} color="#22e584" />
@@ -279,6 +361,7 @@ export default function TaskboardScreen({ navigation }) {
         <View style={styles.headerTextContainer}>
           <Text style={styles.headerTitle}>Task Board</Text>
           <Text style={styles.headerSubtext}>View all tasks and upcoming deadlines</Text>
+          <Text style={styles.syncLabel}>{formatSyncLabel(lastSyncedAt)}</Text>
         </View>
         <View style={styles.headerActions}>
           <TouchableOpacity
@@ -305,8 +388,8 @@ export default function TaskboardScreen({ navigation }) {
       {!initialLoad && tasks.length > 0 && (
         <View style={styles.paginationInfo}>
           <Text style={styles.paginationText}>
-            Showing {startIndex + 1}-{Math.min(endIndex, tasks.length)} of {tasks.length}{' '}
-            {tasks.length === 1 ? 'task' : 'tasks'}
+            Showing {startIndex + 1}-{Math.min(endIndex, sortedTasks.length)} of {sortedTasks.length}{' '}
+            {sortedTasks.length === 1 ? 'task' : 'tasks'}
           </Text>
         </View>
       )}
@@ -486,6 +569,12 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter_400Regular',
     color: palette.textMuted,
   },
+  syncLabel: {
+    marginTop: 5,
+    fontSize: 11,
+    fontFamily: 'Inter_500Medium',
+    color: palette.textMuted,
+  },
   tasksContent: {
     flex: 1,
     paddingHorizontal: 16,
@@ -519,6 +608,19 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: 8,
     flexShrink: 0,
+  },
+  pinButton: {
+    width: 26,
+    height: 26,
+    borderRadius: 10,
+    borderWidth: 2,
+    borderColor: palette.border,
+    backgroundColor: palette.white,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  pinButtonActive: {
+    backgroundColor: palette.mustard,
   },
   completedBadge: {
     flexDirection: 'row',

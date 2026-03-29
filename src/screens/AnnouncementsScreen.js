@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   View,
   Text,
@@ -17,7 +17,17 @@ import {
 } from '@expo-google-fonts/inter';
 import { Feather, MaterialCommunityIcons } from '@expo/vector-icons';
 import { auth, db } from '../config/firebaseConfig';
-import { collection, query, orderBy, onSnapshot, limit } from 'firebase/firestore';
+import {
+  collection,
+  query,
+  orderBy,
+  onSnapshot,
+  limit,
+  doc,
+  updateDoc,
+  arrayUnion,
+  arrayRemove,
+} from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
 import AnnouncementCardSkeleton from '../components/AnnouncementCardSkeleton';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -103,6 +113,8 @@ export default function AnnouncementsScreen({ navigation }) {
   const [currentPage, setCurrentPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState('');
   const [reloadKey, setReloadKey] = useState(0);
+  const [pinnedAnnouncementIds, setPinnedAnnouncementIds] = useState([]);
+  const [lastSyncedAt, setLastSyncedAt] = useState(null);
 
   const [fontsLoaded] = useFonts({
     Inter_400Regular,
@@ -112,10 +124,13 @@ export default function AnnouncementsScreen({ navigation }) {
 
   useEffect(() => {
     let unsubscribeAnnouncements = null;
+    let unsubscribeUser = null;
 
     const unsubscribeAuth = onAuthStateChanged(auth, user => {
       if (!user) {
         setAnnouncements([]);
+        setPinnedAnnouncementIds([]);
+        setLastSyncedAt(null);
         setError('Please log in to view announcements.');
         setInitialLoad(false);
         return;
@@ -123,6 +138,12 @@ export default function AnnouncementsScreen({ navigation }) {
 
       setError(null);
       setInitialLoad(true);
+      unsubscribeUser = onSnapshot(doc(db, 'users', user.uid), snapshot => {
+        const userData = snapshot.data() || {};
+        setPinnedAnnouncementIds(
+          Array.isArray(userData.pinnedAnnouncementIds) ? userData.pinnedAnnouncementIds : []
+        );
+      });
 
       const announcementsQuery = query(
         collection(db, 'announcements'),
@@ -151,6 +172,7 @@ export default function AnnouncementsScreen({ navigation }) {
           });
 
           setAnnouncements(nextAnnouncements);
+          setLastSyncedAt(new Date().toISOString());
           setError(null);
           setInitialLoad(false);
           setRefreshing(false);
@@ -174,6 +196,9 @@ export default function AnnouncementsScreen({ navigation }) {
 
     return () => {
       unsubscribeAuth();
+      if (unsubscribeUser) {
+        unsubscribeUser();
+      }
       if (unsubscribeAnnouncements) {
         unsubscribeAnnouncements();
       }
@@ -196,10 +221,48 @@ export default function AnnouncementsScreen({ navigation }) {
     );
   });
 
+  const orderedAnnouncements = useMemo(() => {
+    return [...filteredAnnouncements].sort((a, b) => {
+      const aPinned = pinnedAnnouncementIds.includes(a.id);
+      const bPinned = pinnedAnnouncementIds.includes(b.id);
+
+      if (aPinned !== bPinned) {
+        return aPinned ? -1 : 1;
+      }
+
+      const aDate = normalizeDate(a.createdAt) || new Date(0);
+      const bDate = normalizeDate(b.createdAt) || new Date(0);
+      return bDate - aDate;
+    });
+  }, [filteredAnnouncements, pinnedAnnouncementIds]);
+
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
   const endIndex = startIndex + ITEMS_PER_PAGE;
-  const paginatedAnnouncements = filteredAnnouncements.slice(startIndex, endIndex);
-  const totalPages = Math.max(1, Math.ceil(filteredAnnouncements.length / ITEMS_PER_PAGE));
+  const paginatedAnnouncements = orderedAnnouncements.slice(startIndex, endIndex);
+  const totalPages = Math.max(1, Math.ceil(orderedAnnouncements.length / ITEMS_PER_PAGE));
+
+  const formatSyncLabel = timestamp => {
+    if (!timestamp) return 'Sync pending';
+    const date = new Date(timestamp);
+    return `Last synced ${date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+  };
+
+  const togglePinAnnouncement = async announcementId => {
+    if (!auth.currentUser) return;
+
+    const userRef = doc(db, 'users', auth.currentUser.uid);
+    const isPinned = pinnedAnnouncementIds.includes(announcementId);
+
+    try {
+      await updateDoc(userRef, {
+        pinnedAnnouncementIds: isPinned
+          ? arrayRemove(announcementId)
+          : arrayUnion(announcementId),
+      });
+    } catch (pinError) {
+      console.error('Error pinning announcement:', pinError);
+    }
+  };
 
   const onRefresh = () => {
     setRefreshing(true);
@@ -211,6 +274,7 @@ export default function AnnouncementsScreen({ navigation }) {
     const theme = getTypeTheme(item.type);
     const authorName = item.authorName || item.author || 'Campus team';
     const expiryLabel = formatExpiryLabel(item.expiresAt);
+    const isPinned = pinnedAnnouncementIds.includes(item.id);
 
     return (
       <TouchableOpacity
@@ -225,8 +289,22 @@ export default function AnnouncementsScreen({ navigation }) {
               <MaterialCommunityIcons name={theme.icon} size={16} color={palette.text} />
               <Text style={styles.typeBadgeText}>{item.type || 'General'}</Text>
             </View>
-
-            <Text style={styles.cardTimestamp}>{formatRelativeTime(item.createdAt)}</Text>
+            <View style={styles.cardHeaderRight}>
+              <Text style={styles.cardTimestamp}>{formatRelativeTime(item.createdAt)}</Text>
+              <TouchableOpacity
+                style={[styles.pinButton, isPinned && styles.pinButtonActive]}
+                onPress={event => {
+                  event.stopPropagation();
+                  togglePinAnnouncement(item.id);
+                }}
+              >
+                <MaterialCommunityIcons
+                  name={isPinned ? 'star' : 'star-outline'}
+                  size={16}
+                  color={palette.text}
+                />
+              </TouchableOpacity>
+            </View>
           </View>
 
           <Text style={styles.cardTitle} numberOfLines={2}>
@@ -286,25 +364,18 @@ export default function AnnouncementsScreen({ navigation }) {
       <View style={[styles.shape, styles.shapeBottom]} />
 
       <View style={styles.header}>
-        <View style={styles.heroCard}>
-          <View style={styles.heroTopRow}>
-            <View style={styles.heroLead}>
-              <View style={styles.heroIcon}>
-                <MaterialCommunityIcons name="bullhorn-outline" size={28} color={palette.text} />
-              </View>
-
-              <View style={styles.heroText}>
-                <Text style={styles.headerTitle}>Announcements</Text>
-                <Text style={styles.headerSubtext}>
-                  Fresh reminders, events, and urgent updates in one compact board.
-                </Text>
-              </View>
-            </View>
-
-            <View style={styles.heroCount}>
-              <Text style={styles.heroCountNumber}>{filteredAnnouncements.length}</Text>
-              <Text style={styles.heroCountLabel}>Live</Text>
-            </View>
+        <View style={styles.headerTopRow}>
+          <View style={styles.heroIcon}>
+            <MaterialCommunityIcons name="bullhorn-outline" size={28} color={palette.text} />
+          </View>
+          <View style={styles.heroText}>
+            <Text style={styles.headerTitle}>Announcements</Text>
+            <Text style={styles.headerSubtext}>Fresh reminders, events, and urgent updates</Text>
+            <Text style={styles.syncLabel}>{formatSyncLabel(lastSyncedAt)}</Text>
+          </View>
+          <View style={styles.heroCount}>
+            <Text style={styles.heroCountNumber}>{orderedAnnouncements.length}</Text>
+            <Text style={styles.heroCountLabel}>Live</Text>
           </View>
         </View>
 
@@ -338,6 +409,14 @@ export default function AnnouncementsScreen({ navigation }) {
         </View>
       </View>
 
+      {!initialLoad && orderedAnnouncements.length > 0 ? (
+        <View style={styles.paginationInfo}>
+          <Text style={styles.paginationInfoText}>
+            Showing {startIndex + 1}-{Math.min(endIndex, orderedAnnouncements.length)} of {orderedAnnouncements.length}
+          </Text>
+        </View>
+      ) : null}
+
       <View style={styles.contentArea}>
         {error ? (
           <View style={styles.messageCard}>
@@ -354,7 +433,7 @@ export default function AnnouncementsScreen({ navigation }) {
             <AnnouncementCardSkeleton />
             <AnnouncementCardSkeleton />
           </View>
-        ) : filteredAnnouncements.length === 0 ? (
+        ) : orderedAnnouncements.length === 0 ? (
           <View style={styles.messageCard}>
             <Feather name="inbox" size={28} color={palette.text} />
             <Text style={styles.messageTitle}>
@@ -429,34 +508,23 @@ const styles = StyleSheet.create({
     paddingTop: Platform.OS === 'ios' ? 58 : 38,
     paddingHorizontal: 18,
     paddingBottom: 12,
+    borderBottomWidth: 3,
+    borderBottomColor: palette.border,
   },
   contentArea: {
     flex: 1,
   },
-  heroCard: {
-    ...brutalCard('#F7E4D8'),
-    padding: 16,
-    borderRadius: 28,
+  headerTopRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
     marginBottom: 14,
   },
-  heroTopRow: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    justifyContent: 'space-between',
-    gap: 12,
-  },
-  heroLead: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: 12,
-    minWidth: 0,
-  },
   heroIcon: {
-    width: 54,
-    height: 54,
-    borderRadius: 18,
-    backgroundColor: screenAccents.announcements.secondary,
+    width: 38,
+    height: 38,
+    borderRadius: 14,
+    backgroundColor: screenAccents.announcements.primary,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 3,
@@ -474,8 +542,13 @@ const styles = StyleSheet.create({
   },
   headerSubtext: {
     fontSize: 13,
-    lineHeight: 19,
     fontFamily: 'Inter_400Regular',
+    color: palette.textMuted,
+  },
+  syncLabel: {
+    marginTop: 4,
+    fontSize: 11,
+    fontFamily: 'Inter_500Medium',
     color: palette.textMuted,
   },
   heroCount: {
@@ -545,6 +618,15 @@ const styles = StyleSheet.create({
     paddingTop: 8,
     paddingBottom: 120,
   },
+  paginationInfo: {
+    paddingHorizontal: 18,
+    paddingTop: 10,
+  },
+  paginationInfoText: {
+    fontSize: 12,
+    fontFamily: 'Inter_500Medium',
+    color: palette.textMuted,
+  },
   announcementCard: {
     flexDirection: 'row',
     borderWidth: 3,
@@ -571,6 +653,11 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
     marginBottom: 14,
   },
+  cardHeaderRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
   typeBadge: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -592,6 +679,20 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontFamily: 'Inter_500Medium',
     color: palette.textMuted,
+    marginTop: 4,
+  },
+  pinButton: {
+    width: 34,
+    height: 34,
+    borderRadius: 12,
+    borderWidth: 3,
+    borderColor: palette.border,
+    backgroundColor: palette.white,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  pinButtonActive: {
+    backgroundColor: palette.mustard,
   },
   cardTitle: {
     fontSize: 20,

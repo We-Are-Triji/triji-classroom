@@ -17,7 +17,7 @@ import {
   Inter_500Medium,
   Inter_600SemiBold,
 } from '@expo-google-fonts/inter';
-import { Feather } from '@expo/vector-icons';
+import { Feather, MaterialCommunityIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { db } from '../config/firebaseConfig';
 import {
@@ -344,9 +344,16 @@ export default function PostDetailScreen({ route, navigation }) {
         <View style={styles.postCardContainer}>
           {/* Author Header */}
           <View style={styles.authorHeader}>
-            <View style={styles.authorAvatar}>
-              <View
-                style={[styles.personaDot, { backgroundColor: post.personaColor || '#34C759' }]}
+            <View
+              style={[
+                styles.authorAvatar,
+                { backgroundColor: currentPost.personaColor || screenAccents.freedomWall.secondary },
+              ]}
+            >
+              <MaterialCommunityIcons
+                name="account-circle-outline"
+                size={24}
+                color={palette.text}
               />
             </View>
             <View style={styles.authorInfo}>
@@ -369,8 +376,12 @@ export default function PostDetailScreen({ route, navigation }) {
           {/* Interactions */}
           <View style={styles.interactionsBar}>
             <TouchableOpacity style={styles.interactionButton} onPress={handleLike}>
-              <Text style={[styles.heartIcon, isLiked && styles.heartLiked]}>♥</Text>
-              <Text style={styles.interactionText}>{currentPost.likeCount || 0} Likes</Text>
+              <MaterialCommunityIcons
+                name={isLiked ? 'heart' : 'heart-outline'}
+                size={22}
+                color={isLiked ? palette.coral : palette.text}
+              />
+              <Text style={styles.interactionText}>{currentPost.likeCount || 0}</Text>
             </TouchableOpacity>
 
             <TouchableOpacity style={styles.interactionButton} onPress={handleCopyText}>
@@ -550,7 +561,6 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 14,
-    backgroundColor: palette.surfaceAlt,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 3,
@@ -607,13 +617,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontFamily: 'Inter_500Medium',
     color: palette.text,
-  },
-  heartIcon: {
-    fontSize: 22,
-    color: palette.text,
-  },
-  heartLiked: {
-    color: palette.coral,
   },
   countdownCard: {
     flexDirection: 'row',
