@@ -21,6 +21,7 @@ import { db, auth } from '../config/firebaseConfig';
 import { doc, updateDoc, arrayUnion, arrayRemove } from 'firebase/firestore';
 import { showErrorAlert } from '../utils/errorHandler';
 import { successHaptic, mediumHaptic, lightHaptic } from '../utils/haptics';
+import { brutalButton, brutalCard, brutalShadow, palette, screenAccents } from '../theme/neoBrutal';
 
 export default function TaskDetailScreen({ route, navigation }) {
   const { task } = route.params || {};
@@ -207,7 +208,7 @@ export default function TaskDetailScreen({ route, navigation }) {
     return (
       <View style={styles.container}>
         <LinearGradient
-          colors={['#1B2845', '#23243a', '#22305a']}
+          colors={[palette.background, palette.background]}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
           style={styles.backgroundGradient}
@@ -224,7 +225,7 @@ export default function TaskDetailScreen({ route, navigation }) {
   return (
     <View style={styles.container}>
       <LinearGradient
-        colors={['#1B2845', '#23243a', '#22305a', '#3a5a8c', '#23243a']}
+        colors={[palette.background, palette.background]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         style={styles.backgroundGradient}
@@ -238,7 +239,7 @@ export default function TaskDetailScreen({ route, navigation }) {
           navigation.goBack();
         }}
       >
-        <Feather name="arrow-left" size={24} color="#FFFFFF" />
+        <Feather name="arrow-left" size={24} color={palette.text} />
       </TouchableOpacity>
 
       <ScrollView
@@ -251,7 +252,7 @@ export default function TaskDetailScreen({ route, navigation }) {
           {/* Task Header Info */}
           <View style={styles.taskHeader}>
             <View style={styles.taskAvatar}>
-              <Feather name="clipboard" size={24} color="#22e584" />
+              <Feather name="clipboard" size={24} color={palette.text} />
             </View>
             <View style={styles.taskInfo}>
               <View style={styles.subjectRow}>
@@ -274,7 +275,7 @@ export default function TaskDetailScreen({ route, navigation }) {
                   <Feather
                     name={isCompleted ? 'check-circle' : 'circle'}
                     size={14}
-                    color={isCompleted ? '#22e584' : '#FFB800'}
+                    color={isCompleted ? palette.text : palette.text}
                   />
                   <Text
                     style={[
@@ -305,7 +306,7 @@ export default function TaskDetailScreen({ route, navigation }) {
             </View>
           ) : (
             <View style={styles.emptyDescriptionContainer}>
-              <Feather name="file-text" size={32} color="rgba(255, 255, 255, 0.3)" />
+              <Feather name="file-text" size={32} color={palette.textMuted} />
               <Text style={styles.emptyDescriptionText}>No description provided</Text>
             </View>
           )}
@@ -331,7 +332,7 @@ export default function TaskDetailScreen({ route, navigation }) {
                 <Feather
                   name={isCompleted ? 'check-circle' : 'circle'}
                   size={20}
-                  color={isCompleted ? '#22e584' : '#FFB800'}
+                  color={palette.text}
                 />
               </Animated.View>
               <Text
@@ -358,7 +359,7 @@ export default function TaskDetailScreen({ route, navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#121212',
+    backgroundColor: palette.background,
   },
   backgroundGradient: {
     position: 'absolute',
@@ -373,13 +374,14 @@ const styles = StyleSheet.create({
     left: 16,
     width: 44,
     height: 44,
-    borderRadius: 22,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    borderRadius: 16,
+    backgroundColor: screenAccents.tasks.secondary,
     alignItems: 'center',
     justifyContent: 'center',
     zIndex: 100,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
+    borderWidth: 3,
+    borderColor: palette.border,
+    ...brutalShadow(),
   },
   scrollView: {
     flex: 1,
@@ -397,37 +399,35 @@ const styles = StyleSheet.create({
   loadingText: {
     fontFamily: 'Inter_500Medium',
     fontSize: 16,
-    color: 'rgba(255, 255, 255, 0.7)',
+    color: palette.text,
   },
   taskCardContainer: {
-    backgroundColor: 'rgba(30, 32, 40, 0.7)',
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
+    ...brutalCard(screenAccents.tasks.tertiary),
+    borderRadius: 28,
     overflow: 'hidden',
   },
   taskHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     padding: 16,
-    backgroundColor: 'rgba(0, 0, 0, 0.2)',
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255, 255, 255, 0.05)',
+    backgroundColor: palette.powder,
+    borderBottomWidth: 3,
+    borderBottomColor: palette.border,
   },
   separator: {
-    height: 1,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    height: 3,
+    backgroundColor: palette.border,
     marginHorizontal: 16,
   },
   taskAvatar: {
     width: 44,
     height: 44,
-    borderRadius: 22,
-    backgroundColor: 'rgba(34, 229, 132, 0.15)',
+    borderRadius: 14,
+    backgroundColor: screenAccents.tasks.primary,
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 2,
-    borderColor: 'rgba(34, 229, 132, 0.3)',
+    borderWidth: 3,
+    borderColor: palette.border,
   },
   taskInfo: {
     flex: 1,
@@ -443,7 +443,7 @@ const styles = StyleSheet.create({
   taskSubject: {
     fontFamily: 'Inter_600SemiBold',
     fontSize: 16,
-    color: '#FFFFFF',
+    color: palette.text,
     flex: 1,
     flexShrink: 1,
   },
@@ -455,43 +455,43 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     gap: 4,
     flexShrink: 0,
+    borderWidth: 3,
+    borderColor: palette.border,
   },
   statusBadgeCompleted: {
-    backgroundColor: 'rgba(34, 229, 132, 0.15)',
-    borderWidth: 1,
-    borderColor: 'rgba(34, 229, 132, 0.3)',
+    backgroundColor: palette.sage,
   },
   statusBadgePending: {
-    backgroundColor: 'rgba(255, 184, 0, 0.15)',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 184, 0, 0.3)',
+    backgroundColor: palette.mustard,
   },
   statusBadgeText: {
     fontFamily: 'Inter_600SemiBold',
     fontSize: 11,
   },
   statusBadgeTextCompleted: {
-    color: '#22e584',
+    color: palette.text,
   },
   statusBadgeTextPending: {
-    color: '#FFB800',
+    color: palette.text,
   },
   subjectBadge: {
     paddingHorizontal: 8,
     paddingVertical: 4,
-    borderRadius: 6,
-    backgroundColor: 'rgba(34, 229, 132, 0.2)',
+    borderRadius: 10,
+    backgroundColor: screenAccents.tasks.secondary,
+    borderWidth: 3,
+    borderColor: palette.border,
   },
   subjectBadgeText: {
     fontFamily: 'Inter_600SemiBold',
     fontSize: 16,
-    color: '#22e584',
+    color: palette.text,
     textAlign: 'center',
   },
   taskDeadline: {
     fontFamily: 'Inter_400Regular',
     fontSize: 13,
-    color: 'rgba(255, 255, 255, 0.6)',
+    color: palette.textMuted,
   },
   taskTitleContainer: {
     padding: 16,
@@ -500,7 +500,7 @@ const styles = StyleSheet.create({
   taskTitle: {
     fontFamily: 'Inter_600SemiBold',
     fontSize: 22,
-    color: '#FFFFFF',
+    color: palette.text,
     lineHeight: 30,
   },
   taskDescriptionContainer: {
@@ -510,7 +510,7 @@ const styles = StyleSheet.create({
   taskDescription: {
     fontFamily: 'Inter_400Regular',
     fontSize: 15,
-    color: 'rgba(255, 255, 255, 0.8)',
+    color: palette.textMuted,
     lineHeight: 22,
   },
   emptyDescriptionContainer: {
@@ -522,26 +522,22 @@ const styles = StyleSheet.create({
   emptyDescriptionText: {
     fontFamily: 'Inter_500Medium',
     fontSize: 15,
-    color: 'rgba(255, 255, 255, 0.4)',
+    color: palette.textMuted,
     marginTop: 12,
   },
   markDoneButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'rgba(255, 184, 0, 0.15)',
-    borderRadius: 12,
+    ...brutalButton(screenAccents.tasks.secondary),
     paddingVertical: 14,
     paddingHorizontal: 20,
     marginTop: 16,
     marginHorizontal: 16,
     marginBottom: 16,
-    borderWidth: 1.5,
-    borderColor: 'rgba(255, 184, 0, 0.4)',
   },
   markDoneButtonCompleted: {
-    backgroundColor: 'rgba(34, 229, 132, 0.15)',
-    borderColor: 'rgba(34, 229, 132, 0.4)',
+    backgroundColor: screenAccents.tasks.primary,
   },
   markDoneButtonDisabled: {
     opacity: 0.5,
@@ -549,16 +545,17 @@ const styles = StyleSheet.create({
   markDoneButtonText: {
     fontFamily: 'Inter_600SemiBold',
     fontSize: 15,
-    color: '#FFB800',
+    color: palette.text,
     marginLeft: 10,
+    textTransform: 'uppercase',
   },
   markDoneButtonTextCompleted: {
-    color: '#22e584',
+    color: palette.text,
   },
   markDoneButtonHint: {
     fontFamily: 'Inter_400Regular',
     fontSize: 11,
-    color: 'rgba(34, 229, 132, 0.6)',
+    color: palette.textMuted,
     marginLeft: 8,
   },
 });

@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { Feather } from '@expo/vector-icons';
-import { LinearGradient } from 'expo-linear-gradient';
+import { brutalButton, brutalCard, palette } from '../theme/neoBrutal';
 
 class ErrorBoundary extends React.Component {
   constructor(props) {
@@ -39,37 +39,34 @@ class ErrorBoundary extends React.Component {
     if (this.state.hasError) {
       return (
         <View style={styles.container}>
-          <LinearGradient
-            colors={['#1B2845', '#23243a', '#22305a', '#3a5a8c', '#23243a']}
-            style={styles.gradient}
-          />
-
           <View style={styles.content}>
-            <View style={styles.iconContainer}>
-              <Feather name="alert-triangle" size={64} color="#FF3B30" />
+            <View style={styles.errorCard}>
+              <View style={styles.iconContainer}>
+                <Feather name="alert-triangle" size={64} color={palette.error} />
+              </View>
+
+              <Text style={styles.title}>Oops! Something went wrong</Text>
+              <Text style={styles.message}>
+                The app encountered an unexpected error. Don&apos;t worry, your data is safe.
+              </Text>
+
+              {__DEV__ && this.state.error && (
+                <ScrollView style={styles.errorDetails}>
+                  <Text style={styles.errorTitle}>Error Details (Dev Mode):</Text>
+                  <Text style={styles.errorText}>{this.state.error.toString()}</Text>
+                  {this.state.errorInfo && (
+                    <Text style={styles.errorText}>{this.state.errorInfo.componentStack}</Text>
+                  )}
+                </ScrollView>
+              )}
+
+              <TouchableOpacity style={styles.button} onPress={this.handleReset}>
+                <Feather name="refresh-cw" size={20} color={palette.text} />
+                <Text style={styles.buttonText}>Try Again</Text>
+              </TouchableOpacity>
+
+              <Text style={styles.helpText}>If the problem persists, please contact support</Text>
             </View>
-
-            <Text style={styles.title}>Oops! Something went wrong</Text>
-            <Text style={styles.message}>
-              The app encountered an unexpected error. Don't worry, your data is safe.
-            </Text>
-
-            {__DEV__ && this.state.error && (
-              <ScrollView style={styles.errorDetails}>
-                <Text style={styles.errorTitle}>Error Details (Dev Mode):</Text>
-                <Text style={styles.errorText}>{this.state.error.toString()}</Text>
-                {this.state.errorInfo && (
-                  <Text style={styles.errorText}>{this.state.errorInfo.componentStack}</Text>
-                )}
-              </ScrollView>
-            )}
-
-            <TouchableOpacity style={styles.button} onPress={this.handleReset}>
-              <Feather name="refresh-cw" size={20} color="#FFFFFF" />
-              <Text style={styles.buttonText}>Try Again</Text>
-            </TouchableOpacity>
-
-            <Text style={styles.helpText}>If the problem persists, please contact support</Text>
           </View>
         </View>
       );
@@ -82,14 +79,7 @@ class ErrorBoundary extends React.Component {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#121212',
-  },
-  gradient: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    top: 0,
-    bottom: 0,
+    backgroundColor: palette.background,
   },
   content: {
     flex: 1,
@@ -97,22 +87,31 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     padding: 24,
   },
+  errorCard: {
+    width: '100%',
+    maxWidth: 440,
+    alignItems: 'center',
+    padding: 24,
+    ...brutalCard('#F8D9D3'),
+  },
   iconContainer: {
     marginBottom: 24,
     padding: 20,
-    borderRadius: 50,
-    backgroundColor: 'rgba(255, 59, 48, 0.1)',
+    borderRadius: 20,
+    backgroundColor: palette.mustard,
+    borderWidth: 3,
+    borderColor: palette.border,
   },
   title: {
     fontSize: 24,
     fontWeight: '700',
-    color: '#FFFFFF',
+    color: palette.text,
     marginBottom: 12,
     textAlign: 'center',
   },
   message: {
     fontSize: 16,
-    color: 'rgba(255, 255, 255, 0.7)',
+    color: palette.textMuted,
     textAlign: 'center',
     marginBottom: 32,
     lineHeight: 24,
@@ -120,40 +119,41 @@ const styles = StyleSheet.create({
   errorDetails: {
     maxHeight: 200,
     width: '100%',
-    backgroundColor: 'rgba(0, 0, 0, 0.3)',
+    backgroundColor: palette.white,
     borderRadius: 8,
     padding: 12,
     marginBottom: 24,
+    borderWidth: 3,
+    borderColor: palette.border,
   },
   errorTitle: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#FF3B30',
+    color: palette.error,
     marginBottom: 8,
   },
   errorText: {
     fontSize: 12,
-    color: 'rgba(255, 255, 255, 0.6)',
+    color: palette.text,
     fontFamily: 'monospace',
   },
   button: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#007AFF',
+    gap: 8,
     paddingHorizontal: 32,
     paddingVertical: 16,
-    borderRadius: 12,
-    gap: 8,
     marginBottom: 16,
+    ...brutalButton(palette.teal),
   },
   buttonText: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#FFFFFF',
+    color: palette.text,
   },
   helpText: {
     fontSize: 14,
-    color: 'rgba(255, 255, 255, 0.5)',
+    color: palette.textMuted,
     textAlign: 'center',
   },
 });

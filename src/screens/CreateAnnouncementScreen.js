@@ -24,6 +24,7 @@ import { auth, db } from '../config/firebaseConfig';
 import { collection, addDoc, doc, getDoc } from 'firebase/firestore';
 import { useNetwork } from '../context/NetworkContext';
 import { showErrorAlert, logError } from '../utils/errorHandler';
+import { brutalButton, brutalCard, brutalInput, brutalShadow, palette, screenAccents } from '../theme/neoBrutal';
 
 export default function CreateAnnouncementScreen({ navigation }) {
   const { isConnected } = useNetwork();
@@ -41,13 +42,13 @@ export default function CreateAnnouncementScreen({ navigation }) {
   const getTypeColor = type => {
     switch (type) {
       case 'Critical':
-        return '#FF3B30';
+        return palette.coral;
       case 'Event':
-        return '#AF52DE';
+        return palette.lavender;
       case 'Reminder':
-        return '#FF9500';
+        return palette.peach;
       default:
-        return '#007AFF';
+        return palette.sky;
     }
   };
 
@@ -123,7 +124,7 @@ export default function CreateAnnouncementScreen({ navigation }) {
     return (
       <View style={styles.container}>
         <LinearGradient
-          colors={['#0f1c2e', '#162447', '#121212']}
+          colors={[palette.background, palette.background]}
           start={{ x: 0.5, y: 0 }}
           end={{ x: 0.5, y: 1 }}
           style={styles.shiningGradient}
@@ -138,7 +139,7 @@ export default function CreateAnnouncementScreen({ navigation }) {
   return (
     <View style={styles.outerContainer}>
       <LinearGradient
-        colors={['#1B2845', '#23243a', '#22305a', '#3a5a8c', '#23243a']}
+        colors={[palette.background, palette.background]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         style={styles.shiningGradient}
@@ -147,7 +148,7 @@ export default function CreateAnnouncementScreen({ navigation }) {
         style={styles.floatingBackButton}
         onPress={() => (step === 1 ? navigation.goBack() : setStep(1))}
       >
-        <Feather name="arrow-left" size={24} color="#FFFFFF" />
+        <Feather name="arrow-left" size={24} color={palette.text} />
       </TouchableOpacity>
       {step === 1 ? (
         <View style={styles.centerCardWrapper}>
@@ -201,7 +202,7 @@ export default function CreateAnnouncementScreen({ navigation }) {
                   value={title}
                   onChangeText={setTitle}
                   placeholder="What's this announcement about?"
-                  placeholderTextColor="#8E8E93"
+                  placeholderTextColor={palette.textMuted}
                 />
               </View>
               <View style={styles.inputGroup}>
@@ -240,7 +241,7 @@ export default function CreateAnnouncementScreen({ navigation }) {
                 <Text style={styles.label}>Expires On</Text>
                 <TouchableOpacity style={styles.checkboxRow} onPress={() => setNoExpiry(!noExpiry)}>
                   <View style={[styles.checkbox, noExpiry && styles.checkboxChecked]}>
-                    {noExpiry && <Feather name="check" size={16} color="#fff" />}
+                    {noExpiry && <Feather name="check" size={16} color={palette.text} />}
                   </View>
                   <Text style={styles.checkboxLabel}>No expiry date (indefinite)</Text>
                 </TouchableOpacity>
@@ -270,7 +271,7 @@ export default function CreateAnnouncementScreen({ navigation }) {
                         style={styles.dateButton}
                         onPress={() => setShowDatePicker(true)}
                       >
-                        <Feather name="calendar" size={20} color="#8E8E93" />
+                        <Feather name="calendar" size={20} color={palette.textMuted} />
                         <Text style={styles.dateButtonText}>{expiresAt.toLocaleDateString()}</Text>
                       </TouchableOpacity>
                       {showDatePicker && (
@@ -295,7 +296,7 @@ export default function CreateAnnouncementScreen({ navigation }) {
                 onPress={() => setStep(2)}
                 disabled={!title.trim()}
               >
-                <Feather name="arrow-right" size={18} color="#fff" style={{ marginRight: 8 }} />
+                <Feather name="arrow-right" size={18} color={palette.text} style={{ marginRight: 8 }} />
                 <Text style={styles.actionButtonTextGlow}>Next</Text>
               </TouchableOpacity>
             </ScrollView>
@@ -338,7 +339,7 @@ export default function CreateAnnouncementScreen({ navigation }) {
                   color={getTypeColor(selectedType)}
                   style={styles.bellIcon}
                 />
-                <Feather name="plus-circle" size={16} color="#fff" style={styles.plusIconOverlay} />
+                <Feather name="plus-circle" size={16} color={palette.text} style={styles.plusIconOverlay} />
               </View>
               <Text style={styles.screenTitle}>New Announcement</Text>
             </View>
@@ -365,7 +366,7 @@ export default function CreateAnnouncementScreen({ navigation }) {
               value={content}
               onChangeText={setContent}
               placeholder="What do you want to announce?"
-              placeholderTextColor="#8E8E93"
+              placeholderTextColor={palette.textMuted}
               multiline
               textAlignVertical="top"
               autoFocus
@@ -382,7 +383,7 @@ export default function CreateAnnouncementScreen({ navigation }) {
                 <ActivityIndicator color="#FFFFFF" size="small" />
               ) : (
                 <>
-                  <Feather name="check" size={18} color="#fff" style={{ marginRight: 8 }} />
+                  <Feather name="check" size={18} color={palette.text} style={{ marginRight: 8 }} />
                   <Text style={styles.actionButtonTextGlow}>Publish</Text>
                 </>
               )}
@@ -397,7 +398,7 @@ export default function CreateAnnouncementScreen({ navigation }) {
 const styles = StyleSheet.create({
   outerContainer: {
     flex: 1,
-    backgroundColor: '#121212',
+    backgroundColor: palette.background,
   },
   container: {
     flex: 1,
@@ -429,17 +430,15 @@ const styles = StyleSheet.create({
   glowIconContainer: {
     width: 56,
     height: 56,
-    borderRadius: 28,
-    backgroundColor: 'rgba(18, 18, 18, 0.85)',
+    borderRadius: 18,
+    backgroundColor: screenAccents.announcements.secondary,
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 2.5,
+    borderWidth: 3,
+    borderColor: palette.border,
     marginBottom: 8,
     marginTop: 2,
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.7,
-    shadowRadius: 18,
-    elevation: 8,
+    ...brutalShadow(),
     position: 'relative',
   },
   bellPlusIconContainer: {
@@ -459,15 +458,17 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: -6,
     right: -8,
-    backgroundColor: 'rgba(30,32,40,0.9)',
+    backgroundColor: palette.mustard,
     borderRadius: 12,
     padding: 1,
+    borderWidth: 2,
+    borderColor: palette.border,
     zIndex: 4,
   },
   screenTitle: {
     fontSize: 24,
     fontFamily: 'Inter_600SemiBold',
-    color: '#fff',
+    color: palette.text,
     marginTop: 8,
     marginBottom: 8,
     letterSpacing: 0.2,
@@ -480,24 +481,18 @@ const styles = StyleSheet.create({
     left: 18,
     width: 44,
     height: 44,
-    borderRadius: 22,
-    backgroundColor: 'rgba(30,32,40,0.85)',
+    borderRadius: 16,
+    backgroundColor: screenAccents.announcements.secondary,
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 1.5,
-    borderColor: 'rgba(255,255,255,0.13)',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.12,
-    shadowRadius: 6,
-    elevation: 2,
+    borderWidth: 3,
+    borderColor: palette.border,
+    ...brutalShadow(),
     zIndex: 100,
   },
   cardModernPolished: {
-    backgroundColor: 'rgba(30, 32, 40, 0.65)',
-    borderRadius: 22,
-    borderWidth: 1.5,
-    borderColor: 'rgba(255,255,255,0.13)',
+    ...brutalCard(screenAccents.announcements.tertiary),
+    borderRadius: 28,
     borderLeftWidth: 7,
     marginBottom: 16,
     marginTop: 4,
@@ -505,7 +500,6 @@ const styles = StyleSheet.create({
     width: '100%',
     maxWidth: 480,
     alignSelf: 'center',
-    backdropFilter: 'blur(18px)', // web only
     overflow: 'hidden',
     padding: 20,
     paddingTop: 32,
@@ -617,27 +611,19 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 15,
     fontFamily: 'Inter_500Medium',
-    color: '#FFFFFF',
+    color: palette.text,
     marginBottom: 8,
     letterSpacing: 0.1,
     opacity: 0.92,
   },
   input: {
     height: 50,
-    backgroundColor: 'rgba(30, 32, 40, 0.55)',
-    borderRadius: 14,
+    ...brutalInput(palette.white),
     paddingHorizontal: 16,
     fontSize: 16,
     fontFamily: 'Inter_400Regular',
-    color: '#FFFFFF',
-    borderWidth: 1.2,
-    borderColor: 'rgba(255, 255, 255, 0.13)',
+    color: palette.text,
     marginBottom: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 4,
-    elevation: 1,
   },
   textArea: {
     minHeight: 120,
@@ -694,26 +680,23 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
     paddingTop: 18,
     paddingBottom: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255, 255, 255, 0.08)',
+    borderBottomWidth: 3,
+    borderBottomColor: palette.border,
     marginBottom: 24, // increase space below preview card
     borderRadius: 24,
     borderWidth: 0,
     width: '92%',
     minWidth: 0,
     overflow: 'hidden',
-    backgroundColor: 'rgba(30, 32, 40, 0.55)',
+    backgroundColor: palette.surface,
     marginHorizontal: '4%',
-    shadowColor: '#007AFF',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.1,
-    shadowRadius: 24,
-    elevation: 8,
+    borderWidth: 3,
+    borderColor: palette.border,
   },
   twitterTitle: {
     fontSize: 22,
     fontFamily: 'Inter_600SemiBold',
-    color: '#FFFFFF',
+    color: palette.text,
     marginBottom: 8,
     flexWrap: 'wrap',
     width: '100%',
@@ -733,11 +716,11 @@ const styles = StyleSheet.create({
   twitterTypeChip: {
     paddingHorizontal: 12,
     paddingVertical: 4,
-    borderRadius: 14,
+    borderRadius: 10,
     marginRight: 8,
-    backgroundColor: 'rgba(255,255,255,0.08)',
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.13)',
+    backgroundColor: palette.surfaceAlt,
+    borderWidth: 2,
+    borderColor: palette.border,
   },
   twitterTypeText: {
     fontSize: 12,
@@ -748,30 +731,25 @@ const styles = StyleSheet.create({
   twitterExpiry: {
     fontSize: 12,
     fontFamily: 'Inter_400Regular',
-    color: '#8E8E93',
+    color: palette.textMuted,
   },
   twitterTextArea: {
     flex: 1,
     fontSize: 18,
     lineHeight: 28,
     fontFamily: 'Inter_400Regular',
-    color: '#FFFFFF',
+    color: palette.text,
     textAlignVertical: 'top',
     padding: 22,
     borderRadius: 18,
-    borderWidth: 1.5,
+    borderWidth: 3,
     marginTop: 0, // remove extra top margin
     marginBottom: 12,
     minHeight: 260,
     maxHeight: 400,
-    backgroundColor: 'rgba(30, 32, 40, 0.55)',
-    borderColor: 'rgba(255,255,255,0.13)',
+    backgroundColor: palette.white,
+    borderColor: palette.border,
     marginHorizontal: 0,
-    shadowColor: '#007AFF',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.1,
-    shadowRadius: 24,
-    elevation: 8,
     transition: 'all 0.2s',
     width: '100%',
     boxSizing: 'border-box',
@@ -782,7 +760,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   loadingText: {
-    color: '#FFFFFF',
+    color: palette.text,
     fontSize: 18,
   },
   typeGrid: {
@@ -805,26 +783,23 @@ const styles = StyleSheet.create({
   typeCardText: {
     fontSize: 14,
     fontFamily: 'Inter_500Medium',
-    color: '#8E8E93',
+    color: palette.textMuted,
   },
   typeCardTextSelected: {
-    color: '#FFFFFF',
+    color: palette.text,
   },
   dateButton: {
     height: 50,
-    backgroundColor: 'rgba(255, 255, 255, 0.03)',
-    borderRadius: 14,
+    ...brutalInput(palette.white),
     paddingHorizontal: 16,
     flexDirection: 'row',
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
     gap: 12,
   },
   dateButtonText: {
     fontSize: 16,
     fontFamily: 'Inter_400Regular',
-    color: '#FFFFFF',
+    color: palette.text,
   },
   checkboxRow: {
     flexDirection: 'row',
@@ -837,20 +812,20 @@ const styles = StyleSheet.create({
     width: 24,
     height: 24,
     borderRadius: 6,
-    borderWidth: 2,
-    borderColor: 'rgba(255, 255, 255, 0.3)',
-    backgroundColor: 'rgba(255, 255, 255, 0.03)',
+    borderWidth: 3,
+    borderColor: palette.border,
+    backgroundColor: palette.white,
     alignItems: 'center',
     justifyContent: 'center',
   },
   checkboxChecked: {
-    backgroundColor: '#22e584',
-    borderColor: '#22e584',
+    backgroundColor: screenAccents.announcements.primary,
+    borderColor: palette.border,
   },
   checkboxLabel: {
     fontSize: 15,
     fontFamily: 'Inter_500Medium',
-    color: 'rgba(255, 255, 255, 0.9)',
+    color: palette.text,
   },
   cardWithMargin: {
     marginHorizontal: 18,
@@ -870,31 +845,26 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 8,
-    backgroundColor: '#22e584',
-    borderRadius: 16,
+    ...brutalButton(screenAccents.announcements.primary),
     paddingHorizontal: 0,
     paddingVertical: 13,
     marginHorizontal: 4,
-    shadowColor: '#22e584',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.18,
-    shadowRadius: 8,
-    elevation: 2,
     marginTop: 12,
     width: '100%',
     minWidth: 0,
     maxWidth: '100%',
   },
   actionButtonGlowDisabled: {
-    backgroundColor: '#2a2a2a',
-    borderColor: '#4A4A4A',
+    backgroundColor: palette.textMuted,
+    borderColor: palette.border,
     opacity: 0.6,
   },
   actionButtonTextGlow: {
     fontSize: 16,
     fontFamily: 'Inter_600SemiBold',
-    color: '#fff',
+    color: palette.text,
     letterSpacing: 0.2,
+    textTransform: 'uppercase',
   },
   cardFinalizeStep: {
     minHeight: 700,

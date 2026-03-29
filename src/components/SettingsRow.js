@@ -1,6 +1,7 @@
 import React from 'react';
 import { TouchableOpacity, Text, View, StyleSheet } from 'react-native';
 import { Feather } from '@expo/vector-icons';
+import { brutalCard, palette } from '../theme/neoBrutal';
 
 export default function SettingsRow({
   icon,
@@ -17,7 +18,7 @@ export default function SettingsRow({
       activeOpacity={0.7}
     >
       <View style={styles.iconCircle}>
-        <Feather name={icon} size={20} color={isDestructive ? '#FF3B30' : '#22e584'} />
+        <Feather name={icon} size={20} color={isDestructive ? palette.error : palette.text} />
       </View>
       <View style={styles.textContainer}>
         <Text style={[styles.title, isDestructive && styles.destructiveTitle]}>{title}</Text>
@@ -27,7 +28,7 @@ export default function SettingsRow({
           </Text>
         )}
       </View>
-      {showArrow && <Feather name="chevron-right" size={20} color="rgba(255, 255, 255, 0.3)" />}
+      {showArrow && <Feather name="chevron-right" size={20} color={palette.textMuted} />}
     </TouchableOpacity>
   );
 }
@@ -37,18 +38,19 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     padding: 16,
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255, 255, 255, 0.05)',
+    marginBottom: 12,
+    ...brutalCard(palette.surface),
   },
   destructiveRow: {
-    backgroundColor: 'rgba(255, 59, 48, 0.05)',
+    backgroundColor: '#F8D9D3',
   },
   iconCircle: {
     width: 40,
     height: 40,
-    borderRadius: 20,
-    backgroundColor: 'rgba(34, 229, 132, 0.15)',
+    borderRadius: 14,
+    backgroundColor: palette.mustard,
+    borderWidth: 3,
+    borderColor: palette.border,
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 12,
@@ -59,18 +61,18 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 16,
     fontFamily: 'Inter_500Medium',
-    color: '#FFFFFF',
+    color: palette.text,
     marginBottom: 2,
   },
   destructiveTitle: {
-    color: '#FF3B30',
+    color: palette.error,
   },
   subtitle: {
     fontSize: 13,
     fontFamily: 'Inter_400Regular',
-    color: 'rgba(255, 255, 255, 0.5)',
+    color: palette.textMuted,
   },
   destructiveSubtitle: {
-    color: 'rgba(255, 59, 48, 0.7)',
+    color: palette.error,
   },
 });

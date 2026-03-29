@@ -34,6 +34,7 @@ import {
 import { doc, getDoc } from 'firebase/firestore';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { LinearGradient } from 'expo-linear-gradient';
+import { brutalButton, brutalCard, brutalInput, palette, screenAccents } from '../theme/neoBrutal';
 
 const { width, height } = Dimensions.get('window');
 
@@ -240,7 +241,7 @@ export default function LoginScreen({ navigation }) {
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
       <LinearGradient
-        colors={['#1B2845', '#23243a', '#22305a']}
+        colors={[palette.background, palette.background]}
         style={styles.container}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
@@ -266,19 +267,19 @@ export default function LoginScreen({ navigation }) {
             <TextInput
               style={styles.input}
               placeholder="username"
-              placeholderTextColor="rgba(255,255,255,0.5)"
+              placeholderTextColor={palette.textMuted}
               value={email}
               onChangeText={setEmail}
               autoCapitalize="none"
             />
-            <Feather name="user" size={20} color="rgba(255,255,255,0.5)" style={styles.inputIcon} />
+            <Feather name="user" size={20} color={palette.textMuted} style={styles.inputIcon} />
           </View>
           {/* Password Input */}
           <View style={styles.inputWrapper}>
             <TextInput
               style={styles.input}
               placeholder="password"
-              placeholderTextColor="rgba(255,255,255,0.5)"
+              placeholderTextColor={palette.textMuted}
               secureTextEntry={!showPassword}
               value={password}
               onChangeText={setPassword}
@@ -288,7 +289,7 @@ export default function LoginScreen({ navigation }) {
               <Feather
                 name={showPassword ? 'eye-off' : 'eye'}
                 size={20}
-                color="rgba(255,255,255,0.5)"
+                color={palette.textMuted}
                 style={styles.inputIcon}
               />
             </TouchableOpacity>
@@ -313,7 +314,7 @@ export default function LoginScreen({ navigation }) {
           {/* Sign In Button */}
           <TouchableOpacity style={styles.signInButton} onPress={handleLogin} disabled={loading}>
             {loading ? (
-              <ActivityIndicator color="#fff" />
+              <ActivityIndicator color={palette.text} />
             ) : (
               <Text style={styles.signInButtonText}>Sign In</Text>
             )}
@@ -344,7 +345,7 @@ export default function LoginScreen({ navigation }) {
                   <View style={styles.modalHeader}>
                     <Text style={styles.modalTitle}>Reset Password</Text>
                     <TouchableOpacity onPress={handleCloseResetModal}>
-                      <Feather name="x" size={24} color="#FFFFFF" />
+                      <Feather name="x" size={24} color={palette.text} />
                     </TouchableOpacity>
                   </View>
 
@@ -356,13 +357,13 @@ export default function LoginScreen({ navigation }) {
                     <Feather
                       name="mail"
                       size={20}
-                      color="rgba(255, 255, 255, 0.6)"
+                      color={palette.textMuted}
                       style={styles.modalInputIcon}
                     />
                     <TextInput
                       style={styles.modalInput}
                       placeholder="Email Address"
-                      placeholderTextColor="rgba(255, 255, 255, 0.4)"
+                      placeholderTextColor={palette.textMuted}
                       value={resetEmail}
                       onChangeText={setResetEmail}
                       keyboardType="email-address"
@@ -401,7 +402,7 @@ export default function LoginScreen({ navigation }) {
                       activeOpacity={0.8}
                     >
                       {resetLoading ? (
-                        <ActivityIndicator color="#FFFFFF" />
+                        <ActivityIndicator color={palette.text} />
                       ) : (
                         <Text style={styles.modalButtonText}>Send Reset Link</Text>
                       )}
@@ -422,28 +423,22 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#1B2845',
+    backgroundColor: palette.background,
   },
   bgCard: {
     width: '100%',
-    backgroundColor: 'rgba(27, 40, 69, 0.9)',
-    borderRadius: 0,
-    borderTopLeftRadius: 0,
-    borderTopRightRadius: 0,
+    backgroundColor: screenAccents.auth.secondary,
     alignItems: 'flex-start',
     paddingTop: 56,
     paddingBottom: 120,
     paddingLeft: 28,
     paddingRight: 28,
     marginBottom: LOGIN_CARD_MARGIN_TOP,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 12 },
-    shadowOpacity: 0.25,
-    shadowRadius: 30,
-    elevation: 15,
+    borderBottomWidth: 3,
+    borderColor: palette.border,
   },
   title: {
-    color: '#FFFFFF',
+    color: palette.text,
     fontSize: 28,
     fontWeight: '600',
     fontFamily: 'Inter_600SemiBold',
@@ -454,7 +449,7 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-start',
   },
   appName: {
-    color: '#22e584',
+    color: palette.coral,
     fontSize: 48,
     fontWeight: 'bold',
     fontFamily: 'Inter_700Bold',
@@ -464,7 +459,7 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-start',
   },
   subtitle: {
-    color: 'rgba(255,255,255,0.7)',
+    color: palette.textMuted,
     fontSize: 16,
     fontFamily: 'Inter_400Regular',
     fontStyle: 'italic',
@@ -474,17 +469,10 @@ const styles = StyleSheet.create({
   loginCard: {
     height: LOGIN_CARD_HEIGHT,
     width: '100%',
-    borderRadius: CARD_RADIUS,
-    backgroundColor: 'rgba(30, 39, 70, 0.95)',
-    borderWidth: 1.5,
-    borderColor: 'rgba(34, 229, 132, 0.2)',
+    backgroundColor: screenAccents.auth.tertiary,
     marginTop: LOGIN_CARD_MARGIN_TOP - 20,
     zIndex: 2,
-    shadowColor: '#22e584',
-    shadowOffset: { width: 0, height: 15 },
-    shadowOpacity: 0.2,
-    shadowRadius: 35,
-    elevation: 20,
+    ...brutalCard(screenAccents.auth.tertiary),
   },
   loginCardContent: {
     paddingTop: 48,
@@ -495,7 +483,7 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-start',
   },
   loginLabel: {
-    color: '#fff',
+    color: palette.text,
     fontSize: 32,
     fontWeight: 'bold',
     fontFamily: 'Inter_700Bold',
@@ -507,23 +495,15 @@ const styles = StyleSheet.create({
   inputWrapper: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(27, 33, 64, 0.92)',
-    borderRadius: 25,
+    ...brutalInput(palette.white),
     marginBottom: 20,
     paddingHorizontal: 20,
     paddingVertical: 2,
     width: '100%',
-    borderWidth: 1.5,
-    borderColor: 'rgba(255,255,255,0.12)',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
-    shadowRadius: 12,
-    elevation: 8,
   },
   input: {
     flex: 1,
-    color: '#fff',
+    color: palette.text,
     fontSize: 16,
     fontFamily: 'Inter_400Regular',
     paddingVertical: 12,
@@ -552,57 +532,44 @@ const styles = StyleSheet.create({
     height: 18,
     borderRadius: 4,
     borderWidth: 1.5,
-    borderColor: 'rgba(255,255,255,0.5)',
-    backgroundColor: 'transparent',
+    borderColor: palette.border,
+    backgroundColor: palette.white,
     marginRight: 8,
     alignItems: 'center',
     justifyContent: 'center',
   },
   checkboxChecked: {
-    borderColor: '#fff',
-    backgroundColor: 'rgba(255,255,255,0.2)',
+    borderColor: palette.border,
+    backgroundColor: palette.mustard,
   },
   checkboxInner: {
     width: 10,
     height: 10,
     borderRadius: 2,
-    backgroundColor: '#fff',
+    backgroundColor: palette.text,
   },
   rememberMe: {
-    color: 'rgba(255,255,255,0.7)',
+    color: palette.textMuted,
     fontSize: 15,
     fontFamily: 'Inter_400Regular',
   },
   needHelp: {
-    color: 'rgba(255,255,255,0.9)',
+    color: palette.text,
     fontSize: 15,
     fontWeight: 'bold',
     fontFamily: 'Inter_600SemiBold',
   },
   signInButton: {
     width: '100%',
-    backgroundColor: '#22e584',
-    borderRadius: 25,
     paddingVertical: 16,
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: '#22e584',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 5,
     marginTop: 10,
     marginBottom: 24,
-    borderWidth: 1.5,
-    borderColor: 'rgba(255,255,255,0.12)',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.2,
-    shadowRadius: 15,
-    elevation: 10,
+    ...brutalButton(screenAccents.auth.primary),
   },
   signInButtonText: {
-    color: '#1B2845',
+    color: palette.text,
     fontSize: 17,
     fontWeight: '600',
     fontFamily: 'Inter_600SemiBold',
@@ -610,8 +577,8 @@ const styles = StyleSheet.create({
   },
   divider: {
     width: '100%',
-    height: 1,
-    backgroundColor: 'rgba(255,255,255,0.08)',
+    height: 3,
+    backgroundColor: palette.border,
     marginTop: 20,
     marginBottom: 20,
   },
@@ -626,12 +593,12 @@ const styles = StyleSheet.create({
     marginBottom: 0,
   },
   footerText: {
-    color: 'rgba(255,255,255,0.7)',
+    color: palette.textMuted,
     fontSize: 15,
     fontFamily: 'Inter_400Regular',
   },
   footerLink: {
-    color: '#fff',
+    color: palette.text,
     fontSize: 15,
     fontWeight: 'bold',
     fontFamily: 'Inter_600SemiBold',
@@ -639,7 +606,7 @@ const styles = StyleSheet.create({
     textDecorationLine: 'underline',
   },
   errorText: {
-    color: '#ff6b6b',
+    color: palette.error,
     fontSize: 14,
     fontFamily: 'Inter_400Regular',
     marginVertical: 12,
@@ -648,22 +615,14 @@ const styles = StyleSheet.create({
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.85)',
+    backgroundColor: 'rgba(43, 43, 43, 0.35)',
     justifyContent: 'center',
     alignItems: 'center',
   },
   modalContent: {
     width: '85%',
-    backgroundColor: 'rgba(30, 39, 70, 0.98)',
-    borderRadius: 20,
     padding: 24,
-    borderWidth: 1.5,
-    borderColor: 'rgba(34, 229, 132, 0.3)',
-    shadowColor: '#22e584',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.2,
-    shadowRadius: 20,
-    elevation: 10,
+    ...brutalCard(palette.background),
   },
   modalHeader: {
     flexDirection: 'row',
@@ -674,12 +633,12 @@ const styles = StyleSheet.create({
   modalTitle: {
     fontSize: 24,
     fontWeight: '700',
-    color: '#FFFFFF',
+    color: palette.text,
     fontFamily: 'Inter_700Bold',
   },
   modalDescription: {
     fontSize: 15,
-    color: 'rgba(255, 255, 255, 0.7)',
+    color: palette.textMuted,
     marginBottom: 24,
     lineHeight: 22,
     fontFamily: 'Inter_400Regular',
@@ -687,12 +646,9 @@ const styles = StyleSheet.create({
   modalInputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    borderWidth: 1.5,
-    borderColor: 'rgba(34, 229, 132, 0.3)',
-    borderRadius: 12,
     paddingHorizontal: 16,
-    backgroundColor: 'rgba(0, 0, 0, 0.2)',
     marginBottom: 16,
+    ...brutalInput(palette.white),
   },
   modalInputIcon: {
     marginRight: 12,
@@ -700,7 +656,7 @@ const styles = StyleSheet.create({
   modalInput: {
     flex: 1,
     height: 52,
-    color: '#fff',
+    color: palette.text,
     fontSize: 16,
     fontFamily: 'Inter_400Regular',
   },
@@ -711,29 +667,23 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter_400Regular',
   },
   successMessage: {
-    color: '#22e584',
+    color: palette.success,
   },
   errorMessage: {
-    color: '#ff6b6b',
+    color: palette.error,
   },
   modalButton: {
     width: '100%',
     height: 52,
-    backgroundColor: '#22e584',
-    borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: '#22e584',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 5,
+    ...brutalButton(palette.teal),
   },
   modalButtonDisabled: {
     opacity: 0.5,
   },
   modalButtonText: {
-    color: '#1B2845',
+    color: palette.text,
     fontSize: 17,
     fontWeight: '600',
     fontFamily: 'Inter_600SemiBold',

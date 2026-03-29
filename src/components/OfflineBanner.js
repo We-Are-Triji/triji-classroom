@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Animated, Modal } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { useNetwork } from '../context/NetworkContext';
+import { brutalButton, brutalCard, palette } from '../theme/neoBrutal';
 
 export default function OfflineBanner() {
   const { isConnected } = useNetwork();
@@ -34,7 +35,7 @@ export default function OfflineBanner() {
   if (showBackOnline) {
     return (
       <Animated.View style={[styles.banner, styles.onlineBanner, { opacity: fadeAnim }]}>
-        <Feather name="wifi" size={16} color="#FFFFFF" />
+        <Feather name="wifi" size={16} color={palette.text} />
         <Text style={styles.onlineText}>Back Online! Syncing...</Text>
       </Animated.View>
     );
@@ -44,10 +45,10 @@ export default function OfflineBanner() {
     return (
       <>
         <View style={[styles.banner, styles.offlineBanner]}>
-          <Feather name="wifi-off" size={16} color="#FFFFFF" />
+          <Feather name="wifi-off" size={16} color={palette.text} />
           <Text style={styles.offlineText}>No Internet Connection</Text>
           <TouchableOpacity style={styles.infoButton} onPress={() => setShowHelpModal(true)}>
-            <Feather name="help-circle" size={16} color="#FFFFFF" />
+            <Feather name="help-circle" size={16} color={palette.text} />
           </TouchableOpacity>
         </View>
 
@@ -64,16 +65,16 @@ export default function OfflineBanner() {
           >
             <View style={styles.modalContent}>
               <View style={styles.modalHeader}>
-                <Feather name="wifi-off" size={24} color="#FF9800" />
+                <Feather name="wifi-off" size={24} color={palette.warning} />
                 <Text style={styles.modalTitle}>Offline Mode</Text>
                 <TouchableOpacity onPress={() => setShowHelpModal(false)}>
-                  <Feather name="x" size={24} color="rgba(255,255,255,0.7)" />
+                  <Feather name="x" size={24} color={palette.textMuted} />
                 </TouchableOpacity>
               </View>
 
               <View style={styles.section}>
                 <View style={styles.sectionHeader}>
-                  <Feather name="x-circle" size={18} color="#FF3B30" />
+                  <Feather name="x-circle" size={18} color={palette.error} />
                   <Text style={styles.sectionTitle}>Unavailable Features</Text>
                 </View>
                 <Text style={styles.featureItem}>• View or post announcements</Text>
@@ -85,7 +86,7 @@ export default function OfflineBanner() {
 
               <View style={styles.section}>
                 <View style={styles.sectionHeader}>
-                  <Feather name="check-circle" size={18} color="#4CAF50" />
+                  <Feather name="check-circle" size={18} color={palette.success} />
                   <Text style={styles.sectionTitle}>What You Can Do</Text>
                 </View>
                 <Text style={styles.featureItem}>• Use the Grade Calculator</Text>
@@ -94,7 +95,7 @@ export default function OfflineBanner() {
               </View>
 
               <View style={styles.tipBox}>
-                <Feather name="info" size={16} color="#007AFF" />
+                <Feather name="info" size={16} color={palette.text} />
                 <Text style={styles.tipText}>
                   Your changes will sync automatically when you reconnect
                 </Text>
@@ -127,20 +128,22 @@ const styles = StyleSheet.create({
     gap: 8,
     zIndex: 9999,
     elevation: 10,
+    borderBottomWidth: 3,
+    borderBottomColor: palette.border,
   },
   offlineBanner: {
-    backgroundColor: '#FF6B6B',
+    backgroundColor: palette.peach,
   },
   onlineBanner: {
-    backgroundColor: '#4CAF50',
+    backgroundColor: palette.sage,
   },
   offlineText: {
-    color: '#FFFFFF',
+    color: palette.text,
     fontSize: 14,
     fontWeight: '500',
   },
   onlineText: {
-    color: '#FFFFFF',
+    color: palette.text,
     fontSize: 14,
     fontWeight: '500',
   },
@@ -149,17 +152,16 @@ const styles = StyleSheet.create({
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    backgroundColor: 'rgba(43, 43, 43, 0.4)',
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
   },
   modalContent: {
-    backgroundColor: '#1E1E1E',
-    borderRadius: 16,
-    padding: 20,
     width: '100%',
     maxWidth: 400,
+    padding: 20,
+    ...brutalCard(palette.background),
   },
   modalHeader: {
     flexDirection: 'row',
@@ -170,7 +172,7 @@ const styles = StyleSheet.create({
   modalTitle: {
     fontSize: 20,
     fontWeight: '700',
-    color: '#FFFFFF',
+    color: palette.text,
     flex: 1,
     marginLeft: 12,
   },
@@ -186,11 +188,11 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#FFFFFF',
+    color: palette.text,
   },
   featureItem: {
     fontSize: 14,
-    color: 'rgba(255, 255, 255, 0.7)',
+    color: palette.textMuted,
     marginBottom: 6,
     lineHeight: 20,
   },
@@ -198,26 +200,27 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
-    backgroundColor: 'rgba(0, 122, 255, 0.1)',
+    backgroundColor: palette.mustard,
     padding: 12,
-    borderRadius: 8,
+    borderRadius: 12,
     marginBottom: 20,
+    borderWidth: 3,
+    borderColor: palette.border,
   },
   tipText: {
     fontSize: 13,
-    color: '#007AFF',
+    color: palette.text,
     flex: 1,
     lineHeight: 18,
   },
   closeButton: {
-    backgroundColor: '#007AFF',
     paddingVertical: 14,
-    borderRadius: 10,
     alignItems: 'center',
+    ...brutalButton(palette.teal),
   },
   closeButtonText: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#FFFFFF',
+    color: palette.text,
   },
 });

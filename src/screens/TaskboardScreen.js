@@ -22,6 +22,7 @@ import { db, auth } from '../config/firebaseConfig';
 import { collection, query, onSnapshot, orderBy, limit } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
 import TaskCardSkeleton from '../components/TaskCardSkeleton';
+import { brutalButton, brutalCard, brutalShadow, palette, screenAccents } from '../theme/neoBrutal';
 
 export default function TaskboardScreen({ navigation }) {
   const [tasks, setTasks] = useState([]);
@@ -250,7 +251,7 @@ export default function TaskboardScreen({ navigation }) {
     return (
       <View style={styles.container}>
         <LinearGradient
-          colors={['#0f1c2e', '#162447', '#121212']}
+          colors={[palette.background, palette.background]}
           start={{ x: 0.5, y: 0 }}
           end={{ x: 0.5, y: 1 }}
           style={styles.backgroundGradient}
@@ -265,7 +266,7 @@ export default function TaskboardScreen({ navigation }) {
   return (
     <View style={styles.container}>
       <LinearGradient
-        colors={['#1B2845', '#23243a', '#22305a', '#3a5a8c', '#23243a']}
+        colors={[palette.background, palette.background]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         style={styles.backgroundGradient}
@@ -273,7 +274,7 @@ export default function TaskboardScreen({ navigation }) {
 
       <View style={styles.header}>
         <View style={styles.iconCircle}>
-          <MaterialCommunityIcons name="clipboard-list-outline" size={28} color="#22e584" />
+          <MaterialCommunityIcons name="clipboard-list-outline" size={28} color={palette.text} />
         </View>
         <View style={styles.headerTextContainer}>
           <Text style={styles.headerTitle}>Task Board</Text>
@@ -288,7 +289,7 @@ export default function TaskboardScreen({ navigation }) {
             <Feather
               name={sortOrder === 'asc' ? 'arrow-up' : 'arrow-down'}
               size={18}
-              color="#22e584"
+              color={palette.text}
             />
           </TouchableOpacity>
           <TouchableOpacity
@@ -296,7 +297,7 @@ export default function TaskboardScreen({ navigation }) {
             onPress={() => navigation.navigate('ArchivedTasks')}
             activeOpacity={0.7}
           >
-            <Feather name="archive" size={18} color="#22e584" />
+            <Feather name="archive" size={18} color={palette.text} />
           </TouchableOpacity>
         </View>
       </View>
@@ -319,7 +320,7 @@ export default function TaskboardScreen({ navigation }) {
           </View>
         ) : error ? (
           <View style={styles.emptyContainer}>
-            <Feather name="wifi-off" size={64} color="#FF3B30" />
+            <Feather name="wifi-off" size={64} color={palette.error} />
             <Text style={styles.emptyTitle}>Connection Error</Text>
             <Text style={styles.emptyMessage}>{error}</Text>
             <TouchableOpacity style={styles.retryButton} onPress={() => fetchTasks()}>
@@ -328,7 +329,7 @@ export default function TaskboardScreen({ navigation }) {
           </View>
         ) : tasks.length === 0 ? (
           <View style={styles.emptyContainer}>
-            <Feather name="clipboard" size={64} color="#8E8E93" />
+            <Feather name="clipboard" size={64} color={palette.textMuted} />
             <Text style={styles.emptyTitle}>No tasks yet</Text>
             <Text style={styles.emptyMessage}>
               Tasks will appear here once added by administrators
@@ -344,10 +345,10 @@ export default function TaskboardScreen({ navigation }) {
                 <RefreshControl
                   refreshing={refreshing}
                   onRefresh={onRefresh}
-                  tintColor="#FFFFFF"
-                  colors={['#22e584', '#FFFFFF']}
-                  progressBackgroundColor="rgba(34, 229, 132, 0.3)"
-                  titleColor="#FFFFFF"
+                  tintColor={palette.text}
+                  colors={[palette.teal]}
+                  progressBackgroundColor={palette.background}
+                  titleColor={palette.text}
                   title="Refreshing..."
                 />
               }
@@ -365,7 +366,7 @@ export default function TaskboardScreen({ navigation }) {
                   <Feather
                     name="chevron-left"
                     size={20}
-                    color={currentPage === 1 ? '#555' : '#22e584'}
+                    color={currentPage === 1 ? palette.textMuted : palette.text}
                   />
                   <Text
                     style={[
@@ -400,7 +401,7 @@ export default function TaskboardScreen({ navigation }) {
                   <Feather
                     name="chevron-right"
                     size={20}
-                    color={currentPage === totalPages ? '#555' : '#22e584'}
+                    color={currentPage === totalPages ? palette.textMuted : palette.text}
                   />
                 </TouchableOpacity>
               </View>
@@ -415,7 +416,7 @@ export default function TaskboardScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0f1c2e',
+    backgroundColor: palette.background,
   },
   backgroundGradient: {
     position: 'absolute',
@@ -431,8 +432,8 @@ const styles = StyleSheet.create({
     paddingTop: Platform.OS === 'ios' ? 60 : 40,
     paddingBottom: 16,
     gap: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255, 255, 255, 0.1)',
+    borderBottomWidth: 3,
+    borderBottomColor: palette.border,
   },
   headerActions: {
     flexDirection: 'row',
@@ -441,32 +442,34 @@ const styles = StyleSheet.create({
   sortButton: {
     width: 40,
     height: 40,
-    borderRadius: 20,
-    backgroundColor: 'rgba(34, 229, 132, 0.15)',
+    borderRadius: 14,
+    backgroundColor: screenAccents.tasks.secondary,
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: 'rgba(34, 229, 132, 0.3)',
+    borderWidth: 3,
+    borderColor: palette.border,
+    ...brutalShadow(),
   },
   archiveButton: {
     width: 40,
     height: 40,
-    borderRadius: 20,
-    backgroundColor: 'rgba(34, 229, 132, 0.15)',
+    borderRadius: 14,
+    backgroundColor: screenAccents.tasks.tertiary,
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: 'rgba(34, 229, 132, 0.3)',
+    borderWidth: 3,
+    borderColor: palette.border,
+    ...brutalShadow(),
   },
   iconCircle: {
     width: 35,
     height: 35,
-    borderRadius: 24,
-    backgroundColor: 'rgba(34, 229, 132, 0.15)',
+    borderRadius: 14,
+    backgroundColor: screenAccents.tasks.primary,
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: 'rgba(34, 229, 132, 0.3)',
+    borderWidth: 3,
+    borderColor: palette.border,
   },
   headerTextContainer: {
     flex: 1,
@@ -474,13 +477,14 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 22,
     fontFamily: 'Inter_600SemiBold',
-    color: '#FFFFFF',
+    color: palette.text,
     marginBottom: 2,
+    textTransform: 'uppercase',
   },
   headerSubtext: {
     fontSize: 13,
     fontFamily: 'Inter_400Regular',
-    color: 'rgba(255, 255, 255, 0.6)',
+    color: palette.textMuted,
   },
   tasksContent: {
     flex: 1,
@@ -495,16 +499,13 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
   },
   taskCard: {
-    backgroundColor: 'rgba(255, 255, 255, 0.08)',
-    borderRadius: 12,
     padding: 12,
     marginBottom: 10,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
+    ...brutalCard(screenAccents.tasks.tertiary),
   },
   taskCardCompleted: {
-    backgroundColor: 'rgba(34, 229, 132, 0.08)',
-    borderColor: 'rgba(34, 229, 132, 0.2)',
+    backgroundColor: '#DDEDE9',
+    borderColor: palette.border,
     opacity: 0.85,
   },
   taskCardHeader: {
@@ -522,54 +523,54 @@ const styles = StyleSheet.create({
   completedBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(34, 229, 132, 0.15)',
+    backgroundColor: '#DDEDE9',
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 12,
     gap: 4,
-    borderWidth: 1,
-    borderColor: 'rgba(34, 229, 132, 0.3)',
+    borderWidth: 2,
+    borderColor: palette.border,
   },
   completedText: {
     fontFamily: 'Inter_600SemiBold',
     fontSize: 11,
-    color: '#22e584',
+    color: palette.success,
   },
   pendingBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(255, 184, 0, 0.15)',
+    backgroundColor: '#F9EDC3',
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 12,
     gap: 4,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 184, 0, 0.3)',
+    borderWidth: 2,
+    borderColor: palette.border,
   },
   pendingText: {
     fontFamily: 'Inter_600SemiBold',
     fontSize: 11,
-    color: '#FFB800',
+    color: palette.warning,
   },
   subjectBadge: {
-    backgroundColor: 'rgba(34, 229, 132, 0.15)',
+    backgroundColor: screenAccents.tasks.primary,
     paddingHorizontal: 10,
     paddingVertical: 5,
-    borderRadius: 6,
-    borderWidth: 1,
-    borderColor: 'rgba(34, 229, 132, 0.3)',
+    borderRadius: 10,
+    borderWidth: 2,
+    borderColor: palette.border,
     flexShrink: 1,
     maxWidth: '65%',
   },
   subjectBadgeText: {
     fontSize: 11,
     fontFamily: 'Inter_600SemiBold',
-    color: '#22e584',
+    color: palette.text,
   },
   overdueTag: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(255, 59, 48, 0.15)',
+    backgroundColor: '#F8D9D3',
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 6,
@@ -578,19 +579,19 @@ const styles = StyleSheet.create({
   overdueText: {
     fontSize: 11,
     fontFamily: 'Inter_500Medium',
-    color: '#FF3B30',
+    color: palette.error,
   },
   taskTitle: {
     fontSize: 16,
     fontFamily: 'Inter_600SemiBold',
-    color: '#FFFFFF',
+    color: palette.text,
     marginBottom: 6,
     lineHeight: 22,
   },
   taskDescription: {
     fontSize: 13,
     fontFamily: 'Inter_400Regular',
-    color: 'rgba(255, 255, 255, 0.65)',
+    color: palette.textMuted,
     lineHeight: 18,
     marginBottom: 8,
   },
@@ -607,7 +608,7 @@ const styles = StyleSheet.create({
   taskDate: {
     fontSize: 12,
     fontFamily: 'Inter_500Medium',
-    color: '#8E8E93',
+    color: palette.textMuted,
   },
   emptyContainer: {
     flex: 1,
@@ -618,7 +619,7 @@ const styles = StyleSheet.create({
   emptyTitle: {
     fontSize: 20,
     fontFamily: 'Inter_600SemiBold',
-    color: '#FFFFFF',
+    color: palette.text,
     textAlign: 'center',
     marginTop: 16,
     marginBottom: 8,
@@ -626,21 +627,20 @@ const styles = StyleSheet.create({
   emptyMessage: {
     fontSize: 14,
     fontFamily: 'Inter_400Regular',
-    color: 'rgba(255, 255, 255, 0.6)',
+    color: palette.textMuted,
     textAlign: 'center',
     lineHeight: 20,
   },
   retryButton: {
-    backgroundColor: '#22e584',
     paddingHorizontal: 24,
     paddingVertical: 12,
-    borderRadius: 12,
     marginTop: 20,
+    ...brutalButton(screenAccents.tasks.primary),
   },
   retryButtonText: {
     fontSize: 14,
     fontFamily: 'Inter_600SemiBold',
-    color: '#0f1c2e',
+    color: palette.text,
   },
   loadingContainer: {
     flex: 1,
@@ -648,21 +648,21 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   loadingText: {
-    color: '#FFFFFF',
+    color: palette.text,
     fontSize: 16,
     fontFamily: 'Inter_500Medium',
   },
   paginationInfo: {
     paddingHorizontal: 20,
     paddingVertical: 12,
-    backgroundColor: 'rgba(34, 229, 132, 0.05)',
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255, 255, 255, 0.1)',
+    backgroundColor: '#F9EDC3',
+    borderBottomWidth: 3,
+    borderBottomColor: palette.border,
   },
   paginationText: {
     fontSize: 13,
     fontFamily: 'Inter_500Medium',
-    color: 'rgba(255, 255, 255, 0.7)',
+    color: palette.text,
     textAlign: 'center',
   },
   paginationControls: {
@@ -671,9 +671,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 16,
     paddingVertical: 16,
-    backgroundColor: 'rgba(255, 255, 255, 0.02)',
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(255, 255, 255, 0.1)',
+    backgroundColor: '#EFE7DC',
+    borderTopWidth: 3,
+    borderTopColor: palette.border,
   },
   pageButton: {
     flexDirection: 'row',
@@ -681,26 +681,26 @@ const styles = StyleSheet.create({
     gap: 6,
     paddingHorizontal: 16,
     paddingVertical: 10,
-    backgroundColor: 'rgba(34, 229, 132, 0.1)',
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: 'rgba(34, 229, 132, 0.3)',
+    backgroundColor: screenAccents.tasks.primary,
+    borderRadius: 12,
+    borderWidth: 3,
+    borderColor: palette.border,
   },
   pageButtonDisabled: {
-    backgroundColor: 'rgba(255, 255, 255, 0.03)',
-    borderColor: 'rgba(255, 255, 255, 0.1)',
+    backgroundColor: '#E5DDD2',
+    borderColor: palette.border,
   },
   pageButtonText: {
     fontSize: 14,
     fontFamily: 'Inter_600SemiBold',
-    color: '#22e584',
+    color: palette.text,
   },
   pageButtonTextDisabled: {
-    color: '#555',
+    color: palette.textMuted,
   },
   pageIndicator: {
     fontSize: 14,
     fontFamily: 'Inter_600SemiBold',
-    color: '#FFFFFF',
+    color: palette.text,
   },
 });

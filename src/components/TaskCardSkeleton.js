@@ -6,6 +6,7 @@ import Animated, {
   withRepeat,
   withTiming,
 } from 'react-native-reanimated';
+import { brutalCard, palette } from '../theme/neoBrutal';
 
 export default function TaskCardSkeleton() {
   const opacity = useSharedValue(0.3);
@@ -36,12 +37,10 @@ export default function TaskCardSkeleton() {
 
 const styles = StyleSheet.create({
   taskCard: {
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-    borderRadius: 12,
+    ...brutalCard(palette.surfaceAlt),
+    borderRadius: 24,
     padding: 16,
     marginBottom: 12,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
   },
   taskHeader: {
     flexDirection: 'row',
@@ -53,22 +52,22 @@ const styles = StyleSheet.create({
   },
   titleSkeleton: {
     height: 16,
-    backgroundColor: '#666666',
-    borderRadius: 4,
+    backgroundColor: palette.surface,
+    borderRadius: 8,
     marginBottom: 8,
     width: '70%',
   },
   subjectSkeleton: {
     height: 12,
-    backgroundColor: '#666666',
-    borderRadius: 4,
+    backgroundColor: palette.mustard,
+    borderRadius: 8,
     width: '50%',
   },
   statusSkeleton: {
     width: 80,
     height: 24,
-    backgroundColor: '#666666',
-    borderRadius: 12,
+    backgroundColor: palette.teal,
+    borderRadius: 10,
     marginLeft: 12,
   },
 });

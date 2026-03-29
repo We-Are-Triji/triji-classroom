@@ -23,6 +23,7 @@ import { BlurView } from 'expo-blur';
 import { auth, db } from '../config/firebaseConfig';
 import { doc, getDoc } from 'firebase/firestore';
 import { ProfileSection, InfoRow } from '../components';
+import { brutalCard, brutalShadow, palette, screenAccents } from '../theme/neoBrutal';
 
 const { width, height } = Dimensions.get('window');
 
@@ -110,7 +111,7 @@ export default function ProfileScreen({ navigation }) {
     return (
       <View style={styles.container}>
         <LinearGradient
-          colors={['#1B2845', '#23243a', '#22305a', '#3a5a8c', '#23243a']}
+          colors={[palette.background, palette.background]}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
           style={StyleSheet.absoluteFill}
@@ -126,7 +127,7 @@ export default function ProfileScreen({ navigation }) {
     <View style={styles.container}>
       {/* Enhanced gradient background */}
       <LinearGradient
-        colors={['#1B2845', '#23243a', '#22305a', '#3a5a8c', '#23243a']}
+        colors={[palette.background, palette.background]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         style={StyleSheet.absoluteFill}
@@ -137,14 +138,14 @@ export default function ProfileScreen({ navigation }) {
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-          <Feather name="arrow-left" size={24} color="#FFFFFF" />
+          <Feather name="arrow-left" size={24} color={palette.text} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Student Profile</Text>
         <TouchableOpacity
           style={styles.settingsButton}
           onPress={() => navigation.navigate('EditProfile')}
         >
-          <Feather name="edit-2" size={24} color="#FFFFFF" />
+          <Feather name="edit-2" size={24} color={palette.text} />
         </TouchableOpacity>
       </View>
 
@@ -158,7 +159,7 @@ export default function ProfileScreen({ navigation }) {
           <View style={styles.profileHeader}>
             <View style={styles.avatarContainer}>
               <LinearGradient
-                colors={['#FF9500', '#FFD23F']}
+                colors={[screenAccents.profile.primary, screenAccents.profile.primary]}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
                 style={styles.avatarGradient}
@@ -168,7 +169,7 @@ export default function ProfileScreen({ navigation }) {
                 </View>
               </LinearGradient>
               <TouchableOpacity style={styles.editAvatarButton}>
-                <Feather name="camera" size={16} color="#FFFFFF" />
+                <Feather name="camera" size={16} color={palette.text} />
               </TouchableOpacity>
             </View>
             <View style={styles.profileInfo}>
@@ -179,7 +180,7 @@ export default function ProfileScreen({ navigation }) {
                 {userData.program} • {userData.yearLevel}
               </Text>
               <View style={styles.statusBadge}>
-                <View style={[styles.statusDot, { backgroundColor: '#22e584' }]} />
+                <View style={[styles.statusDot, { backgroundColor: palette.success }]} />
                 <Text style={styles.statusText}>{userData.enrollmentStatus}</Text>
               </View>
             </View>
@@ -192,21 +193,31 @@ export default function ProfileScreen({ navigation }) {
             icon="user"
             label="Full Name"
             value={`${userData.firstName} ${userData.lastName}`}
-            iconColor="#FF9500"
+            iconColor={palette.peach}
           />
-          <InfoRow icon="mail" label="Email Address" value={userData.email} iconColor="#007AFF" />
-          <InfoRow icon="phone" label="Phone Number" value={userData.phone} iconColor="#34C759" />
+          <InfoRow
+            icon="mail"
+            label="Email Address"
+            value={userData.email}
+            iconColor={palette.sky}
+          />
+          <InfoRow
+            icon="phone"
+            label="Phone Number"
+            value={userData.phone}
+            iconColor={palette.sage}
+          />
           <InfoRow
             icon="calendar"
             label="Date of Birth"
             value={userData.dateOfBirth}
-            iconColor="#AF52DE"
+            iconColor={palette.lavender}
           />
           <InfoRow
             icon="map-pin"
             label="Address"
             value={userData.address}
-            iconColor="#FF6B35"
+            iconColor={palette.coral}
             showDivider={false}
           />
         </ProfileSection>
@@ -217,14 +228,14 @@ export default function ProfileScreen({ navigation }) {
             icon="credit-card"
             label="Student ID"
             value={userData.studentId}
-            iconColor="#22e584"
+            iconColor={palette.teal}
           />
-          <InfoRow icon="book" label="Program" value={userData.program} iconColor="#007AFF" />
+          <InfoRow icon="book" label="Program" value={userData.program} iconColor={palette.sky} />
           <InfoRow
             icon="layers"
             label="Year Level"
             value={userData.yearLevel}
-            iconColor="#AF52DE"
+            iconColor={palette.lavender}
             showDivider={false}
           />
         </ProfileSection>
@@ -235,13 +246,13 @@ export default function ProfileScreen({ navigation }) {
             icon="user-plus"
             label="Contact Name"
             value={userData.emergencyContactName}
-            iconColor="#FF6B35"
+            iconColor={palette.coral}
           />
           <InfoRow
             icon="phone-call"
             label="Contact Phone"
             value={userData.emergencyContactPhone}
-            iconColor="#34C759"
+            iconColor={palette.sage}
             showDivider={false}
           />
         </ProfileSection>
@@ -257,7 +268,7 @@ export default function ProfileScreen({ navigation }) {
               ]}
             >
               <View style={styles.achievementIcon}>
-                <Feather name="award" size={16} color="#FFD23F" />
+                <Feather name="award" size={16} color={palette.text} />
               </View>
               <Text style={styles.achievementText}>{achievement}</Text>
             </View>
@@ -273,7 +284,7 @@ export default function ProfileScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#121212',
+    backgroundColor: palette.background,
     minHeight: '100vh',
     minWidth: '100vw',
     maxWidth: '100vw',
@@ -290,7 +301,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   loadingText: {
-    color: '#FFFFFF',
+    color: palette.text,
     fontSize: 18,
     fontFamily: 'Inter_400Regular',
   },
@@ -306,26 +317,33 @@ const styles = StyleSheet.create({
   backButton: {
     width: 44,
     height: 44,
-    borderRadius: 22,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    borderRadius: 16,
+    backgroundColor: screenAccents.profile.primary,
     alignItems: 'center',
     justifyContent: 'center',
+    borderWidth: 3,
+    borderColor: palette.border,
+    ...brutalShadow(),
   },
   headerTitle: {
     fontSize: 22,
     fontFamily: 'Inter_600SemiBold',
-    color: '#FFFFFF',
+    color: palette.text,
     flex: 1,
     textAlign: 'center',
     marginHorizontal: 16,
+    textTransform: 'uppercase',
   },
   settingsButton: {
     width: 44,
     height: 44,
-    borderRadius: 22,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    borderRadius: 16,
+    backgroundColor: screenAccents.profile.secondary,
     alignItems: 'center',
     justifyContent: 'center',
+    borderWidth: 3,
+    borderColor: palette.border,
+    ...brutalShadow(),
   },
   content: {
     flex: 1,
@@ -341,21 +359,14 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   profileHeaderCard: {
-    backgroundColor: 'rgba(255,255,255,0.15)',
-    borderRadius: 24,
-    borderWidth: 1.5,
-    borderColor: 'rgba(255,255,255,0.2)',
+    backgroundColor: screenAccents.profile.tertiary,
     marginBottom: 24,
-    shadowColor: '#007AFF',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.3,
-    shadowRadius: 24,
-    elevation: 16,
     overflow: 'hidden',
+    ...brutalCard(screenAccents.profile.tertiary),
     ...Platform.select({
       web: {
-        boxShadow: '0 8px 32px rgba(0, 122, 255, 0.15), 0 4px 8px rgba(0, 122, 255, 0.1)',
-        backdropFilter: 'blur(20px)',
+        boxShadow: '4px 4px 0px #2B2B2B',
+        backdropFilter: 'none',
       },
     }),
   },
@@ -371,24 +382,23 @@ const styles = StyleSheet.create({
   avatarGradient: {
     width: 80,
     height: 80,
-    borderRadius: 40,
+    borderRadius: 24,
     padding: 3,
+    borderWidth: 3,
+    borderColor: palette.border,
   },
   avatar: {
     width: 74,
     height: 74,
-    borderRadius: 37,
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    borderRadius: 20,
+    backgroundColor: palette.background,
     alignItems: 'center',
     justifyContent: 'center',
   },
   avatarText: {
     fontSize: 28,
     fontFamily: 'Inter_700Bold',
-    color: '#FFFFFF',
-    textShadowColor: 'rgba(0,0,0,0.3)',
-    textShadowOffset: { width: 0, height: 2 },
-    textShadowRadius: 4,
+    color: palette.text,
   },
   editAvatarButton: {
     position: 'absolute',
@@ -396,12 +406,12 @@ const styles = StyleSheet.create({
     right: -2,
     width: 28,
     height: 28,
-    borderRadius: 14,
-    backgroundColor: '#007AFF',
+    borderRadius: 10,
+    backgroundColor: palette.mustard,
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 2,
-    borderColor: '#FFFFFF',
+    borderWidth: 3,
+    borderColor: palette.border,
   },
   profileInfo: {
     flex: 1,
@@ -409,27 +419,26 @@ const styles = StyleSheet.create({
   profileName: {
     fontSize: 24,
     fontFamily: 'Inter_700Bold',
-    color: '#FFFFFF',
+    color: palette.text,
     marginBottom: 4,
-    textShadowColor: 'rgba(0,0,0,0.3)',
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 2,
   },
   profileSubtitle: {
     fontSize: 16,
     fontFamily: 'Inter_400Regular',
-    color: '#b6c2d1',
+    color: palette.textMuted,
     marginBottom: 12,
     opacity: 0.9,
   },
   statusBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(34, 229, 132, 0.15)',
+    backgroundColor: '#DDEDE9',
     borderRadius: 12,
     paddingHorizontal: 12,
     paddingVertical: 6,
     alignSelf: 'flex-start',
+    borderWidth: 3,
+    borderColor: palette.border,
   },
   statusDot: {
     width: 8,
@@ -440,14 +449,14 @@ const styles = StyleSheet.create({
   statusText: {
     fontSize: 14,
     fontFamily: 'Inter_500Medium',
-    color: '#22e584',
+    color: palette.text,
   },
   achievementItem: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255,255,255,0.08)',
+    borderBottomWidth: 3,
+    borderBottomColor: palette.border,
   },
   lastAchievementItem: {
     borderBottomWidth: 0,
@@ -455,16 +464,18 @@ const styles = StyleSheet.create({
   achievementIcon: {
     width: 32,
     height: 32,
-    borderRadius: 16,
-    backgroundColor: 'rgba(255, 210, 63, 0.2)',
+    borderRadius: 12,
+    backgroundColor: palette.mustard,
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 16,
+    borderWidth: 3,
+    borderColor: palette.border,
   },
   achievementText: {
     fontSize: 15,
     fontFamily: 'Inter_400Regular',
-    color: '#FFFFFF',
+    color: palette.text,
     flex: 1,
     lineHeight: 20,
   },

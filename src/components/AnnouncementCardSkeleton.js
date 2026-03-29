@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { View, StyleSheet, Animated } from 'react-native';
+import { brutalCard, palette } from '../theme/neoBrutal';
 
 export default function AnnouncementCardSkeleton() {
   const shimmerValue = useRef(new Animated.Value(0)).current;
@@ -58,12 +59,10 @@ export default function AnnouncementCardSkeleton() {
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: 'rgba(255, 255, 255, 0.06)',
-    borderRadius: 16,
+    ...brutalCard(palette.powder),
+    borderRadius: 24,
     padding: 16,
     marginBottom: 16,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.15)',
   },
   cardMain: {
     flexDirection: 'row',
@@ -89,45 +88,47 @@ const styles = StyleSheet.create({
   profileSkeleton: {
     width: 40,
     height: 40,
-    borderRadius: 20,
-    backgroundColor: '#8E8E93',
+    borderRadius: 14,
+    backgroundColor: palette.mustard,
+    borderWidth: 3,
+    borderColor: palette.border,
   },
   authorSkeleton: {
     width: 80,
     height: 16,
     borderRadius: 8,
-    backgroundColor: '#8E8E93',
+    backgroundColor: palette.surface,
   },
   timestampSkeleton: {
     width: 40,
     height: 12,
     borderRadius: 6,
-    backgroundColor: '#8E8E93',
+    backgroundColor: palette.surface,
   },
   typeSkeleton: {
     width: 50,
     height: 16,
     borderRadius: 8,
-    backgroundColor: '#8E8E93',
+    backgroundColor: palette.peach,
   },
   titleSkeleton: {
     width: '90%',
     height: 18,
     borderRadius: 9,
-    backgroundColor: '#8E8E93',
+    backgroundColor: palette.surface,
     marginBottom: 4,
   },
   titleSkeletonShort: {
     width: '60%',
     height: 18,
     borderRadius: 9,
-    backgroundColor: '#8E8E93',
+    backgroundColor: palette.surface,
     marginBottom: 8,
   },
   expirySkeleton: {
     width: 70,
     height: 12,
     borderRadius: 6,
-    backgroundColor: '#8E8E93',
+    backgroundColor: palette.sage,
   },
 });

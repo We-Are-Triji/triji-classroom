@@ -10,6 +10,7 @@ import FreedomWallScreen from '../screens/FreedomWallScreen';
 import GradeCalculatorScreen from '../screens/GradeCalculatorScreen';
 import { startAllListeners } from '../utils/firestoreListeners';
 import { auth } from '../config/firebaseConfig';
+import { brutalShadow, palette } from '../theme/neoBrutal';
 
 const Tab = createBottomTabNavigator();
 
@@ -60,20 +61,21 @@ export default function TabNavigator() {
             </Animated.View>
           );
         },
-        tabBarActiveTintColor: '#22e584',
-        tabBarInactiveTintColor: 'rgba(255, 255, 255, 0.5)',
+        tabBarActiveTintColor: palette.text,
+        tabBarInactiveTintColor: palette.textMuted,
         tabBarStyle: {
-          backgroundColor: 'rgba(28, 34, 47, 0.95)',
-          borderTopColor: 'rgba(34, 229, 132, 0.2)',
-          borderTopWidth: 1,
+          backgroundColor: palette.mustard,
+          borderTopColor: palette.border,
+          borderTopWidth: 3,
           height: Platform.OS === 'ios' ? 85 : Math.max(65, 65 + insets.bottom),
           paddingBottom: Platform.OS === 'ios' ? 25 : Math.max(10, insets.bottom),
           paddingTop: 10,
-          elevation: 0,
+          ...brutalShadow(0, -4),
         },
         tabBarLabelStyle: {
           fontSize: 11,
           fontWeight: '600',
+          textTransform: 'uppercase',
         },
         tabBarHideOnKeyboard: true,
         lazy: true,

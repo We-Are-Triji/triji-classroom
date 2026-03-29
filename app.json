@@ -4,13 +4,13 @@
     "slug": "triji-app",
     "version": "1.6.0",
     "orientation": "portrait",
-    "userInterfaceStyle": "dark",
-    "backgroundColor": "#1B2845",
+    "userInterfaceStyle": "light",
+    "backgroundColor": "#F6F3EE",
     "icon": "./assets/icon.png",
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
-      "backgroundColor": "#1B2845"
+      "backgroundColor": "#F6F3EE"
     },
     "ios": {
       "supportsTablet": true,
@@ -20,7 +20,7 @@
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#1B2845"
+        "backgroundColor": "#F6F3EE"
       },
       "package": "com.triji.app",
       "versionCode": 10600,
@@ -37,7 +37,7 @@
       [
         "expo-notifications",
         {
-          "color": "#22e584"
+          "color": "#E76F51"
         }
       ],
       [

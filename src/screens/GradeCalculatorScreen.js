@@ -13,6 +13,7 @@ import {
 } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+import { brutalButton, brutalCard, brutalInput, brutalShadow, palette, screenAccents } from '../theme/neoBrutal';
 
 const { width, height } = Dimensions.get('window');
 const initialSubject = { name: '', units: '', grade: '' };
@@ -112,7 +113,7 @@ export default function GradeCalculatorScreen({ navigation }) {
     <View style={styles.mainContainer}>
       {/* Base dark gradient */}
       <LinearGradient
-        colors={['#1B2845', '#23243a', '#22305a', '#3a5a8c', '#23243a']}
+        colors={[palette.background, palette.background]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         style={styles.gradientBackground}
@@ -121,7 +122,7 @@ export default function GradeCalculatorScreen({ navigation }) {
       {/* Back Button - Fixed Position */}
       <View style={styles.headerContainer}>
         <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-          <Feather name="arrow-left" size={24} color="#FFFFFF" />
+          <Feather name="arrow-left" size={24} color={palette.text} />
         </TouchableOpacity>
       </View>
 
@@ -135,7 +136,7 @@ export default function GradeCalculatorScreen({ navigation }) {
         <View style={styles.cardContainer}>
           <View style={styles.mainCard}>
             <View style={styles.iconContainer}>
-              <Feather name="trending-up" size={32} color="#22e584" />
+              <Feather name="trending-up" size={32} color={palette.text} />
             </View>
 
             <Text style={styles.headerTitle}>GWA Calculator</Text>
@@ -168,7 +169,7 @@ export default function GradeCalculatorScreen({ navigation }) {
                       <TextInput
                         style={styles.input}
                         placeholder="0"
-                        placeholderTextColor="rgba(255,255,255,0.3)"
+                        placeholderTextColor={palette.textMuted}
                         keyboardType="numeric"
                         value={subject.units}
                         onChangeText={text => handleInputChange(idx, 'units', text)}
@@ -179,7 +180,7 @@ export default function GradeCalculatorScreen({ navigation }) {
                       <TextInput
                         style={styles.input}
                         placeholder="0.0"
-                        placeholderTextColor="rgba(255,255,255,0.3)"
+                        placeholderTextColor={palette.textMuted}
                         keyboardType="decimal-pad"
                         value={subject.grade}
                         onChangeText={text => handleInputChange(idx, 'grade', text)}
@@ -193,19 +194,19 @@ export default function GradeCalculatorScreen({ navigation }) {
             {/* Action Buttons */}
             <View style={styles.buttonContainer}>
               <TouchableOpacity style={styles.addButton} onPress={addSubject}>
-                <Feather name="plus" size={20} color="#22e584" />
+                <Feather name="plus" size={20} color={palette.text} />
                 <Text style={styles.addButtonText}>Add Subject</Text>
               </TouchableOpacity>
 
               {selectedSubjectIdx !== null && subjects.length > 1 && (
                 <TouchableOpacity style={styles.deleteButton} onPress={deleteSubject}>
-                  <Feather name="trash-2" size={20} color="#FF3B30" />
+                  <Feather name="trash-2" size={20} color={palette.text} />
                   <Text style={styles.deleteButtonText}>Remove Selected</Text>
                 </TouchableOpacity>
               )}
 
               <TouchableOpacity style={styles.calculateButton} onPress={calculateGWA}>
-                <Feather name="check-circle" size={20} color="#fff" />
+                <Feather name="check-circle" size={20} color={palette.text} />
                 <Text style={styles.calculateButtonText}>Calculate GWA</Text>
               </TouchableOpacity>
             </View>
@@ -219,7 +220,7 @@ export default function GradeCalculatorScreen({ navigation }) {
 const styles = StyleSheet.create({
   mainContainer: {
     flex: 1,
-    backgroundColor: '#121212',
+    backgroundColor: palette.background,
   },
   gradientBackground: {
     position: 'absolute',
@@ -236,10 +237,13 @@ const styles = StyleSheet.create({
   backButton: {
     width: 40,
     height: 40,
-    borderRadius: 20,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    borderRadius: 14,
+    backgroundColor: screenAccents.tasks.secondary,
     alignItems: 'center',
     justifyContent: 'center',
+    borderWidth: 3,
+    borderColor: palette.border,
+    ...brutalShadow(),
   },
   scrollView: {
     flex: 1,
@@ -252,52 +256,53 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   mainCard: {
-    backgroundColor: 'rgba(30, 32, 40, 0.7)',
-    borderRadius: 16,
     padding: 20,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
+    ...brutalCard(screenAccents.tasks.tertiary),
   },
   iconContainer: {
     width: 64,
     height: 64,
-    borderRadius: 32,
-    backgroundColor: 'rgba(34, 229, 132, 0.15)',
+    borderRadius: 20,
+    backgroundColor: screenAccents.tasks.primary,
     alignItems: 'center',
     justifyContent: 'center',
     alignSelf: 'center',
     marginBottom: 16,
+    borderWidth: 3,
+    borderColor: palette.border,
   },
   headerTitle: {
     fontSize: 24,
     fontWeight: '700',
-    color: '#FFFFFF',
+    color: palette.text,
     textAlign: 'center',
     marginBottom: 8,
+    textTransform: 'uppercase',
   },
   subtitle: {
     fontSize: 14,
-    color: 'rgba(255, 255, 255, 0.6)',
+    color: palette.textMuted,
     textAlign: 'center',
     marginBottom: 20,
   },
   resultContainer: {
-    backgroundColor: 'rgba(34, 229, 132, 0.1)',
-    borderWidth: 1,
-    borderColor: 'rgba(34, 229, 132, 0.3)',
-    borderRadius: 12,
+    backgroundColor: '#DDEDE9',
     padding: 16,
     marginBottom: 20,
     alignItems: 'center',
+    borderWidth: 3,
+    borderColor: palette.border,
+    borderRadius: 18,
   },
   resultLabel: {
-    color: '#22e584',
+    color: palette.text,
     fontSize: 14,
     fontWeight: '600',
     marginBottom: 4,
+    textTransform: 'uppercase',
   },
   resultValue: {
-    color: '#FFFFFF',
+    color: palette.text,
     fontSize: 32,
     fontWeight: '700',
   },
@@ -306,19 +311,15 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   subjectCard: {
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-    borderRadius: 12,
     padding: 16,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
+    ...brutalCard(palette.white),
   },
   selectedSubjectCard: {
-    borderColor: '#FF3B30',
-    borderWidth: 2,
-    backgroundColor: 'rgba(255, 59, 48, 0.05)',
+    borderColor: palette.border,
+    backgroundColor: '#F8D9D3',
   },
   subjectNumber: {
-    color: '#FFFFFF',
+    color: palette.text,
     fontSize: 16,
     fontWeight: '600',
     marginBottom: 12,
@@ -331,20 +332,19 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   inputLabel: {
-    color: 'rgba(255, 255, 255, 0.7)',
+    color: palette.textMuted,
     fontSize: 13,
     fontWeight: '500',
     marginBottom: 6,
+    textTransform: 'uppercase',
   },
   input: {
-    backgroundColor: 'rgba(0, 0, 0, 0.3)',
-    borderRadius: 8,
+    backgroundColor: palette.background,
     padding: 12,
-    color: '#FFFFFF',
+    color: palette.text,
     fontSize: 16,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.15)',
     textAlign: 'center',
+    ...brutalInput(palette.background),
   },
   buttonContainer: {
     gap: 12,
@@ -354,14 +354,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     padding: 14,
-    borderRadius: 12,
-    backgroundColor: 'transparent',
-    borderWidth: 1,
-    borderColor: '#22e584',
+    backgroundColor: screenAccents.tasks.primary,
     gap: 8,
+    ...brutalButton(screenAccents.tasks.primary),
   },
   addButtonText: {
-    color: '#22e584',
+    color: palette.text,
     fontSize: 15,
     fontWeight: '600',
   },
@@ -370,14 +368,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     padding: 14,
-    borderRadius: 12,
-    backgroundColor: 'transparent',
-    borderWidth: 1,
-    borderColor: '#FF3B30',
+    backgroundColor: '#F8D9D3',
     gap: 8,
+    ...brutalButton('#F8D9D3'),
   },
   deleteButtonText: {
-    color: '#FF3B30',
+    color: palette.text,
     fontSize: 15,
     fontWeight: '600',
   },
@@ -385,13 +381,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#22e584',
     padding: 16,
-    borderRadius: 12,
     gap: 8,
+    ...brutalButton(screenAccents.tasks.secondary),
   },
   calculateButtonText: {
-    color: '#FFFFFF',
+    color: palette.text,
     fontSize: 16,
     fontWeight: '700',
   },

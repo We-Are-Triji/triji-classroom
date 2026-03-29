@@ -28,6 +28,7 @@ import {
   serverTimestamp,
 } from 'firebase/firestore';
 import { showErrorAlert, logError } from '../utils/errorHandler';
+import { brutalButton, brutalCard, brutalInput, brutalShadow, palette, screenAccents } from '../theme/neoBrutal';
 
 export default function CreateTaskScreen({ navigation }) {
   const [title, setTitle] = useState('');
@@ -134,7 +135,7 @@ export default function CreateTaskScreen({ navigation }) {
     return (
       <View style={styles.container}>
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#007AFF" />
+          <ActivityIndicator size="large" color={palette.teal} />
           <Text style={styles.loadingText}>Loading...</Text>
         </View>
       </View>
@@ -145,7 +146,7 @@ export default function CreateTaskScreen({ navigation }) {
     <View style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-          <Feather name="arrow-left" size={24} color="#FFFFFF" />
+          <Feather name="arrow-left" size={24} color={palette.text} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Create Task</Text>
       </View>
@@ -159,7 +160,7 @@ export default function CreateTaskScreen({ navigation }) {
               value={title}
               onChangeText={setTitle}
               placeholder="Enter task title"
-              placeholderTextColor="#8E8E93"
+              placeholderTextColor={palette.textMuted}
               maxLength={100}
             />
           </View>
@@ -177,7 +178,7 @@ export default function CreateTaskScreen({ navigation }) {
                     subjects.find(s => s.id === selectedSubject)?.subjectName
                   : 'Select a subject'}
               </Text>
-              <Feather name="chevron-down" size={20} color="#8E8E93" />
+              <Feather name="chevron-down" size={20} color={palette.textMuted} />
             </TouchableOpacity>
           </View>
 
@@ -188,7 +189,7 @@ export default function CreateTaskScreen({ navigation }) {
               value={details}
               onChangeText={setDetails}
               placeholder="Enter task details (optional)"
-              placeholderTextColor="#8E8E93"
+              placeholderTextColor={palette.textMuted}
               multiline
               numberOfLines={4}
               textAlignVertical="top"
@@ -199,7 +200,7 @@ export default function CreateTaskScreen({ navigation }) {
             <Text style={styles.label}>Deadline</Text>
             <TouchableOpacity style={styles.dateButton} onPress={() => setShowDatePicker(true)}>
               <Text style={styles.dateButtonText}>{formatDate(deadline)}</Text>
-              <Feather name="calendar" size={20} color="#8E8E93" />
+              <Feather name="calendar" size={20} color={palette.textMuted} />
             </TouchableOpacity>
           </View>
 
@@ -221,7 +222,7 @@ export default function CreateTaskScreen({ navigation }) {
             disabled={saving}
           >
             {saving ? (
-              <ActivityIndicator color="#FFFFFF" size="small" />
+              <ActivityIndicator color={palette.text} size="small" />
             ) : (
               <Text style={styles.saveButtonText}>Save Task</Text>
             )}
@@ -265,7 +266,7 @@ export default function CreateTaskScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#2A2A2A',
+    backgroundColor: palette.background,
   },
   header: {
     flexDirection: 'row',
@@ -273,22 +274,26 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: 60,
     paddingBottom: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255, 255, 255, 0.1)',
+    borderBottomWidth: 3,
+    borderBottomColor: palette.border,
   },
   backButton: {
     width: 40,
     height: 40,
-    borderRadius: 20,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    borderRadius: 16,
+    backgroundColor: screenAccents.tasks.secondary,
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 16,
+    borderWidth: 3,
+    borderColor: palette.border,
+    ...brutalShadow(),
   },
   headerTitle: {
     fontSize: 20,
     fontFamily: 'Inter_600SemiBold',
-    color: '#FFFFFF',
+    color: palette.text,
+    textTransform: 'uppercase',
   },
   content: {
     flex: 1,
@@ -302,39 +307,34 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 16,
     fontFamily: 'Inter_500Medium',
-    color: '#FFFFFF',
+    color: palette.text,
     marginBottom: 8,
+    textTransform: 'uppercase',
   },
   input: {
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-    borderRadius: 12,
+    ...brutalInput(palette.white),
     paddingHorizontal: 16,
     paddingVertical: 14,
     fontSize: 16,
     fontFamily: 'Inter_400Regular',
-    color: '#FFFFFF',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
+    color: palette.text,
   },
   textArea: {
     height: 100,
     paddingTop: 14,
   },
   subjectButton: {
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-    borderRadius: 12,
+    ...brutalInput(palette.white),
     paddingHorizontal: 16,
     paddingVertical: 14,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
   },
   subjectButtonText: {
     fontSize: 16,
     fontFamily: 'Inter_400Regular',
-    color: '#FFFFFF',
+    color: palette.text,
     flex: 1,
   },
   modalOverlay: {
@@ -343,25 +343,24 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    backgroundColor: 'rgba(43, 43, 43, 0.35)',
     alignItems: 'center',
     justifyContent: 'center',
   },
   subjectModal: {
-    backgroundColor: '#2A2A2A',
-    borderRadius: 12,
+    ...brutalCard(screenAccents.tasks.tertiary),
+    borderRadius: 24,
     padding: 20,
     width: '80%',
     maxHeight: '60%',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
   },
   modalTitle: {
     fontSize: 18,
     fontFamily: 'Inter_600SemiBold',
-    color: '#FFFFFF',
+    color: palette.text,
     marginBottom: 16,
     textAlign: 'center',
+    textTransform: 'uppercase',
   },
   subjectList: {
     maxHeight: 200,
@@ -369,17 +368,16 @@ const styles = StyleSheet.create({
   subjectOption: {
     paddingVertical: 12,
     paddingHorizontal: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255, 255, 255, 0.1)',
+    borderBottomWidth: 3,
+    borderBottomColor: palette.border,
   },
   subjectOptionText: {
     fontSize: 16,
     fontFamily: 'Inter_400Regular',
-    color: '#FFFFFF',
+    color: palette.text,
   },
   modalCloseButton: {
-    backgroundColor: '#FF3B30',
-    borderRadius: 8,
+    ...brutalButton(palette.coral),
     paddingVertical: 12,
     alignItems: 'center',
     marginTop: 16,
@@ -387,40 +385,37 @@ const styles = StyleSheet.create({
   modalCloseButtonText: {
     fontSize: 16,
     fontFamily: 'Inter_500Medium',
-    color: '#FFFFFF',
+    color: palette.text,
   },
   dateButton: {
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-    borderRadius: 12,
+    ...brutalInput(palette.white),
     paddingHorizontal: 16,
     paddingVertical: 14,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
   },
   dateButtonText: {
     fontSize: 16,
     fontFamily: 'Inter_400Regular',
-    color: '#FFFFFF',
+    color: palette.text,
   },
   saveButton: {
-    backgroundColor: '#007AFF',
-    borderRadius: 12,
+    ...brutalButton(screenAccents.tasks.primary),
     paddingVertical: 16,
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: 20,
   },
   saveButtonDisabled: {
-    backgroundColor: '#4A4A4A',
+    backgroundColor: palette.textMuted,
     opacity: 0.6,
   },
   saveButtonText: {
     fontSize: 16,
     fontFamily: 'Inter_600SemiBold',
-    color: '#FFFFFF',
+    color: palette.text,
+    textTransform: 'uppercase',
   },
   loadingContainer: {
     flex: 1,
@@ -428,7 +423,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   loadingText: {
-    color: '#FFFFFF',
+    color: palette.text,
     fontSize: 16,
     fontFamily: 'Inter_400Regular',
     marginTop: 12,

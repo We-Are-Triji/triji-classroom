@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Feather } from '@expo/vector-icons';
+import { palette } from '../theme/neoBrutal';
 
 export default function InfoRow({
   icon,
@@ -9,7 +10,7 @@ export default function InfoRow({
   onPress,
   isEditable = false,
   showDivider = true,
-  iconColor = '#22e584',
+  iconColor = palette.teal,
 }) {
   const Content = (
     <View style={[styles.row, !showDivider && styles.noDivider]}>
@@ -22,7 +23,7 @@ export default function InfoRow({
           <Text style={styles.value}>{value || 'Not set'}</Text>
         </View>
       </View>
-      {isEditable && <Feather name="chevron-right" size={20} color="#8E8E93" />}
+      {isEditable && <Feather name="chevron-right" size={20} color={palette.textMuted} />}
     </View>
   );
 
@@ -39,15 +40,15 @@ export default function InfoRow({
 
 const styles = StyleSheet.create({
   touchable: {
-    borderRadius: 12,
+    borderRadius: 16,
   },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingVertical: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255,255,255,0.08)',
+    borderBottomWidth: 3,
+    borderBottomColor: palette.border,
   },
   noDivider: {
     borderBottomWidth: 0,
@@ -61,7 +62,9 @@ const styles = StyleSheet.create({
   iconContainer: {
     width: 36,
     height: 36,
-    borderRadius: 18,
+    borderRadius: 12,
+    borderWidth: 3,
+    borderColor: palette.border,
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 16,
@@ -72,7 +75,7 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 13,
     fontFamily: 'Inter_500Medium',
-    color: '#8E8E93',
+    color: palette.textMuted,
     marginBottom: 4,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
@@ -80,7 +83,7 @@ const styles = StyleSheet.create({
   value: {
     fontSize: 16,
     fontFamily: 'Inter_400Regular',
-    color: '#FFFFFF',
+    color: palette.text,
     lineHeight: 20,
   },
 });

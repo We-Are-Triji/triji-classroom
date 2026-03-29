@@ -14,6 +14,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { auth, db } from '../config/firebaseConfig';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { showErrorAlert, logError } from '../utils/errorHandler';
+import { brutalButton, brutalCard, brutalInput, brutalShadow, palette, screenAccents } from '../theme/neoBrutal';
 
 export default function EditProfileScreen({ navigation }) {
   const [firstName, setFirstName] = useState('');
@@ -114,11 +115,11 @@ export default function EditProfileScreen({ navigation }) {
     return (
       <View style={styles.container}>
         <LinearGradient
-          colors={['#1B2845', '#23243a', '#22305a', '#3a5a8c', '#23243a']}
+          colors={[palette.background, palette.background]}
           style={styles.gradient}
         />
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#FFFFFF" />
+          <ActivityIndicator size="large" color={palette.text} />
           <Text style={styles.loadingText}>Loading...</Text>
         </View>
       </View>
@@ -128,13 +129,13 @@ export default function EditProfileScreen({ navigation }) {
   return (
     <View style={styles.container}>
       <LinearGradient
-        colors={['#1B2845', '#23243a', '#22305a', '#3a5a8c', '#23243a']}
+        colors={[palette.background, palette.background]}
         style={styles.gradient}
       />
 
       <View style={styles.header}>
         <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-          <Feather name="arrow-left" size={24} color="#FFFFFF" />
+          <Feather name="arrow-left" size={24} color={palette.text} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Edit Name</Text>
       </View>
@@ -152,7 +153,7 @@ export default function EditProfileScreen({ navigation }) {
               value={firstName}
               onChangeText={setFirstName}
               placeholder="Enter first name"
-              placeholderTextColor="#8E8E93"
+              placeholderTextColor={palette.textMuted}
               autoCapitalize="words"
             />
           </View>
@@ -164,7 +165,7 @@ export default function EditProfileScreen({ navigation }) {
               value={lastName}
               onChangeText={setLastName}
               placeholder="Enter last name"
-              placeholderTextColor="#8E8E93"
+              placeholderTextColor={palette.textMuted}
               autoCapitalize="words"
             />
           </View>
@@ -175,7 +176,7 @@ export default function EditProfileScreen({ navigation }) {
             disabled={saving}
           >
             {saving ? (
-              <ActivityIndicator size="small" color="#FFFFFF" />
+              <ActivityIndicator size="small" color={palette.text} />
             ) : (
               <Text style={styles.saveButtonText}>Save Changes</Text>
             )}
@@ -189,7 +190,7 @@ export default function EditProfileScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#121212',
+    backgroundColor: palette.background,
   },
   gradient: {
     position: 'absolute',
@@ -208,13 +209,17 @@ const styles = StyleSheet.create({
   backButton: {
     padding: 8,
     marginRight: 16,
-    borderRadius: 8,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    borderRadius: 14,
+    backgroundColor: screenAccents.profile.primary,
+    borderWidth: 3,
+    borderColor: palette.border,
+    ...brutalShadow(),
   },
   headerTitle: {
     fontSize: 28,
     fontWeight: '600',
-    color: '#FFFFFF',
+    color: palette.text,
+    textTransform: 'uppercase',
   },
   content: {
     flex: 1,
@@ -223,11 +228,8 @@ const styles = StyleSheet.create({
     padding: 24,
   },
   card: {
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-    borderRadius: 16,
     padding: 20,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
+    ...brutalCard(screenAccents.profile.tertiary),
   },
   inputGroup: {
     marginBottom: 20,
@@ -235,36 +237,33 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 14,
     fontWeight: '500',
-    color: '#FFFFFF',
+    color: palette.text,
     marginBottom: 8,
     opacity: 0.9,
+    textTransform: 'uppercase',
   },
   input: {
     height: 48,
-    backgroundColor: 'rgba(255, 255, 255, 0.08)',
-    borderRadius: 12,
     paddingHorizontal: 16,
     fontSize: 16,
-    color: '#FFFFFF',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.15)',
+    color: palette.text,
+    ...brutalInput(palette.background),
   },
   saveButton: {
     height: 52,
-    backgroundColor: '#007AFF',
-    borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: 12,
+    ...brutalButton(screenAccents.profile.secondary),
   },
   saveButtonDisabled: {
-    backgroundColor: '#4A4A4A',
+    backgroundColor: '#D9D2C9',
     opacity: 0.6,
   },
   saveButtonText: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#FFFFFF',
+    color: palette.text,
   },
   loadingContainer: {
     flex: 1,
@@ -272,7 +271,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   loadingText: {
-    color: '#FFFFFF',
+    color: palette.text,
     fontSize: 16,
     marginTop: 12,
     opacity: 0.8,

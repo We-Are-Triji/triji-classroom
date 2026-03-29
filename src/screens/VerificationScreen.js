@@ -1,6 +1,5 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Dimensions, Alert } from 'react-native';
-import { BlurView } from 'expo-blur';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialIcons } from '@expo/vector-icons';
 import {
@@ -12,6 +11,7 @@ import {
 import { auth } from '../config/firebaseConfig';
 import { sendEmailVerification } from 'firebase/auth';
 import { useState } from 'react';
+import { brutalButton, brutalCard, palette, screenAccents } from '../theme/neoBrutal';
 
 const { width, height } = Dimensions.get('window');
 
@@ -76,22 +76,20 @@ export default function VerificationScreen({ navigation }) {
     <View style={styles.container}>
       {/* Multi-color gradient background */}
       <LinearGradient
-        colors={['#23243a', '#22305a', '#3a5a8c', '#23243a']}
+        colors={[palette.background, palette.background]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         style={StyleSheet.absoluteFill}
       />
-      {/* Floating blurred shapes for depth */}
-      <BlurView intensity={80} tint="dark" style={[styles.floatingShape, styles.shape1]} />
-      <BlurView intensity={60} tint="light" style={[styles.floatingShape, styles.shape2]} />
-      <BlurView intensity={50} tint="dark" style={[styles.floatingShape, styles.shape3]} />
-      {/* Glassmorphic Card */}
-      <BlurView intensity={110} tint="dark" style={styles.glassCard}>
+      <View style={[styles.floatingShape, styles.shape1]} />
+      <View style={[styles.floatingShape, styles.shape2]} />
+      <View style={[styles.floatingShape, styles.shape3]} />
+      <View style={styles.glassCard}>
         <View style={styles.iconWrapper}>
           <MaterialIcons
             name="mark-email-read"
             size={54}
-            color="#34C759"
+            color={palette.text}
             style={styles.iconShadow}
           />
         </View>
@@ -105,14 +103,9 @@ export default function VerificationScreen({ navigation }) {
           promotions folder as well.
         </Text>
         <TouchableOpacity style={styles.backButton} onPress={() => navigation.navigate('Login')}>
-          <LinearGradient
-            colors={['#3a5a8c', '#22305a']}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 0 }}
-            style={styles.buttonGradient}
-          >
+          <View style={styles.buttonGradient}>
             <Text style={styles.backButtonText}>Back to Login</Text>
-          </LinearGradient>
+          </View>
         </TouchableOpacity>
         {/* Resend Verification Email Button */}
         <TouchableOpacity
@@ -125,7 +118,7 @@ export default function VerificationScreen({ navigation }) {
           </Text>
         </TouchableOpacity>
         {resendMessage ? <Text style={styles.resendMessage}>{resendMessage}</Text> : null}
-      </BlurView>
+      </View>
     </View>
   );
 }
@@ -133,7 +126,7 @@ export default function VerificationScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: 'transparent',
+    backgroundColor: palette.background,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -152,61 +145,50 @@ const styles = StyleSheet.create({
     height: 180,
     top: height * 0.1,
     left: width * 0.1,
-    backgroundColor: '#22305a',
+    backgroundColor: screenAccents.auth.secondary,
   },
   shape2: {
     width: 120,
     height: 120,
     bottom: height * 0.18,
     right: width * 0.15,
-    backgroundColor: '#3a5a8c',
+    backgroundColor: screenAccents.auth.primary,
   },
   shape3: {
     width: 90,
     height: 90,
     top: height * 0.5,
     right: width * 0.25,
-    backgroundColor: '#23243a',
+    backgroundColor: screenAccents.auth.tertiary,
   },
   glassCard: {
     width: '92%',
     maxWidth: 420,
-    backgroundColor: 'rgba(30, 36, 54, 0.60)',
-    borderRadius: 32,
     padding: 38,
     alignItems: 'center',
-    borderWidth: 1.5,
-    borderColor: 'rgba(255, 255, 255, 0.18)',
-    shadowColor: '#22305a',
-    shadowOffset: { width: 0, height: 12 },
-    shadowOpacity: 0.18,
-    shadowRadius: 32,
-    elevation: 12,
     marginTop: 12,
+    ...brutalCard(screenAccents.auth.secondary),
   },
   iconWrapper: {
     width: 90,
     height: 90,
-    borderRadius: 45,
-    backgroundColor: 'rgba(58, 90, 140, 0.18)',
+    borderRadius: 24,
+    backgroundColor: palette.mustard,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 28,
-    shadowColor: '#22305a',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.35,
-    shadowRadius: 24,
-    elevation: 10,
+    borderWidth: 3,
+    borderColor: palette.border,
   },
   iconShadow: {
-    textShadowColor: '#34C759',
+    textShadowColor: 'transparent',
     textShadowOffset: { width: 0, height: 2 },
-    textShadowRadius: 12,
+    textShadowRadius: 0,
   },
   headline: {
     fontSize: 28,
     fontFamily: 'Inter_600SemiBold',
-    color: '#FFFFFF',
+    color: palette.text,
     marginBottom: 14,
     textAlign: 'center',
     letterSpacing: 0.2,
@@ -214,7 +196,7 @@ const styles = StyleSheet.create({
   message: {
     fontSize: 17,
     fontFamily: 'Inter_400Regular',
-    color: '#B0FFCB',
+    color: palette.text,
     textAlign: 'center',
     lineHeight: 26,
     marginBottom: 10,
@@ -223,7 +205,7 @@ const styles = StyleSheet.create({
   trustMessage: {
     fontSize: 15,
     fontFamily: 'Inter_400Regular',
-    color: '#8E8E93',
+    color: palette.textMuted,
     textAlign: 'center',
     marginBottom: 30,
     marginHorizontal: 4,
@@ -241,18 +223,18 @@ const styles = StyleSheet.create({
   buttonGradient: {
     width: '100%',
     height: '100%',
-    borderRadius: 16,
     alignItems: 'center',
     justifyContent: 'center',
+    ...brutalButton(screenAccents.auth.primary),
   },
   backButtonText: {
     fontSize: 16,
     fontFamily: 'Inter_500Medium',
-    color: '#FFFFFF',
+    color: palette.text,
     letterSpacing: 0.3,
-    textShadowColor: '#1a2980',
+    textShadowColor: 'transparent',
     textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 4,
+    textShadowRadius: 0,
   },
   loadingContainer: {
     flex: 1,
@@ -260,18 +242,20 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   loadingText: {
-    color: '#FFFFFF',
+    color: palette.text,
     fontSize: 18,
   },
   resendButton: {
     width: '100%',
     height: 48,
-    backgroundColor: 'rgba(58,90,140,0.12)',
+    backgroundColor: palette.powder,
     borderRadius: 14,
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: 10,
     marginBottom: 2,
+    borderWidth: 3,
+    borderColor: palette.border,
   },
   resendButtonDisabled: {
     opacity: 0.5,
@@ -279,13 +263,13 @@ const styles = StyleSheet.create({
   resendButtonText: {
     fontSize: 15,
     fontFamily: 'Inter_500Medium',
-    color: '#3a5a8c',
+    color: palette.text,
     letterSpacing: 0.2,
   },
   resendMessage: {
     fontSize: 14,
     fontFamily: 'Inter_400Regular',
-    color: '#34C759',
+    color: palette.success,
     textAlign: 'center',
     marginTop: 8,
     marginBottom: 2,

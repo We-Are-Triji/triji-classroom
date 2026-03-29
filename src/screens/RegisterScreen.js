@@ -15,7 +15,6 @@ import {
   Keyboard,
 } from 'react-native';
 import Checkbox from 'expo-checkbox';
-import { BlurView } from 'expo-blur';
 import { LinearGradient } from 'expo-linear-gradient';
 import {
   useFonts,
@@ -30,6 +29,7 @@ import { createUserWithEmailAndPassword, sendEmailVerification } from 'firebase/
 import { doc, setDoc } from 'firebase/firestore';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getUserMessage } from '../utils/errorHandler';
+import { brutalButton, brutalCard, brutalInput, palette, screenAccents } from '../theme/neoBrutal';
 
 export default function RegisterScreen({ navigation }) {
   const [firstName, setFirstName] = useState('');
@@ -118,7 +118,7 @@ export default function RegisterScreen({ navigation }) {
       keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
     >
       <LinearGradient
-        colors={['#1B2845', '#23243a', '#22305a']}
+        colors={[palette.background, palette.background]}
         style={styles.backgroundGradient}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
@@ -130,81 +130,81 @@ export default function RegisterScreen({ navigation }) {
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
         >
-          <BlurView intensity={80} tint="dark" style={styles.glassCard}>
+          <View style={styles.glassCard}>
             <Text style={styles.greeting}>Welcome!,</Text>
             <Text style={styles.headline}>Let's Get You Started.</Text>
             <View style={styles.inputContainer}>
               <View style={styles.inputGroup}>
-                <FontAwesome name="user-o" size={18} color="#8E8E93" style={styles.inputIcon} />
+                <FontAwesome name="user-o" size={18} color={palette.textMuted} style={styles.inputIcon} />
                 <TextInput
                   style={styles.input}
                   placeholder="First Name"
-                  placeholderTextColor="#8E8E93"
+                  placeholderTextColor={palette.textMuted}
                   value={firstName}
                   onChangeText={setFirstName}
                   autoCapitalize="words"
-                  selectionColor="#22e584"
+                  selectionColor={palette.text}
                   underlineColorAndroid="transparent"
                 />
               </View>
               <View style={styles.inputGroup}>
-                <FontAwesome name="user-o" size={18} color="#8E8E93" style={styles.inputIcon} />
+                <FontAwesome name="user-o" size={18} color={palette.textMuted} style={styles.inputIcon} />
                 <TextInput
                   style={styles.input}
                   placeholder="Last Name"
-                  placeholderTextColor="#8E8E93"
+                  placeholderTextColor={palette.textMuted}
                   value={lastName}
                   onChangeText={setLastName}
                   autoCapitalize="words"
-                  selectionColor="#22e584"
+                  selectionColor={palette.text}
                   underlineColorAndroid="transparent"
                 />
               </View>
               <View style={styles.inputGroup}>
-                <Feather name="mail" size={18} color="#8E8E93" style={styles.inputIcon} />
+                <Feather name="mail" size={18} color={palette.textMuted} style={styles.inputIcon} />
                 <TextInput
                   style={styles.input}
                   placeholder="Email"
-                  placeholderTextColor="#8E8E93"
+                  placeholderTextColor={palette.textMuted}
                   keyboardType="email-address"
                   value={email}
                   onChangeText={setEmail}
                   autoCapitalize="none"
-                  selectionColor="#22e584"
+                  selectionColor={palette.text}
                   underlineColorAndroid="transparent"
                 />
               </View>
               <View style={styles.inputGroup}>
-                <Feather name="lock" size={18} color="#8E8E93" style={styles.inputIcon} />
+                <Feather name="lock" size={18} color={palette.textMuted} style={styles.inputIcon} />
                 <TextInput
                   style={styles.input}
                   placeholder="Password"
-                  placeholderTextColor="#8E8E93"
+                  placeholderTextColor={palette.textMuted}
                   secureTextEntry={!showPassword}
                   value={password}
                   onChangeText={setPassword}
                   autoCapitalize="none"
-                  selectionColor="#22e584"
+                  selectionColor={palette.text}
                   underlineColorAndroid="transparent"
                 />
                 <TouchableOpacity
                   style={styles.eyeIcon}
                   onPress={() => setShowPassword(!showPassword)}
                 >
-                  <Feather name={showPassword ? 'eye-off' : 'eye'} size={18} color="#8E8E93" />
+                  <Feather name={showPassword ? 'eye-off' : 'eye'} size={18} color={palette.textMuted} />
                 </TouchableOpacity>
               </View>
               <View style={styles.inputGroup}>
-                <Feather name="lock" size={18} color="#8E8E93" style={styles.inputIcon} />
+                <Feather name="lock" size={18} color={palette.textMuted} style={styles.inputIcon} />
                 <TextInput
                   style={styles.input}
                   placeholder="Confirm Password"
-                  placeholderTextColor="#8E8E93"
+                  placeholderTextColor={palette.textMuted}
                   secureTextEntry={!showConfirmPassword}
                   value={confirmPassword}
                   onChangeText={setConfirmPassword}
                   autoCapitalize="none"
-                  selectionColor="#22e584"
+                  selectionColor={palette.text}
                   underlineColorAndroid="transparent"
                 />
                 <TouchableOpacity
@@ -214,7 +214,7 @@ export default function RegisterScreen({ navigation }) {
                   <Feather
                     name={showConfirmPassword ? 'eye-off' : 'eye'}
                     size={18}
-                    color="#8E8E93"
+                    color={palette.textMuted}
                   />
                 </TouchableOpacity>
               </View>
@@ -223,7 +223,7 @@ export default function RegisterScreen({ navigation }) {
               <Checkbox
                 value={agree}
                 onValueChange={setAgree}
-                color={agree ? '#007AFF' : undefined}
+                color={agree ? palette.teal : undefined}
                 style={styles.checkbox}
               />
               <Text style={styles.termsText}>
@@ -252,7 +252,7 @@ export default function RegisterScreen({ navigation }) {
               onPress={handleRegister}
             >
               {loading ? (
-                <ActivityIndicator color="#FFFFFF" size="small" />
+                <ActivityIndicator color={palette.text} size="small" />
               ) : (
                 <Text style={styles.registerButtonText}>Register</Text>
               )}
@@ -273,7 +273,7 @@ export default function RegisterScreen({ navigation }) {
                 </TouchableOpacity>
               </View>
             </View>
-          </BlurView>
+          </View>
         </ScrollView>
       </TouchableWithoutFeedback>
     </KeyboardAvoidingView>
@@ -283,7 +283,7 @@ export default function RegisterScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#1B2845',
+    backgroundColor: palette.background,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -303,23 +303,15 @@ const styles = StyleSheet.create({
   glassCard: {
     width: '92%',
     maxWidth: 400,
-    backgroundColor: 'rgba(30, 39, 70, 0.9)',
-    borderRadius: 24,
     padding: 28,
     paddingTop: 32,
     paddingBottom: 24,
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: 'rgba(34, 229, 132, 0.2)',
-    shadowColor: '#22e584',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.15,
-    shadowRadius: 24,
-    elevation: 8,
+    ...brutalCard(screenAccents.auth.secondary),
   },
   greeting: {
     fontSize: 16,
-    color: '#B0B3B8',
+    color: palette.textMuted,
     fontFamily: 'Inter_400Regular',
     marginBottom: 2,
     alignSelf: 'flex-start',
@@ -327,7 +319,7 @@ const styles = StyleSheet.create({
   headline: {
     fontSize: 24,
     fontFamily: 'Inter_700Bold',
-    color: '#fff',
+    color: palette.text,
     marginBottom: 24,
     alignSelf: 'flex-start',
   },
@@ -338,12 +330,9 @@ const styles = StyleSheet.create({
   inputGroup: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(0,0,0,0.18)',
-    borderRadius: 12,
     marginBottom: 14,
-    borderWidth: 1.2,
-    borderColor: 'rgba(255,255,255,0.08)',
     paddingHorizontal: 10,
+    ...brutalInput(palette.white),
   },
   inputIcon: {
     marginRight: 8,
@@ -351,7 +340,7 @@ const styles = StyleSheet.create({
   input: {
     flex: 1,
     height: 48,
-    color: '#fff',
+    color: palette.text,
     fontSize: 15,
     fontFamily: 'Inter_400Regular',
     backgroundColor: 'transparent',
@@ -372,14 +361,14 @@ const styles = StyleSheet.create({
     marginLeft: 2,
   },
   termsText: {
-    color: '#8E8E93',
+    color: palette.textMuted,
     fontSize: 12,
     fontFamily: 'Inter_400Regular',
     flex: 1,
     flexWrap: 'wrap',
   },
   link: {
-    color: '#007AFF', // blue
+    color: palette.text,
     textDecorationLine: 'underline',
     fontFamily: 'Inter_500Medium',
   },
@@ -394,38 +383,34 @@ const styles = StyleSheet.create({
   registerButton: {
     width: '100%',
     height: 52,
-    backgroundColor: '#22e584',
-    borderRadius: 14,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 18,
     marginTop: 2,
-    shadowColor: '#22e584',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.3,
-    shadowRadius: 6,
-    elevation: 3,
+    ...brutalButton(screenAccents.auth.primary),
   },
   registerButtonText: {
     fontSize: 16,
     fontFamily: 'Inter_600SemiBold',
-    color: '#1B2845',
+    color: palette.text,
     letterSpacing: 0.3,
   },
   registerButtonDisabled: {
-    backgroundColor: 'rgba(34, 229, 132, 0.3)',
+    backgroundColor: '#E5CDBB',
     opacity: 0.6,
   },
   errorText: {
-    color: '#FF3B30',
+    color: palette.error,
     fontSize: 14,
     fontFamily: 'Inter_400Regular',
     textAlign: 'center',
     marginTop: 4,
-    backgroundColor: 'rgba(255, 59, 48, 0.1)',
+    backgroundColor: '#F8D9D3',
     padding: 10,
-    borderRadius: 8,
+    borderRadius: 12,
     width: '100%',
+    borderWidth: 3,
+    borderColor: palette.border,
   },
   bottomSection: {
     alignItems: 'center',
@@ -435,7 +420,7 @@ const styles = StyleSheet.create({
   brandText: {
     fontSize: 28,
     fontFamily: 'Inter_700Bold',
-    color: '#fff',
+    color: palette.text,
     marginBottom: 2,
     letterSpacing: 0.2,
     textAlign: 'center',
@@ -448,7 +433,7 @@ const styles = StyleSheet.create({
     paddingVertical: 2,
   },
   linkText: {
-    color: '#8E8E93',
+    color: palette.textMuted,
     fontSize: 15,
     fontFamily: 'Inter_400Regular',
   },
@@ -458,23 +443,20 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   loadingText: {
-    color: '#FFFFFF',
+    color: palette.text,
     fontSize: 18,
   },
   logoBottom: {
     width: 48,
     height: 48,
-    borderRadius: 24,
-    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    backgroundColor: palette.powder,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 6,
-    shadowColor: '#007AFF',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.18,
-    shadowRadius: 6,
-    elevation: 3,
     overflow: 'hidden',
+    borderWidth: 3,
+    borderColor: palette.border,
   },
   logoImageBottom: {
     width: '100%',

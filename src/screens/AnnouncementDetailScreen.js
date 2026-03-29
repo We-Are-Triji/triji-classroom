@@ -20,6 +20,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { auth, db } from '../config/firebaseConfig';
 import { doc, getDoc, deleteDoc } from 'firebase/firestore';
 import { lightHaptic, mediumHaptic, warningHaptic, successHaptic } from '../utils/haptics';
+import { brutalButton, brutalCard, brutalShadow, palette, screenAccents } from '../theme/neoBrutal';
 
 export default function AnnouncementDetailScreen({ route, navigation }) {
   const { announcementId } = route.params || {};
@@ -74,13 +75,13 @@ export default function AnnouncementDetailScreen({ route, navigation }) {
   const getTypeColor = type => {
     switch (type) {
       case 'Critical':
-        return '#FF3B30';
+        return palette.coral;
       case 'Event':
-        return '#AF52DE';
+        return palette.lavender;
       case 'Reminder':
-        return '#FF9500';
+        return palette.peach;
       default:
-        return '#007AFF';
+        return palette.sky;
     }
   };
 
@@ -150,7 +151,7 @@ export default function AnnouncementDetailScreen({ route, navigation }) {
   return (
     <View style={styles.container}>
       <LinearGradient
-        colors={['#1B2845', '#23243a', '#22305a', '#3a5a8c', '#23243a']}
+        colors={[palette.background, palette.background]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         style={styles.shiningGradient}
@@ -164,7 +165,7 @@ export default function AnnouncementDetailScreen({ route, navigation }) {
             navigation.goBack();
           }}
         >
-          <Feather name="arrow-left" size={24} color="#fff" />
+          <Feather name="arrow-left" size={24} color={palette.text} />
         </TouchableOpacity>
       </View>
       <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContainerPolished}>
@@ -192,7 +193,7 @@ export default function AnnouncementDetailScreen({ route, navigation }) {
               </View>
               {auth.currentUser && announcement.authorId === auth.currentUser.uid && (
                 <TouchableOpacity style={styles.deleteButtonCompact} onPress={handleDelete}>
-                  <Feather name="trash-2" size={18} color="#FF3B30" />
+                  <Feather name="trash-2" size={18} color={palette.text} />
                 </TouchableOpacity>
               )}
             </View>
@@ -274,7 +275,7 @@ export default function AnnouncementDetailScreen({ route, navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#121212',
+    backgroundColor: palette.background,
   },
   shiningGradient: {
     ...StyleSheet.absoluteFillObject,
@@ -390,7 +391,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   loadingText: {
-    color: '#FFFFFF',
+    color: palette.text,
     fontSize: 18,
   },
   deleteButton: {
@@ -400,31 +401,30 @@ const styles = StyleSheet.create({
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    backgroundColor: 'rgba(43, 43, 43, 0.35)',
     alignItems: 'center',
     justifyContent: 'center',
   },
   modalCard: {
     width: '85%',
     maxWidth: 350,
-    backgroundColor: 'rgba(18, 18, 18, 0.95)',
-    borderRadius: 16,
+    ...brutalCard(screenAccents.announcements.tertiary),
+    borderRadius: 24,
     padding: 24,
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.2)',
   },
   modalTitle: {
     fontSize: 20,
     fontFamily: 'Inter_600SemiBold',
-    color: '#FFFFFF',
+    color: palette.text,
     marginBottom: 12,
     textAlign: 'center',
+    textTransform: 'uppercase',
   },
   modalMessage: {
     fontSize: 16,
     fontFamily: 'Inter_400Regular',
-    color: '#8E8E93',
+    color: palette.textMuted,
     textAlign: 'center',
     marginBottom: 24,
     lineHeight: 22,
@@ -437,28 +437,26 @@ const styles = StyleSheet.create({
   cancelButton: {
     flex: 1,
     height: 44,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    borderRadius: 12,
+    ...brutalButton(palette.surfaceAlt),
     alignItems: 'center',
     justifyContent: 'center',
   },
   cancelButtonText: {
     fontSize: 16,
     fontFamily: 'Inter_500Medium',
-    color: '#FFFFFF',
+    color: palette.text,
   },
   deleteConfirmButton: {
     flex: 1,
     height: 44,
-    backgroundColor: '#FF3B30',
-    borderRadius: 12,
+    ...brutalButton(palette.coral),
     alignItems: 'center',
     justifyContent: 'center',
   },
   deleteConfirmButtonText: {
     fontSize: 16,
     fontFamily: 'Inter_500Medium',
-    color: '#FFFFFF',
+    color: palette.text,
   },
   errorContainer: {
     flex: 1,
@@ -469,21 +467,20 @@ const styles = StyleSheet.create({
   errorText: {
     fontSize: 16,
     fontFamily: 'Inter_400Regular',
-    color: '#FFFFFF',
+    color: palette.text,
     textAlign: 'center',
     marginBottom: 20,
     lineHeight: 24,
   },
   retryButton: {
-    backgroundColor: '#007AFF',
+    ...brutalButton(screenAccents.announcements.primary),
     paddingHorizontal: 24,
     paddingVertical: 12,
-    borderRadius: 12,
   },
   retryButtonText: {
     fontSize: 16,
     fontFamily: 'Inter_500Medium',
-    color: '#FFFFFF',
+    color: palette.text,
   },
   headerModern: {
     flexDirection: 'row',
@@ -527,22 +524,14 @@ const styles = StyleSheet.create({
   cardModernPolished: {
     flexDirection: 'row',
     alignItems: 'stretch',
-    backgroundColor: 'rgba(30, 32, 40, 0.65)',
-    borderRadius: 22,
-    borderWidth: 1.5,
-    borderColor: 'rgba(255,255,255,0.13)',
+    ...brutalCard(screenAccents.announcements.tertiary),
+    borderRadius: 28,
     borderLeftWidth: 7,
     marginBottom: 20,
     marginTop: 4,
-    elevation: 10,
     width: '100%',
     maxWidth: 600,
     alignSelf: 'center',
-    backdropFilter: 'blur(18px)', // web only
-    shadowColor: '#22e584',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.15,
-    shadowRadius: 24,
     overflow: 'hidden',
   },
   cardAccentBar: {
@@ -659,17 +648,13 @@ const styles = StyleSheet.create({
   floatingBackButton: {
     width: 44,
     height: 44,
-    borderRadius: 22,
-    backgroundColor: 'rgba(30,32,40,0.85)',
+    borderRadius: 16,
+    backgroundColor: screenAccents.announcements.secondary,
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 1.5,
-    borderColor: 'rgba(255,255,255,0.13)',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.12,
-    shadowRadius: 6,
-    elevation: 2,
+    borderWidth: 3,
+    borderColor: palette.border,
+    ...brutalShadow(),
   },
   scrollContainerPolished: {
     padding: 24,
@@ -695,28 +680,31 @@ const styles = StyleSheet.create({
   authorLabel: {
     fontSize: 12,
     fontFamily: 'Inter_500Medium',
-    color: 'rgba(255, 255, 255, 0.6)',
+    color: palette.textMuted,
     marginRight: 6,
   },
   authorNameCompact: {
     fontSize: 14,
     fontFamily: 'Inter_600SemiBold',
-    color: '#FFFFFF',
+    color: palette.text,
     flex: 1,
   },
   deleteButtonCompact: {
     padding: 6,
-    borderRadius: 8,
-    backgroundColor: 'rgba(255, 59, 48, 0.1)',
+    borderRadius: 10,
+    backgroundColor: palette.coral,
+    borderWidth: 2,
+    borderColor: palette.border,
   },
   typeChipCompact: {
     alignSelf: 'flex-start',
     paddingHorizontal: 12,
     paddingVertical: 4,
-    borderRadius: 12,
+    borderRadius: 10,
     marginBottom: 12,
-    backgroundColor: 'rgba(255,255,255,0.08)',
-    borderWidth: 1,
+    backgroundColor: palette.surface,
+    borderWidth: 2,
+    borderColor: palette.border,
   },
   typeChipTextCompact: {
     fontSize: 11,
@@ -727,7 +715,7 @@ const styles = StyleSheet.create({
   titleCompact: {
     fontSize: 20,
     fontFamily: 'Inter_600SemiBold',
-    color: '#FFFFFF',
+    color: palette.text,
     marginBottom: 12,
     lineHeight: 28,
   },
@@ -741,22 +729,22 @@ const styles = StyleSheet.create({
   timestampCompact: {
     fontSize: 12,
     fontFamily: 'Inter_500Medium',
-    color: 'rgba(255, 255, 255, 0.7)',
+    color: palette.textMuted,
   },
   expiryTextCompact: {
     fontSize: 12,
     fontFamily: 'Inter_500Medium',
-    color: '#FF9500',
+    color: palette.textMuted,
   },
   divider: {
-    height: 1,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    height: 3,
+    backgroundColor: palette.border,
     marginVertical: 16,
   },
   contentCompact: {
     fontSize: 15,
     fontFamily: 'Inter_400Regular',
-    color: 'rgba(255, 255, 255, 0.95)',
+    color: palette.text,
     lineHeight: 24,
   },
 });

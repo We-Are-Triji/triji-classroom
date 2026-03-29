@@ -20,6 +20,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { db, auth } from '../config/firebaseConfig';
 import { collection, query, orderBy, limit, getDocs, doc, getDoc } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
+import { brutalCard, brutalShadow, palette, screenAccents } from '../theme/neoBrutal';
 
 const { width, height } = Dimensions.get('window');
 
@@ -316,7 +317,7 @@ export default function DashboardScreen({ navigation }) {
     switch (item.type) {
       case 'task':
         icon = 'clipboard';
-        iconColor = '#22e584';
+        iconColor = palette.teal;
         title = item.title || 'Untitled Task';
         subtitle = item.subjectCode || item.subject || 'Task';
         onPress = () => navigation.navigate('TaskDetail', { task: item });
@@ -331,7 +332,7 @@ export default function DashboardScreen({ navigation }) {
         break;
       case 'post':
         icon = 'message-circle';
-        iconColor = '#3498DB';
+        iconColor = palette.sky;
         title = item.content || 'No content';
         subtitle = `${item.nickname || item.displayName || 'Anonymous'} • ${item.likedBy?.length || 0} likes`;
         onPress = () => navigation.navigate('PostDetail', { post: item });
@@ -366,14 +367,14 @@ export default function DashboardScreen({ navigation }) {
   const getBadgeColors = type => {
     switch (type) {
       case 'Critical':
-        return { bg: 'rgba(239, 68, 68, 0.2)', text: '#EF4444' }; // Red
+        return { bg: '#F8D9D3', text: palette.error };
       case 'Event':
-        return { bg: 'rgba(139, 92, 246, 0.2)', text: '#8B5CF6' }; // Purple
+        return { bg: '#E8DCF4', text: palette.lavender };
       case 'Reminder':
-        return { bg: 'rgba(251, 191, 36, 0.2)', text: '#FBBF24' }; // Yellow/Amber
+        return { bg: '#F9EDC3', text: palette.warning };
       case 'General':
       default:
-        return { bg: 'rgba(34, 229, 132, 0.2)', text: '#22e584' }; // Green
+        return { bg: '#DDEDE9', text: palette.teal };
     }
   };
 
@@ -381,7 +382,7 @@ export default function DashboardScreen({ navigation }) {
     return (
       <View style={styles.container}>
         <LinearGradient
-          colors={['#1B2845', '#23243a', '#22305a', '#3a5a8c', '#23243a']}
+          colors={[palette.background, palette.background]}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
           style={StyleSheet.absoluteFill}
@@ -396,7 +397,7 @@ export default function DashboardScreen({ navigation }) {
   return (
     <View style={styles.container}>
       <LinearGradient
-        colors={['#1B2845', '#23243a', '#22305a', '#3a5a8c', '#23243a']}
+        colors={[palette.background, palette.background]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         style={StyleSheet.absoluteFill}
@@ -415,7 +416,7 @@ export default function DashboardScreen({ navigation }) {
           style={styles.settingsButton}
           onPress={() => navigation.navigate('AccountSettings')}
         >
-          <Feather name="settings" size={24} color="#FFFFFF" />
+          <Feather name="settings" size={24} color={palette.text} />
         </TouchableOpacity>
       </View>
 
@@ -444,9 +445,9 @@ export default function DashboardScreen({ navigation }) {
           <RefreshControl
             refreshing={refreshing}
             onRefresh={onRefresh}
-            tintColor="#22e584"
-            colors={['#22e584']}
-            progressBackgroundColor="rgba(255, 255, 255, 0.1)"
+            tintColor={palette.text}
+            colors={[palette.teal]}
+            progressBackgroundColor={palette.background}
           />
         }
       >
@@ -457,7 +458,7 @@ export default function DashboardScreen({ navigation }) {
           </View>
         ) : (
           <View style={styles.emptyState}>
-            <Feather name="inbox" size={64} color="rgba(255, 255, 255, 0.3)" />
+            <Feather name="inbox" size={64} color={palette.textMuted} />
             <Text style={styles.emptyStateText}>Nothing to show yet</Text>
             <Text style={styles.emptyStateSubtext}>Check back later for updates</Text>
           </View>
@@ -470,7 +471,7 @@ export default function DashboardScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0f1c2e',
+    backgroundColor: palette.background,
   },
   header: {
     flexDirection: 'row',
@@ -486,29 +487,30 @@ const styles = StyleSheet.create({
   greeting: {
     fontSize: 20,
     fontFamily: 'Inter_500Medium',
-    color: 'rgba(255, 255, 255, 0.7)',
+    color: palette.textMuted,
     marginBottom: 2,
   },
   userName: {
     fontSize: 28,
     fontFamily: 'Inter_600SemiBold',
-    color: '#FFFFFF',
+    color: palette.text,
     marginBottom: 4,
   },
   subGreeting: {
     fontSize: 14,
     fontFamily: 'Inter_400Regular',
-    color: 'rgba(255, 255, 255, 0.6)',
+    color: palette.textMuted,
   },
   settingsButton: {
     width: 44,
     height: 44,
-    borderRadius: 22,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    borderRadius: 16,
+    backgroundColor: screenAccents.dashboard.secondary,
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.2)',
+    borderWidth: 3,
+    borderColor: palette.border,
+    ...brutalShadow(),
   },
   statsContainer: {
     flexDirection: 'row',
@@ -518,25 +520,24 @@ const styles = StyleSheet.create({
   },
   statCard: {
     flex: 1,
-    backgroundColor: 'rgba(34, 229, 132, 0.1)',
-    borderRadius: 12,
+    borderRadius: 20,
     padding: 12,
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: 'rgba(34, 229, 132, 0.2)',
     minWidth: 0,
+    ...brutalCard(screenAccents.dashboard.primary),
   },
   statNumber: {
     fontSize: 22,
     fontFamily: 'Inter_600SemiBold',
-    color: '#22e584',
+    color: palette.text,
     marginBottom: 2,
   },
   statLabel: {
     fontSize: 11,
     fontFamily: 'Inter_500Medium',
-    color: 'rgba(255, 255, 255, 0.7)',
+    color: palette.textMuted,
     textAlign: 'center',
+    textTransform: 'uppercase',
   },
   feedContainer: {
     flex: 1,
@@ -551,28 +552,29 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 19,
     fontFamily: 'Inter_600SemiBold',
-    color: '#FFFFFF',
+    color: palette.text,
     marginBottom: 12,
+    textTransform: 'uppercase',
   },
   updatesContainer: {
     gap: 8,
   },
   updateItem: {
-    backgroundColor: 'rgba(255, 255, 255, 0.06)',
-    borderRadius: 12,
+    borderRadius: 20,
     padding: 12,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
+    ...brutalCard(screenAccents.dashboard.tertiary),
   },
   updateIcon: {
     width: 40,
     height: 40,
-    borderRadius: 20,
+    borderRadius: 14,
     alignItems: 'center',
     justifyContent: 'center',
+    borderWidth: 3,
+    borderColor: palette.border,
   },
   updateContent: {
     flex: 1,
@@ -581,17 +583,17 @@ const styles = StyleSheet.create({
   updateTitle: {
     fontSize: 14,
     fontFamily: 'Inter_600SemiBold',
-    color: '#FFFFFF',
+    color: palette.text,
   },
   updateSubtitle: {
     fontSize: 12,
     fontFamily: 'Inter_400Regular',
-    color: 'rgba(255, 255, 255, 0.6)',
+    color: palette.textMuted,
   },
   updateTime: {
     fontSize: 11,
     fontFamily: 'Inter_500Medium',
-    color: 'rgba(255, 255, 255, 0.5)',
+    color: palette.textMuted,
     flexShrink: 0,
   },
   emptyState: {
@@ -602,14 +604,14 @@ const styles = StyleSheet.create({
   emptyStateText: {
     fontSize: 18,
     fontFamily: 'Inter_600SemiBold',
-    color: 'rgba(255, 255, 255, 0.7)',
+    color: palette.text,
     marginTop: 16,
     marginBottom: 8,
   },
   emptyStateSubtext: {
     fontSize: 14,
     fontFamily: 'Inter_400Regular',
-    color: 'rgba(255, 255, 255, 0.5)',
+    color: palette.textMuted,
   },
   loadingContainer: {
     flex: 1,
@@ -617,7 +619,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   loadingText: {
-    color: '#FFFFFF',
+    color: palette.text,
     fontSize: 16,
     fontFamily: 'Inter_500Medium',
   },

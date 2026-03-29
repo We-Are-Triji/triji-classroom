@@ -24,6 +24,7 @@ import { onAuthStateChanged } from 'firebase/auth';
 import AnnouncementCardSkeleton from '../components/AnnouncementCardSkeleton';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { brutalButton, brutalCard, brutalInput, brutalShadow, palette, screenAccents } from '../theme/neoBrutal';
 
 export default function AnnouncementsScreen({ navigation }) {
   const [announcements, setAnnouncements] = useState([]);
@@ -157,13 +158,13 @@ export default function AnnouncementsScreen({ navigation }) {
   const getTypeColor = type => {
     switch (type) {
       case 'Critical':
-        return '#FF3B30';
+        return palette.coral;
       case 'Event':
-        return '#AF52DE';
+        return palette.lavender;
       case 'Reminder':
-        return '#FF9500';
+        return palette.peach;
       default:
-        return '#007AFF';
+        return palette.sky;
     }
   };
 
@@ -312,7 +313,7 @@ export default function AnnouncementsScreen({ navigation }) {
     <View style={styles.container}>
       {/* Shining gradient background */}
       <LinearGradient
-        colors={['#1B2845', '#23243a', '#22305a', '#3a5a8c', '#23243a']}
+        colors={[palette.background, palette.background]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         style={styles.shiningGradient}
@@ -321,7 +322,7 @@ export default function AnnouncementsScreen({ navigation }) {
       <View style={styles.header}>
         <View style={styles.headerTop}>
           <View style={styles.iconCircle}>
-            <MaterialCommunityIcons name="bell-ring" size={28} color="#22e584" />
+            <MaterialCommunityIcons name="bell-ring" size={28} color={palette.text} />
           </View>
           <View style={styles.headerTextContainer}>
             <Text style={styles.headerTitle}>Announcements</Text>
@@ -335,19 +336,19 @@ export default function AnnouncementsScreen({ navigation }) {
             <Feather
               name="search"
               size={18}
-              color="rgba(255,255,255,0.5)"
+              color={palette.textMuted}
               style={styles.searchIcon}
             />
             <TextInput
               style={styles.searchInput}
               placeholder="Search for news..."
-              placeholderTextColor="rgba(255,255,255,0.4)"
+              placeholderTextColor={palette.textMuted}
               value={searchQuery}
               onChangeText={setSearchQuery}
             />
             {searchQuery.length > 0 && (
               <TouchableOpacity onPress={() => setSearchQuery('')} style={styles.clearButton}>
-                <Feather name="x" size={18} color="rgba(255,255,255,0.5)" />
+                <Feather name="x" size={18} color={palette.textMuted} />
               </TouchableOpacity>
             )}
           </View>
@@ -370,7 +371,7 @@ export default function AnnouncementsScreen({ navigation }) {
           </View>
         ) : filteredAnnouncements.length === 0 ? (
           <View style={styles.emptyContainerModern}>
-            <Feather name="bell" size={64} color="#8E8E93" />
+            <Feather name="bell" size={64} color={palette.textMuted} />
             <Text style={styles.emptyTitleModern}>
               {searchQuery ? 'No matching announcements' : 'No announcements yet'}
             </Text>
@@ -391,16 +392,16 @@ export default function AnnouncementsScreen({ navigation }) {
                 <RefreshControl
                   refreshing={refreshing}
                   onRefresh={onRefresh}
-                  tintColor="#22e584"
-                  colors={['#22e584', '#FFFFFF']}
-                  progressBackgroundColor="rgba(34, 229, 132, 0.1)"
-                  titleColor="#FFFFFF"
+                  tintColor={palette.teal}
+                  colors={[palette.teal, palette.mustard]}
+                  progressBackgroundColor={palette.surface}
+                  titleColor={palette.text}
                   title="Pull to refresh..."
                 />
               }
               ListEmptyComponent={() => (
                 <View style={styles.emptyContainerModern}>
-                  <Feather name="bell" size={64} color="#8E8E93" />
+                  <Feather name="bell" size={64} color={palette.textMuted} />
                   <Text style={styles.emptyTitleModern}>
                     {searchQuery ? 'No matching announcements' : 'No announcements yet'}
                   </Text>
@@ -421,7 +422,7 @@ export default function AnnouncementsScreen({ navigation }) {
                   <Feather
                     name="chevron-left"
                     size={20}
-                    color={currentPage === 1 ? '#555' : '#22e584'}
+                    color={currentPage === 1 ? palette.textMuted : palette.text}
                   />
                   <Text
                     style={[
@@ -456,7 +457,7 @@ export default function AnnouncementsScreen({ navigation }) {
                   <Feather
                     name="chevron-right"
                     size={20}
-                    color={currentPage === totalPages ? '#555' : '#22e584'}
+                    color={currentPage === totalPages ? palette.textMuted : palette.text}
                   />
                 </TouchableOpacity>
               </View>
@@ -471,7 +472,7 @@ export default function AnnouncementsScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#121212',
+    backgroundColor: palette.background,
   },
   shiningGradient: {
     position: 'absolute',
@@ -484,8 +485,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: Platform.OS === 'ios' ? 60 : 40,
     paddingBottom: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255, 255, 255, 0.1)',
+    borderBottomWidth: 3,
+    borderBottomColor: palette.border,
   },
   headerTop: {
     flexDirection: 'row',
@@ -496,12 +497,12 @@ const styles = StyleSheet.create({
   iconCircle: {
     width: 48,
     height: 48,
-    borderRadius: 24,
-    backgroundColor: 'rgba(34, 229, 132, 0.15)',
+    borderRadius: 16,
+    backgroundColor: screenAccents.announcements.secondary,
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: 'rgba(34, 229, 132, 0.3)',
+    borderWidth: 3,
+    borderColor: palette.border,
   },
   headerTextContainer: {
     flex: 1,
@@ -509,13 +510,14 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 22,
     fontFamily: 'Inter_600SemiBold',
-    color: '#FFFFFF',
+    color: palette.text,
     marginBottom: 2,
+    textTransform: 'uppercase',
   },
   headerSubtext: {
     fontSize: 13,
     fontFamily: 'Inter_400Regular',
-    color: 'rgba(255, 255, 255, 0.6)',
+    color: palette.textMuted,
   },
   searchRow: {
     flexDirection: 'row',
@@ -527,12 +529,9 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.08)',
-    borderRadius: 12,
+    ...brutalInput(palette.white),
     paddingHorizontal: 12,
     height: 44,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.12)',
   },
   searchIcon: {
     marginRight: 8,
@@ -541,23 +540,21 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 15,
     fontFamily: 'Inter_400Regular',
-    color: '#FFFFFF',
+    color: palette.text,
     paddingVertical: 0,
   },
   newButton: {
-    backgroundColor: 'rgba(34, 229, 132, 0.15)',
-    borderRadius: 12,
+    ...brutalButton(screenAccents.announcements.primary),
     paddingHorizontal: 20,
     height: 44,
     justifyContent: 'center',
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: 'rgba(34, 229, 132, 0.3)',
   },
   newButtonText: {
     fontSize: 15,
     fontFamily: 'Inter_600SemiBold',
-    color: '#22e584',
+    color: palette.text,
+    textTransform: 'uppercase',
   },
   clearButton: {
     padding: 4,
@@ -733,21 +730,20 @@ const styles = StyleSheet.create({
   errorText: {
     fontSize: 16,
     fontFamily: 'Inter_400Regular',
-    color: '#FFFFFF',
+    color: palette.text,
     textAlign: 'center',
     marginBottom: 20,
     lineHeight: 24,
   },
   retryButton: {
-    backgroundColor: '#007AFF',
+    ...brutalButton(screenAccents.announcements.primary),
     paddingHorizontal: 24,
     paddingVertical: 12,
-    borderRadius: 12,
   },
   retryButtonText: {
     fontSize: 16,
     fontFamily: 'Inter_500Medium',
-    color: '#FFFFFF',
+    color: palette.text,
   },
   emptyContainer: {
     flex: 1,
@@ -774,7 +770,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   loadingText: {
-    color: '#FFFFFF',
+    color: palette.text,
     fontSize: 18,
   },
   headerModern: {
@@ -855,14 +851,14 @@ const styles = StyleSheet.create({
   emptyTitleModern: {
     fontSize: 20,
     fontFamily: 'Inter_600SemiBold',
-    color: '#fff',
+    color: palette.text,
     marginTop: 16,
     marginBottom: 8,
   },
   emptyMessageModern: {
     fontSize: 16,
     fontFamily: 'Inter_400Regular',
-    color: '#8E8E93',
+    color: palette.textMuted,
     textAlign: 'center',
   },
   announcementCardModernPolished: {
@@ -1291,7 +1287,7 @@ const styles = StyleSheet.create({
   paginationText: {
     fontSize: 13,
     fontFamily: 'Inter_500Medium',
-    color: 'rgba(255, 255, 255, 0.7)',
+    color: palette.textMuted,
     textAlign: 'center',
   },
   paginationControls: {
@@ -1300,9 +1296,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 16,
     paddingVertical: 16,
-    backgroundColor: 'rgba(255, 255, 255, 0.02)',
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(255, 255, 255, 0.1)',
+    backgroundColor: palette.surface,
+    borderTopWidth: 3,
+    borderTopColor: palette.border,
   },
   pageButton: {
     flexDirection: 'row',
@@ -1310,42 +1306,37 @@ const styles = StyleSheet.create({
     gap: 6,
     paddingHorizontal: 16,
     paddingVertical: 10,
-    backgroundColor: 'rgba(34, 229, 132, 0.1)',
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: 'rgba(34, 229, 132, 0.3)',
+    backgroundColor: screenAccents.announcements.secondary,
+    borderRadius: 12,
+    borderWidth: 3,
+    borderColor: palette.border,
+    ...brutalShadow(),
   },
   pageButtonDisabled: {
-    backgroundColor: 'rgba(255, 255, 255, 0.03)',
-    borderColor: 'rgba(255, 255, 255, 0.1)',
+    backgroundColor: palette.surfaceAlt,
+    borderColor: palette.border,
   },
   pageButtonText: {
     fontSize: 14,
     fontFamily: 'Inter_600SemiBold',
-    color: '#22e584',
+    color: palette.text,
+    textTransform: 'uppercase',
   },
   pageButtonTextDisabled: {
-    color: '#555',
+    color: palette.textMuted,
   },
   pageIndicator: {
     fontSize: 14,
     fontFamily: 'Inter_600SemiBold',
-    color: '#FFFFFF',
+    color: palette.text,
   },
   // Compact card styles (matching dashboard)
   announcementCardCompact: {
-    backgroundColor: 'rgba(255, 255, 255, 0.06)',
-    borderRadius: 12,
+    ...brutalCard(screenAccents.announcements.tertiary),
+    borderRadius: 24,
     padding: 12,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
     borderLeftWidth: 4,
     marginBottom: 0,
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
   },
   cardContentCompact: {
     flex: 1,
@@ -1366,24 +1357,24 @@ const styles = StyleSheet.create({
   authorLabel: {
     fontSize: 11,
     fontFamily: 'Inter_500Medium',
-    color: 'rgba(255, 255, 255, 0.6)',
+    color: palette.textMuted,
     marginRight: 4,
   },
   authorNameCompact: {
     fontFamily: 'Inter_600SemiBold',
-    color: '#FFFFFF',
+    color: palette.text,
     flex: 1,
   },
   timestampCompact: {
     fontSize: 11,
     fontFamily: 'Inter_500Medium',
-    color: 'rgba(255, 255, 255, 0.5)',
+    color: palette.textMuted,
     flexShrink: 0,
   },
   titleCompact: {
     fontSize: 14,
     fontFamily: 'Inter_600SemiBold',
-    color: '#FFFFFF',
+    color: palette.text,
     lineHeight: 20,
     marginBottom: 4,
   },
@@ -1395,8 +1386,10 @@ const styles = StyleSheet.create({
   typeChipCompact: {
     paddingHorizontal: 8,
     paddingVertical: 2,
-    borderRadius: 8,
+    borderRadius: 10,
     alignSelf: 'flex-start',
+    borderWidth: 2,
+    borderColor: palette.border,
   },
   typeChipTextCompact: {
     fontSize: 10,
@@ -1407,7 +1400,7 @@ const styles = StyleSheet.create({
   expiryTextCompact: {
     fontSize: 10,
     fontFamily: 'Inter_400Regular',
-    color: '#FF9500',
+    color: palette.textMuted,
     opacity: 0.8,
   },
 });

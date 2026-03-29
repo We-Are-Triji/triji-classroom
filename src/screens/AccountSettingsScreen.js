@@ -38,6 +38,7 @@ import {
 import { stopAllListeners } from '../utils/firestoreListeners';
 import { showErrorAlert, logError } from '../utils/errorHandler';
 import { version as appVersion } from '../../package.json';
+import { brutalButton, brutalCard, brutalInput, brutalShadow, palette, screenAccents } from '../theme/neoBrutal';
 
 export default function AccountSettingsScreen({ navigation }) {
   const [showPasswordModal, setShowPasswordModal] = useState(false);
@@ -228,7 +229,7 @@ export default function AccountSettingsScreen({ navigation }) {
   return (
     <View style={styles.container}>
       <LinearGradient
-        colors={['#1B2845', '#23243a', '#22305a', '#3a5a8c', '#23243a']}
+        colors={[palette.background, palette.background]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         style={styles.backgroundGradient}
@@ -236,7 +237,7 @@ export default function AccountSettingsScreen({ navigation }) {
 
       <View style={styles.header}>
         <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-          <Feather name="arrow-left" size={24} color="#FFFFFF" />
+          <Feather name="arrow-left" size={24} color={palette.text} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Settings</Text>
       </View>
@@ -246,7 +247,7 @@ export default function AccountSettingsScreen({ navigation }) {
         {userData && (
           <View style={styles.userCard}>
             <View style={styles.userAvatar}>
-              <Feather name="user" size={32} color="#22e584" />
+              <Feather name="user" size={32} color={palette.text} />
             </View>
             <View style={styles.userInfo}>
               <Text style={styles.userName}>
@@ -283,7 +284,7 @@ export default function AccountSettingsScreen({ navigation }) {
             <View style={styles.settingRow}>
               <View style={styles.settingLeft}>
                 <View style={styles.iconCircle}>
-                  <Feather name="clipboard" size={20} color="#22e584" />
+                  <Feather name="clipboard" size={20} color={palette.text} />
                 </View>
                 <View style={styles.settingText}>
                   <Text style={styles.settingTitle}>Tasks</Text>
@@ -293,15 +294,15 @@ export default function AccountSettingsScreen({ navigation }) {
               <Switch
                 value={tasksNotifications}
                 onValueChange={toggleTasksNotifications}
-                trackColor={{ false: '#3e3e3e', true: '#22e584' }}
-                thumbColor="#ffffff"
+                trackColor={{ false: palette.textMuted, true: screenAccents.tasks.primary }}
+                thumbColor={palette.white}
               />
             </View>
 
             <View style={[styles.settingRow, styles.borderTop]}>
               <View style={styles.settingLeft}>
                 <View style={styles.iconCircle}>
-                  <Feather name="megaphone" size={20} color="#22e584" />
+                  <Feather name="megaphone" size={20} color={palette.text} />
                 </View>
                 <View style={styles.settingText}>
                   <Text style={styles.settingTitle}>Announcements</Text>
@@ -311,15 +312,15 @@ export default function AccountSettingsScreen({ navigation }) {
               <Switch
                 value={announcementsNotifications}
                 onValueChange={toggleAnnouncementsNotifications}
-                trackColor={{ false: '#3e3e3e', true: '#22e584' }}
-                thumbColor="#ffffff"
+                trackColor={{ false: palette.textMuted, true: screenAccents.announcements.primary }}
+                thumbColor={palette.white}
               />
             </View>
 
             <View style={[styles.settingRow, styles.borderTop]}>
               <View style={styles.settingLeft}>
                 <View style={styles.iconCircle}>
-                  <Feather name="message-circle" size={20} color="#22e584" />
+                  <Feather name="message-circle" size={20} color={palette.text} />
                 </View>
                 <View style={styles.settingText}>
                   <Text style={styles.settingTitle}>Freedom Wall</Text>
@@ -329,8 +330,8 @@ export default function AccountSettingsScreen({ navigation }) {
               <Switch
                 value={freedomWallNotifications}
                 onValueChange={toggleFreedomWallNotifications}
-                trackColor={{ false: '#3e3e3e', true: '#22e584' }}
-                thumbColor="#ffffff"
+                trackColor={{ false: palette.textMuted, true: screenAccents.freedomWall.primary }}
+                thumbColor={palette.white}
               />
             </View>
           </View>
@@ -360,7 +361,7 @@ export default function AccountSettingsScreen({ navigation }) {
           <View style={styles.versionRow}>
             <Text style={styles.versionLabel}>Latest Release</Text>
             {loadingVersion ? (
-              <ActivityIndicator size="small" color="#22e584" />
+              <ActivityIndicator size="small" color={palette.text} />
             ) : (
               <Text style={styles.versionText}>v{latestVersion || appVersion}</Text>
             )}
@@ -370,13 +371,13 @@ export default function AccountSettingsScreen({ navigation }) {
               style={styles.updateButton}
               onPress={() => Linking.openURL('https://github.com/gauciv/triji-app/releases/latest')}
             >
-              <Feather name="download" size={16} color="#FFFFFF" />
+              <Feather name="download" size={16} color={palette.text} />
               <Text style={styles.updateButtonText}>Update Available</Text>
             </TouchableOpacity>
           )}
           {!loadingVersion && latestVersion && latestVersion === appVersion && (
             <View style={styles.upToDateBadge}>
-              <Feather name="check-circle" size={16} color="#22e584" />
+              <Feather name="check-circle" size={16} color={palette.text} />
               <Text style={styles.upToDateText}>Up to date</Text>
             </View>
           )}
@@ -402,7 +403,7 @@ export default function AccountSettingsScreen({ navigation }) {
                 value={currentPassword}
                 onChangeText={setCurrentPassword}
                 placeholder="Enter current password"
-                placeholderTextColor="#8E8E93"
+                placeholderTextColor={palette.textMuted}
                 secureTextEntry
               />
             </View>
@@ -414,7 +415,7 @@ export default function AccountSettingsScreen({ navigation }) {
                 value={newPassword}
                 onChangeText={setNewPassword}
                 placeholder="Enter new password"
-                placeholderTextColor="#8E8E93"
+                placeholderTextColor={palette.textMuted}
                 secureTextEntry
               />
             </View>
@@ -426,7 +427,7 @@ export default function AccountSettingsScreen({ navigation }) {
                 value={confirmPassword}
                 onChangeText={setConfirmPassword}
                 placeholder="Confirm new password"
-                placeholderTextColor="#8E8E93"
+                placeholderTextColor={palette.textMuted}
                 secureTextEntry
               />
             </View>
@@ -456,7 +457,7 @@ export default function AccountSettingsScreen({ navigation }) {
         <View style={styles.logoutModalOverlay}>
           <View style={styles.logoutModalCard}>
             <View style={styles.logoutSpinner}>
-              <Feather name="log-out" size={32} color="#22e584" />
+              <Feather name="log-out" size={32} color={palette.text} />
             </View>
             <Text style={styles.logoutModalTitle}>Logging out...</Text>
           </View>
@@ -469,7 +470,7 @@ export default function AccountSettingsScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#121212',
+    backgroundColor: palette.background,
   },
   backgroundGradient: {
     position: 'absolute',
@@ -488,17 +489,21 @@ const styles = StyleSheet.create({
   backButton: {
     width: 40,
     height: 40,
-    borderRadius: 20,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    borderRadius: 14,
+    backgroundColor: screenAccents.profile.primary,
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 16,
+    borderWidth: 3,
+    borderColor: palette.border,
+    ...brutalShadow(),
   },
   headerTitle: {
     fontSize: 28,
     fontFamily: 'Inter_600SemiBold',
-    color: '#FFFFFF',
+    color: palette.text,
     flex: 1,
+    textTransform: 'uppercase',
   },
   loadingContainer: {
     flex: 1,
@@ -506,7 +511,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   loadingText: {
-    color: '#FFFFFF',
+    color: palette.text,
     fontSize: 16,
     fontFamily: 'Inter_500Medium',
   },
@@ -516,22 +521,21 @@ const styles = StyleSheet.create({
   userCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
     marginHorizontal: 20,
     marginBottom: 24,
     padding: 16,
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
+    ...brutalCard(screenAccents.profile.tertiary),
   },
   userAvatar: {
     width: 56,
     height: 56,
-    borderRadius: 28,
-    backgroundColor: 'rgba(34, 229, 132, 0.15)',
+    borderRadius: 18,
+    backgroundColor: screenAccents.profile.secondary,
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 16,
+    borderWidth: 3,
+    borderColor: palette.border,
   },
   userInfo: {
     flex: 1,
@@ -539,13 +543,13 @@ const styles = StyleSheet.create({
   userName: {
     fontSize: 18,
     fontFamily: 'Inter_600SemiBold',
-    color: '#FFFFFF',
+    color: palette.text,
     marginBottom: 4,
   },
   userEmail: {
     fontSize: 14,
     fontFamily: 'Inter_400Regular',
-    color: 'rgba(255, 255, 255, 0.6)',
+    color: palette.textMuted,
   },
   section: {
     marginBottom: 32,
@@ -553,7 +557,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 13,
     fontFamily: 'Inter_600SemiBold',
-    color: 'rgba(255, 255, 255, 0.5)',
+    color: palette.textMuted,
     textTransform: 'uppercase',
     letterSpacing: 1,
     marginBottom: 12,
@@ -561,18 +565,15 @@ const styles = StyleSheet.create({
   },
   group: {
     marginHorizontal: 20,
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-    borderRadius: 16,
     overflow: 'hidden',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
+    ...brutalCard(palette.surface),
   },
   settingRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     padding: 16,
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    backgroundColor: palette.surface,
   },
   settingLeft: {
     flexDirection: 'row',
@@ -582,11 +583,13 @@ const styles = StyleSheet.create({
   iconCircle: {
     width: 40,
     height: 40,
-    borderRadius: 20,
-    backgroundColor: 'rgba(34, 229, 132, 0.15)',
+    borderRadius: 14,
+    backgroundColor: screenAccents.tasks.secondary,
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 12,
+    borderWidth: 3,
+    borderColor: palette.border,
   },
   settingText: {
     flex: 1,
@@ -594,37 +597,34 @@ const styles = StyleSheet.create({
   settingTitle: {
     fontSize: 16,
     fontFamily: 'Inter_500Medium',
-    color: '#FFFFFF',
+    color: palette.text,
     marginBottom: 2,
   },
   settingSubtitle: {
     fontSize: 13,
     fontFamily: 'Inter_400Regular',
-    color: 'rgba(255, 255, 255, 0.5)',
+    color: palette.textMuted,
   },
   borderTop: {
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(255, 255, 255, 0.1)',
+    borderTopWidth: 3,
+    borderTopColor: palette.border,
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+    backgroundColor: 'rgba(43, 43, 43, 0.35)',
     alignItems: 'center',
     justifyContent: 'center',
   },
   modalCard: {
     width: '85%',
     maxWidth: 400,
-    backgroundColor: 'rgba(30, 32, 40, 0.95)',
-    borderRadius: 16,
     padding: 24,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.15)',
+    ...brutalCard(palette.background),
   },
   modalTitle: {
     fontSize: 22,
     fontFamily: 'Inter_600SemiBold',
-    color: '#FFFFFF',
+    color: palette.text,
     marginBottom: 20,
     textAlign: 'center',
   },
@@ -634,19 +634,16 @@ const styles = StyleSheet.create({
   inputLabel: {
     fontSize: 14,
     fontFamily: 'Inter_500Medium',
-    color: 'rgba(255, 255, 255, 0.8)',
+    color: palette.text,
     marginBottom: 8,
   },
   modalInput: {
     height: 48,
-    backgroundColor: 'rgba(0, 0, 0, 0.3)',
-    borderRadius: 12,
     paddingHorizontal: 16,
     fontSize: 16,
     fontFamily: 'Inter_400Regular',
-    color: '#FFFFFF',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.2)',
+    color: palette.text,
+    ...brutalInput(palette.white),
   },
   modalButtons: {
     flexDirection: 'row',
@@ -656,49 +653,42 @@ const styles = StyleSheet.create({
   cancelButton: {
     flex: 1,
     height: 48,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.2)',
+    ...brutalButton(palette.powder),
   },
   cancelButtonText: {
     fontSize: 16,
     fontFamily: 'Inter_600SemiBold',
-    color: '#FFFFFF',
+    color: palette.text,
   },
   saveButton: {
     flex: 1,
     height: 48,
-    backgroundColor: '#22e584',
-    borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
+    ...brutalButton(screenAccents.profile.secondary),
   },
   saveButtonDisabled: {
-    backgroundColor: '#4A4A4A',
+    backgroundColor: '#D9D2C9',
     opacity: 0.5,
   },
   saveButtonText: {
     fontSize: 16,
     fontFamily: 'Inter_600SemiBold',
-    color: '#FFFFFF',
+    color: palette.text,
   },
   logoutModalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.85)',
+    backgroundColor: 'rgba(43, 43, 43, 0.35)',
     alignItems: 'center',
     justifyContent: 'center',
   },
   logoutModalCard: {
-    backgroundColor: 'rgba(30, 32, 40, 0.98)',
-    borderRadius: 16,
     paddingVertical: 24,
     paddingHorizontal: 32,
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: 'rgba(34, 229, 132, 0.3)',
+    ...brutalCard(palette.background),
   },
   logoutSpinner: {
     marginBottom: 12,
@@ -706,12 +696,12 @@ const styles = StyleSheet.create({
   logoutModalTitle: {
     fontSize: 16,
     fontFamily: 'Inter_600SemiBold',
-    color: '#FFFFFF',
+    color: palette.text,
   },
   logoutModalSubtext: {
     fontSize: 13,
     fontFamily: 'Inter_400Regular',
-    color: 'rgba(255, 255, 255, 0.5)',
+    color: palette.textMuted,
     marginTop: 4,
   },
   versionContainer: {
@@ -719,10 +709,7 @@ const styles = StyleSheet.create({
     marginTop: 8,
     marginBottom: 24,
     padding: 16,
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
+    ...brutalCard(palette.powder),
   },
   versionRow: {
     flexDirection: 'row',
@@ -733,49 +720,50 @@ const styles = StyleSheet.create({
   versionLabel: {
     fontSize: 14,
     fontFamily: 'Inter_500Medium',
-    color: 'rgba(255, 255, 255, 0.6)',
+    color: palette.textMuted,
   },
   versionText: {
     fontSize: 14,
     fontFamily: 'Inter_600SemiBold',
-    color: '#FFFFFF',
+    color: palette.text,
   },
   updateButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#22e584',
     paddingVertical: 10,
     paddingHorizontal: 16,
-    borderRadius: 8,
     marginTop: 8,
     gap: 8,
+    ...brutalButton(screenAccents.profile.secondary),
   },
   updateButtonText: {
     fontSize: 14,
     fontFamily: 'Inter_600SemiBold',
-    color: '#FFFFFF',
+    color: palette.text,
   },
   upToDateBadge: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'rgba(34, 229, 132, 0.15)',
+    backgroundColor: '#DDEDE9',
     paddingVertical: 8,
     paddingHorizontal: 12,
-    borderRadius: 8,
+    borderRadius: 12,
     marginTop: 8,
     gap: 6,
+    borderWidth: 3,
+    borderColor: palette.border,
   },
   upToDateText: {
     fontSize: 13,
     fontFamily: 'Inter_600SemiBold',
-    color: '#22e584',
+    color: palette.text,
   },
   copyright: {
     fontSize: 12,
     fontFamily: 'Inter_400Regular',
-    color: 'rgba(255, 255, 255, 0.3)',
+    color: palette.textMuted,
     textAlign: 'center',
     marginBottom: 32,
   },

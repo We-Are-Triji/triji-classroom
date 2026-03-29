@@ -13,6 +13,7 @@ import { collection, query, onSnapshot, orderBy, where } from 'firebase/firestor
 import { onAuthStateChanged } from 'firebase/auth';
 import TaskCardSkeleton from '../components/TaskCardSkeleton';
 import { logError } from '../utils/errorHandler';
+import { brutalButton, brutalCard, brutalShadow, palette, screenAccents } from '../theme/neoBrutal';
 
 export default function ArchivedTasksScreen({ navigation }) {
   const [tasks, setTasks] = useState([]);
@@ -112,7 +113,7 @@ export default function ArchivedTasksScreen({ navigation }) {
   return (
     <View style={styles.container}>
       <LinearGradient
-        colors={['#1B2845', '#23243a', '#22305a', '#3a5a8c', '#23243a']}
+        colors={[palette.background, palette.background]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         style={styles.backgroundGradient}
@@ -121,7 +122,7 @@ export default function ArchivedTasksScreen({ navigation }) {
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-          <Feather name="arrow-left" size={24} color="#FFFFFF" />
+          <Feather name="arrow-left" size={24} color={palette.text} />
         </TouchableOpacity>
         <View style={styles.headerTextContainer}>
           <Text style={styles.headerTitle}>Completed Tasks</Text>
@@ -139,8 +140,8 @@ export default function ArchivedTasksScreen({ navigation }) {
           <RefreshControl
             refreshing={refreshing}
             onRefresh={onRefresh}
-            tintColor="#FFFFFF"
-            colors={['#22e584', '#FFFFFF']}
+            tintColor={palette.teal}
+            colors={[palette.teal, palette.mustard]}
           />
         }
       >
@@ -152,7 +153,7 @@ export default function ArchivedTasksScreen({ navigation }) {
           </View>
         ) : tasks.length === 0 ? (
           <View style={styles.emptyContainer}>
-            <Feather name="check-circle" size={64} color="#8E8E93" />
+            <Feather name="check-circle" size={64} color={palette.textMuted} />
             <Text style={styles.emptyTitle}>No completed tasks</Text>
             <Text style={styles.emptyMessage}>Tasks you mark as done will appear here</Text>
           </View>
@@ -171,7 +172,7 @@ export default function ArchivedTasksScreen({ navigation }) {
                   </Text>
                 </View>
                 <View style={styles.completedBadge}>
-                  <Feather name="check-circle" size={13} color="#22e584" />
+                  <Feather name="check-circle" size={13} color={palette.text} />
                   <Text style={styles.completedText}>Done</Text>
                 </View>
               </View>
@@ -186,7 +187,7 @@ export default function ArchivedTasksScreen({ navigation }) {
 
               <View style={styles.taskFooter}>
                 <View style={styles.dateContainer}>
-                  <Feather name="calendar" size={14} color="#8E8E93" />
+                  <Feather name="calendar" size={14} color={palette.textMuted} />
                   <Text style={styles.taskDate}>{formatDate(task.deadline)}</Text>
                 </View>
               </View>
@@ -201,7 +202,7 @@ export default function ArchivedTasksScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#1B2845',
+    backgroundColor: palette.background,
   },
   backgroundGradient: {
     position: 'absolute',
@@ -220,11 +221,14 @@ const styles = StyleSheet.create({
   backButton: {
     width: 44,
     height: 44,
-    borderRadius: 22,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    borderRadius: 16,
+    backgroundColor: screenAccents.tasks.secondary,
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 12,
+    borderWidth: 3,
+    borderColor: palette.border,
+    ...brutalShadow(),
   },
   headerTextContainer: {
     flex: 1,
@@ -232,13 +236,14 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontFamily: 'Inter_600SemiBold',
     fontSize: 24,
-    color: '#FFFFFF',
+    color: palette.text,
+    textTransform: 'uppercase',
     marginBottom: 4,
   },
   headerSubtext: {
     fontFamily: 'Inter_400Regular',
     fontSize: 14,
-    color: 'rgba(255, 255, 255, 0.6)',
+    color: palette.textMuted,
   },
   scrollView: {
     flex: 1,
@@ -254,14 +259,14 @@ const styles = StyleSheet.create({
   emptyTitle: {
     fontFamily: 'Inter_600SemiBold',
     fontSize: 20,
-    color: '#FFFFFF',
+    color: palette.text,
     marginTop: 16,
     marginBottom: 8,
   },
   emptyMessage: {
     fontFamily: 'Inter_400Regular',
     fontSize: 15,
-    color: 'rgba(255, 255, 255, 0.6)',
+    color: palette.textMuted,
     textAlign: 'center',
     paddingHorizontal: 40,
   },
@@ -269,12 +274,10 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
   },
   taskCard: {
-    backgroundColor: 'rgba(34, 229, 132, 0.08)',
-    borderRadius: 16,
+    ...brutalCard(screenAccents.tasks.tertiary),
+    borderRadius: 24,
     padding: 16,
     marginBottom: 12,
-    borderWidth: 1,
-    borderColor: 'rgba(34, 229, 132, 0.2)',
   },
   taskCardHeader: {
     flexDirection: 'row',
@@ -286,42 +289,45 @@ const styles = StyleSheet.create({
   subjectBadge: {
     paddingHorizontal: 10,
     paddingVertical: 6,
-    borderRadius: 8,
-    backgroundColor: 'rgba(34, 229, 132, 0.2)',
+    borderRadius: 10,
+    backgroundColor: screenAccents.tasks.secondary,
     flexShrink: 1,
     maxWidth: '65%',
+    borderWidth: 3,
+    borderColor: palette.border,
   },
   subjectBadgeText: {
     fontFamily: 'Inter_600SemiBold',
     fontSize: 13,
-    color: '#22e584',
+    color: palette.text,
   },
   completedBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(34, 229, 132, 0.15)',
+    backgroundColor: palette.sage,
     paddingHorizontal: 8,
     paddingVertical: 4,
-    borderRadius: 12,
+    borderRadius: 10,
     gap: 4,
-    borderWidth: 1,
-    borderColor: 'rgba(34, 229, 132, 0.3)',
+    borderWidth: 3,
+    borderColor: palette.border,
   },
   completedText: {
     fontFamily: 'Inter_600SemiBold',
     fontSize: 11,
-    color: '#22e584',
+    color: palette.text,
+    textTransform: 'uppercase',
   },
   taskTitle: {
     fontFamily: 'Inter_600SemiBold',
     fontSize: 17,
-    color: '#FFFFFF',
+    color: palette.text,
     marginBottom: 8,
   },
   taskDescription: {
     fontFamily: 'Inter_400Regular',
     fontSize: 14,
-    color: 'rgba(255, 255, 255, 0.7)',
+    color: palette.textMuted,
     lineHeight: 20,
     marginBottom: 12,
   },
@@ -337,7 +343,7 @@ const styles = StyleSheet.create({
   taskDate: {
     fontFamily: 'Inter_500Medium',
     fontSize: 13,
-    color: '#8E8E93',
+    color: palette.textMuted,
     marginLeft: 6,
   },
 });

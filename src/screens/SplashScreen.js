@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, Animated, Easing, Image } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Feather } from '@expo/vector-icons';
 import { version } from '../../package.json';
+import { brutalCard, palette } from '../theme/neoBrutal';
 
 export default function SplashScreen({ loadingMessage = 'Loading...' }) {
   const scaleAnim = useRef(new Animated.Value(0.3)).current;
@@ -77,7 +78,7 @@ export default function SplashScreen({ loadingMessage = 'Loading...' }) {
   return (
     <View style={styles.container}>
       <LinearGradient
-        colors={['#1B2845', '#23243a', '#22305a', '#3a5a8c', '#23243a']}
+        colors={[palette.background, palette.background]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         style={styles.gradient}
@@ -136,7 +137,7 @@ export default function SplashScreen({ loadingMessage = 'Loading...' }) {
         {/* Loading message */}
         <View style={styles.loadingContainer}>
           <Animated.View style={{ transform: [{ rotate: spin }] }}>
-            <Feather name="loader" size={16} color="#22e584" />
+            <Feather name="loader" size={16} color={palette.text} />
           </Animated.View>
           <Text style={styles.loadingText}>{loadingMessage}</Text>
         </View>
@@ -154,7 +155,7 @@ export default function SplashScreen({ loadingMessage = 'Loading...' }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#121212',
+    backgroundColor: palette.background,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -177,10 +178,11 @@ const styles = StyleSheet.create({
     width: 4,
     height: 4,
     borderRadius: 2,
-    backgroundColor: '#22e584',
+    backgroundColor: palette.mustard,
   },
   content: {
     alignItems: 'center',
+    paddingHorizontal: 24,
   },
   logoContainer: {
     position: 'relative',
@@ -189,16 +191,12 @@ const styles = StyleSheet.create({
   logo: {
     width: 100,
     height: 100,
-    borderRadius: 50,
+    borderRadius: 24,
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: '#22e584',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.4,
-    shadowRadius: 20,
-    elevation: 10,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: palette.mustard,
     overflow: 'hidden',
+    ...brutalCard(palette.mustard),
   },
   logoImage: {
     width: '100%',
@@ -209,9 +207,9 @@ const styles = StyleSheet.create({
     width: 120,
     height: 120,
     borderRadius: 60,
-    borderWidth: 2,
+    borderWidth: 3,
     borderColor: 'transparent',
-    borderTopColor: '#22e584',
+    borderTopColor: palette.coral,
     top: -10,
     left: -10,
   },
@@ -223,43 +221,53 @@ const styles = StyleSheet.create({
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: '#22e584',
+    backgroundColor: palette.coral,
   },
   appName: {
     fontSize: 32,
     fontWeight: '700',
-    color: '#FFFFFF',
+    color: palette.text,
     marginBottom: 8,
     letterSpacing: 2,
+    textTransform: 'uppercase',
   },
   tagline: {
     fontSize: 14,
     fontWeight: '400',
-    color: 'rgba(255, 255, 255, 0.6)',
+    color: palette.textMuted,
     marginBottom: 32,
+    textTransform: 'uppercase',
   },
   progressBarContainer: {
     width: 200,
-    height: 4,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    borderRadius: 2,
+    height: 14,
+    backgroundColor: palette.white,
+    borderRadius: 10,
+    borderWidth: 3,
+    borderColor: palette.border,
     overflow: 'hidden',
     marginBottom: 20,
   },
   progressBar: {
     height: '100%',
-    backgroundColor: '#22e584',
-    borderRadius: 2,
+    backgroundColor: palette.teal,
+    borderRadius: 6,
   },
   loadingContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
+    backgroundColor: palette.peach,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderWidth: 3,
+    borderColor: palette.border,
+    borderRadius: 16,
   },
   loadingText: {
     fontSize: 14,
     fontWeight: '500',
-    color: 'rgba(255, 255, 255, 0.7)',
+    color: palette.text,
   },
   footer: {
     position: 'absolute',
@@ -269,12 +277,12 @@ const styles = StyleSheet.create({
   footerText: {
     fontSize: 12,
     fontWeight: '400',
-    color: 'rgba(255, 255, 255, 0.4)',
+    color: palette.textMuted,
     marginBottom: 4,
   },
   version: {
     fontSize: 11,
     fontWeight: '400',
-    color: 'rgba(255, 255, 255, 0.3)',
+    color: palette.textMuted,
   },
 });

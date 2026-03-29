@@ -13,6 +13,7 @@ import { collection, query, orderBy, where, onSnapshot } from 'firebase/firestor
 import { LinearGradient } from 'expo-linear-gradient';
 import AnnouncementCardSkeleton from '../components/AnnouncementCardSkeleton';
 import { logError } from '../utils/errorHandler';
+import { brutalButton, brutalCard, brutalShadow, palette, screenAccents } from '../theme/neoBrutal';
 
 export default function ArchivedAnnouncementsScreen({ navigation }) {
   const [announcements, setAnnouncements] = useState([]);
@@ -74,13 +75,13 @@ export default function ArchivedAnnouncementsScreen({ navigation }) {
   const getTypeColor = type => {
     switch (type) {
       case 'Critical':
-        return '#FF3B30';
+        return palette.coral;
       case 'Event':
-        return '#AF52DE';
+        return palette.lavender;
       case 'Reminder':
-        return '#FF9500';
+        return palette.peach;
       default:
-        return '#007AFF';
+        return palette.sky;
     }
   };
 
@@ -169,20 +170,20 @@ export default function ArchivedAnnouncementsScreen({ navigation }) {
   return (
     <View style={styles.container}>
       <LinearGradient
-        colors={['#1B2845', '#23243a', '#22305a', '#3a5a8c', '#23243a']}
+        colors={[palette.background, palette.background]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         style={styles.shiningGradient}
       />
       <TouchableOpacity style={styles.floatingBackButton} onPress={() => navigation.goBack()}>
-        <Feather name="arrow-left" size={26} color="#fff" />
+        <Feather name="arrow-left" size={26} color={palette.text} />
       </TouchableOpacity>
       <View style={styles.mainCardContainer}>
         <View style={styles.bellCircleWrapper}>
           <View style={styles.bellCircleGlow} />
           <View style={styles.bellCircleOutline}>
             {/* Use archive icon for archived announcements */}
-            <Feather name="archive" size={32} color="#22e584" style={styles.bellIcon} />
+            <Feather name="archive" size={32} color={palette.text} style={styles.bellIcon} />
           </View>
         </View>
         <Text style={styles.headerTitleModernCard}>Archived Announcements</Text>
@@ -198,7 +199,7 @@ export default function ArchivedAnnouncementsScreen({ navigation }) {
             </View>
           ) : announcements.length === 0 ? (
             <View style={styles.emptyContainerModern}>
-              <Feather name="archive" size={64} color="#8E8E93" />
+              <Feather name="archive" size={64} color={palette.textMuted} />
               <Text style={styles.emptyTitleModern}>No archived announcements</Text>
               <Text style={styles.emptyMessageModern}>Expired announcements will appear here.</Text>
             </View>
@@ -221,7 +222,7 @@ export default function ArchivedAnnouncementsScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#121212',
+    backgroundColor: palette.background,
   },
   backgroundGradient: {
     position: 'absolute',
@@ -229,7 +230,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: '#007AFF',
+    backgroundColor: palette.background,
     opacity: 0.05,
   },
   floatingBackButton: {
@@ -238,36 +239,25 @@ const styles = StyleSheet.create({
     left: 18,
     width: 44,
     height: 44,
-    borderRadius: 22,
-    backgroundColor: 'rgba(30,32,40,0.85)',
+    borderRadius: 16,
+    backgroundColor: screenAccents.announcements.secondary,
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 1.5,
-    borderColor: 'rgba(255,255,255,0.13)',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.12,
-    shadowRadius: 6,
-    elevation: 2,
+    borderWidth: 3,
+    borderColor: palette.border,
+    ...brutalShadow(),
     zIndex: 10,
   },
   mainCardContainer: {
     marginTop: Platform.OS === 'ios' ? 100 : 90,
     marginBottom: 20,
     marginHorizontal: 16,
-    backgroundColor: 'rgba(18, 22, 34, 0.92)',
+    ...brutalCard(screenAccents.announcements.tertiary),
     borderRadius: 28,
-    borderWidth: 1.5,
-    borderColor: 'rgba(255,255,255,0.10)',
     alignItems: 'center',
     paddingTop: 24,
     paddingBottom: 24,
     paddingHorizontal: 16,
-    shadowColor: '#22e584',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.1,
-    shadowRadius: 32,
-    elevation: 12,
     maxWidth: 600,
     alignSelf: 'center',
     width: '92%',
@@ -290,10 +280,10 @@ const styles = StyleSheet.create({
     width: 60,
     height: 60,
     borderRadius: 30,
-    backgroundColor: '#22e58444',
+    backgroundColor: screenAccents.announcements.primary,
     opacity: 0.7,
     zIndex: 2,
-    shadowColor: '#22e584',
+    shadowColor: palette.border,
     shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 0.6,
     shadowRadius: 24,
@@ -306,21 +296,20 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     zIndex: 4,
-    borderWidth: 2.5,
-    borderColor: '#22e584',
-    backgroundColor: 'transparent',
-    shadowColor: 'transparent',
+    borderWidth: 3,
+    borderColor: palette.border,
+    backgroundColor: screenAccents.announcements.secondary,
   },
   bellIcon: {
     zIndex: 4,
-    textShadowColor: '#22e58499',
+    textShadowColor: 'transparent',
     textShadowOffset: { width: 0, height: 0 },
     textShadowRadius: 16,
   },
   headerTitleModernCard: {
     fontSize: 24,
     fontFamily: 'Inter_600SemiBold',
-    color: '#fff',
+    color: palette.text,
     textAlign: 'center',
     width: '100%',
     marginBottom: 4,
@@ -330,7 +319,7 @@ const styles = StyleSheet.create({
   headerSubtextCard: {
     fontSize: 14,
     fontFamily: 'Inter_400Regular',
-    color: '#b6c2d1',
+    color: palette.textMuted,
     textAlign: 'center',
     width: '100%',
     marginBottom: 16,
@@ -363,23 +352,21 @@ const styles = StyleSheet.create({
   emptyTitleModern: {
     fontSize: 20,
     fontFamily: 'Inter_600SemiBold',
-    color: '#fff',
+    color: palette.text,
     marginTop: 16,
     marginBottom: 8,
   },
   emptyMessageModern: {
     fontSize: 16,
     fontFamily: 'Inter_400Regular',
-    color: '#8E8E93',
+    color: palette.textMuted,
     textAlign: 'center',
   },
   announcementCardModernPolished: {
     flexDirection: 'row',
     alignItems: 'stretch',
-    backgroundColor: 'rgba(30, 32, 40, 0.65)',
-    borderRadius: 20,
-    borderWidth: 1.5,
-    borderColor: 'rgba(255,255,255,0.13)',
+    ...brutalCard(palette.surface),
+    borderRadius: 24,
     borderLeftWidth: 7,
     marginBottom: 0,
     marginTop: 0,
@@ -387,11 +374,6 @@ const styles = StyleSheet.create({
     width: '100%',
     maxWidth: 600,
     alignSelf: 'center',
-    backdropFilter: 'blur(18px)',
-    shadowColor: '#22e584',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.13,
-    shadowRadius: 24,
     overflow: 'hidden',
   },
   cardMainModernPolished: {
@@ -418,26 +400,23 @@ const styles = StyleSheet.create({
   authorPictureModernPolished: {
     width: 44,
     height: 44,
-    borderRadius: 22,
-    backgroundColor: '#007AFF',
+    borderRadius: 14,
+    backgroundColor: screenAccents.announcements.secondary,
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 8,
-    shadowColor: '#007AFF',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.13,
-    shadowRadius: 6,
-    elevation: 1,
+    borderWidth: 3,
+    borderColor: palette.border,
   },
   authorInitialModernPolished: {
     fontSize: 18,
     fontFamily: 'Inter_600SemiBold',
-    color: '#fff',
+    color: palette.text,
   },
   authorNameModernPolished: {
     fontSize: 15,
     fontFamily: 'Inter_500Medium',
-    color: '#fff',
+    color: palette.text,
     opacity: 0.85,
     flexWrap: 'wrap',
     maxWidth: 120,
@@ -445,7 +424,7 @@ const styles = StyleSheet.create({
   titleModernPolished: {
     fontSize: 20,
     fontFamily: 'Inter_600SemiBold',
-    color: '#fff',
+    color: palette.text,
     marginBottom: 8,
     lineHeight: 28,
     flexWrap: 'wrap',
@@ -460,12 +439,12 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-start',
     paddingHorizontal: 10,
     paddingVertical: 3,
-    borderRadius: 12,
+    borderRadius: 10,
     marginTop: 2,
     marginBottom: 2,
-    backgroundColor: 'rgba(255,255,255,0.08)',
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.13)',
+    backgroundColor: palette.surfaceAlt,
+    borderWidth: 2,
+    borderColor: palette.border,
   },
   typeChipTextModernPolished: {
     fontSize: 11,
@@ -476,14 +455,14 @@ const styles = StyleSheet.create({
   timestampModernPolished: {
     fontSize: 12,
     fontFamily: 'Inter_400Regular',
-    color: '#8E8E93',
+    color: palette.textMuted,
     opacity: 0.8,
     marginLeft: 2,
   },
   expiryTextModernPolished: {
     fontSize: 12,
     fontFamily: 'Inter_400Regular',
-    color: '#FF3B30', // Red for expired
+    color: palette.coral,
     opacity: 0.9,
     marginLeft: 2,
   },
@@ -493,7 +472,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   loadingText: {
-    color: '#FFFFFF',
+    color: palette.text,
     fontSize: 18,
   },
   errorContainer: {
@@ -505,16 +484,15 @@ const styles = StyleSheet.create({
   errorText: {
     fontSize: 16,
     fontFamily: 'Inter_400Regular',
-    color: '#FFFFFF',
+    color: palette.text,
     textAlign: 'center',
     marginBottom: 20,
     lineHeight: 24,
   },
   retryButton: {
-    backgroundColor: '#007AFF',
+    ...brutalButton(screenAccents.announcements.primary),
     paddingHorizontal: 24,
     paddingVertical: 12,
-    borderRadius: 12,
   },
   retryButtonText: {
     fontSize: 16,

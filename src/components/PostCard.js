@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { useFonts, Inter_400Regular, Inter_500Medium } from '@expo-google-fonts/inter';
 import { Feather } from '@expo/vector-icons';
+import { brutalShadow, palette } from '../theme/neoBrutal';
 
 export default function PostCard({
   post,
@@ -69,7 +70,7 @@ export default function PostCard({
         styles.card,
         {
           transform: [{ rotate: rotation }],
-          backgroundColor: post.noteColor || '#FFFACD',
+          backgroundColor: post.noteColor || palette.mustard,
           opacity: post.status === 'pending' ? 0.7 : 1,
         },
       ]}
@@ -84,11 +85,11 @@ export default function PostCard({
           </Text>
         </View>
 
-        <Text
-          style={[styles.postText, { color: textColor || '#2C2C2C' }]}
-          numberOfLines={4}
-          ellipsizeMode="tail"
-        >
+          <Text
+            style={[styles.postText, { color: dynamicTextColor }]}
+            numberOfLines={4}
+            ellipsizeMode="tail"
+          >
           {post.content}
         </Text>
 
@@ -129,29 +130,24 @@ export default function PostCard({
 
 const styles = StyleSheet.create({
   card: {
-    width: 100,
-    height: 140,
-    borderRadius: 4,
-    margin: 4,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 2,
-      height: 4,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 6,
-    elevation: 5,
+    width: 108,
+    height: 148,
+    borderRadius: 16,
+    margin: 6,
+    borderWidth: 3,
+    borderColor: palette.border,
+    ...brutalShadow(4, 4),
     position: 'relative',
   },
   cardContent: {
-    padding: 5,
+    padding: 8,
     flex: 1,
     justifyContent: 'space-between',
   },
   postText: {
     fontSize: 11,
     fontFamily: 'Inter_400Regular',
-    color: '#2C2C2C',
+    color: palette.text,
     lineHeight: 14,
     textAlign: 'left',
     letterSpacing: 0.2,
@@ -175,6 +171,8 @@ const styles = StyleSheet.create({
     height: 8,
     borderRadius: 4,
     marginRight: 6,
+    borderWidth: 1,
+    borderColor: palette.border,
   },
   personaText: {
     fontSize: 9,
@@ -189,11 +187,11 @@ const styles = StyleSheet.create({
   },
   heartIcon: {
     fontSize: 16,
-    color: '#8E8E93',
+    color: palette.textMuted,
     marginRight: 4,
   },
   heartLiked: {
-    color: '#FF3B30',
+    color: palette.coral,
   },
   likeCount: {
     fontSize: 11,
@@ -202,25 +200,19 @@ const styles = StyleSheet.create({
   },
   tape: {
     position: 'absolute',
-    top: -10,
-    right: 20,
-    width: 30,
-    height: 16,
-    backgroundColor: 'rgba(255, 255, 255, 0.7)',
-    borderRadius: 2,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 1,
-    },
-    shadowOpacity: 0.2,
-    shadowRadius: 2,
-    elevation: 2,
+    top: -9,
+    right: 18,
+    width: 34,
+    height: 18,
+    backgroundColor: palette.surface,
+    borderRadius: 4,
+    borderWidth: 2,
+    borderColor: palette.border,
   },
   countdown: {
     fontSize: 8,
     fontFamily: 'Inter_400Regular',
-    color: '#FF6B35',
+    color: palette.text,
     fontStyle: 'italic',
   },
   pendingIndicator: {
@@ -233,7 +225,7 @@ const styles = StyleSheet.create({
   pendingText: {
     fontSize: 7,
     fontFamily: 'Inter_400Regular',
-    color: '#FF9500',
+    color: palette.warning,
     fontStyle: 'italic',
   },
 });

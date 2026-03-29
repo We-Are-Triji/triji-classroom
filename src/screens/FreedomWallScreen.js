@@ -41,8 +41,8 @@ import PostCard from '../components/PostCard';
 import { useNetwork } from '../context/NetworkContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { LinearGradient } from 'expo-linear-gradient';
-import { BlurView } from 'expo-blur';
 import { logError, showErrorAlert } from '../utils/errorHandler';
+import { brutalButton, brutalCard, brutalInput, brutalShadow, palette, screenAccents } from '../theme/neoBrutal';
 
 export default function FreedomWallScreen({ navigation }) {
   const { isConnected, registerSyncCallback } = useNetwork();
@@ -87,12 +87,12 @@ export default function FreedomWallScreen({ navigation }) {
   };
 
   const colorPalette = [
-    '#FFFACD', // Pale yellow
-    '#E6F3FF', // Light blue
-    '#FFE6F0', // Soft pink
-    '#E6FFE6', // Mint green
-    '#F0E6FF', // Light purple
-    '#FFE6CC', // Peach
+    palette.mustard,
+    palette.sky,
+    '#F7D6CC',
+    palette.sage,
+    palette.lavender,
+    palette.peach,
   ];
 
   const getTextColor = backgroundColor => {
@@ -518,7 +518,7 @@ export default function FreedomWallScreen({ navigation }) {
   return (
     <View style={styles.container}>
       <LinearGradient
-        colors={['#1B2845', '#23243a', '#22305a', '#3a5a8c', '#23243a']}
+        colors={[palette.background, palette.background]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         style={StyleSheet.absoluteFill}
@@ -526,14 +526,14 @@ export default function FreedomWallScreen({ navigation }) {
 
       <View style={styles.header}>
         <View style={styles.iconCircle}>
-          <MaterialCommunityIcons name="message-text" size={28} color="#22e584" />
+          <MaterialCommunityIcons name="message-text" size={28} color={palette.text} />
         </View>
         <View style={styles.headerTextContainer}>
           <Text style={styles.headerTitle}>Freedom Wall</Text>
           <Text style={styles.headerSubtext}>Share your thoughts anonymously</Text>
         </View>
         <TouchableOpacity style={styles.sortButton} onPress={() => setShowSortModal(true)}>
-          <Feather name="filter" size={20} color="#22e584" />
+          <Feather name="filter" size={20} color={palette.text} />
         </TouchableOpacity>
       </View>
 
@@ -550,12 +550,12 @@ export default function FreedomWallScreen({ navigation }) {
         {/* Posts list or empty state */}
         {isInitialLoading ? (
           <View style={styles.loadingContainer}>
-            <Feather name="message-circle" size={64} color="#8E8E93" />
+            <Feather name="message-circle" size={64} color={palette.textMuted} />
             <Text style={styles.loadingText}>Loading Freedom Wall...</Text>
           </View>
         ) : combinedPosts.length === 0 ? (
           <View style={styles.emptyContainerModern}>
-            <Feather name="message-circle" size={64} color="#8E8E93" />
+            <Feather name="message-circle" size={64} color={palette.textMuted} />
             <Text style={styles.emptyTitleModern}>
               There are no sticky notes for today yet.{'\n'}Be the first!
             </Text>
@@ -586,10 +586,10 @@ export default function FreedomWallScreen({ navigation }) {
               <RefreshControl
                 refreshing={refreshing}
                 onRefresh={onRefresh}
-                tintColor="#FFFFFF"
-                colors={['#22e584', '#FFFFFF']}
-                progressBackgroundColor="rgba(34, 229, 132, 0.3)"
-                titleColor="#FFFFFF"
+                tintColor={palette.teal}
+                colors={[palette.teal, palette.mustard]}
+                progressBackgroundColor={palette.surface}
+                titleColor={palette.text}
                 title="Refreshing..."
               />
             }
@@ -605,7 +605,7 @@ export default function FreedomWallScreen({ navigation }) {
             onPress={() => setCurrentPage(prev => Math.max(1, prev - 1))}
             disabled={currentPage === 1}
           >
-            <Feather name="chevron-left" size={20} color={currentPage === 1 ? '#555' : '#22e584'} />
+            <Feather name="chevron-left" size={20} color={currentPage === 1 ? palette.textMuted : palette.text} />
             <Text
               style={[styles.pageButtonText, currentPage === 1 && styles.pageButtonTextDisabled]}
             >
@@ -633,7 +633,7 @@ export default function FreedomWallScreen({ navigation }) {
             <Feather
               name="chevron-right"
               size={20}
-              color={currentPage === totalPages ? '#555' : '#22e584'}
+              color={currentPage === totalPages ? palette.textMuted : palette.text}
             />
           </TouchableOpacity>
         </View>
@@ -642,7 +642,7 @@ export default function FreedomWallScreen({ navigation }) {
       {/* Show FAB only when modal is not open */}
       {!showModal && (
         <TouchableOpacity style={styles.fab} onPress={() => setShowModal(true)}>
-          <Feather name="plus" size={28} color="#fff" />
+          <Feather name="plus" size={28} color={palette.text} />
         </TouchableOpacity>
       )}
       {/* Modal for creating a new post, glassmorphic style */}
@@ -651,7 +651,7 @@ export default function FreedomWallScreen({ navigation }) {
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
           style={styles.modalOverlay}
         >
-          <BlurView intensity={110} tint="dark" style={styles.modalCard}>
+          <View style={styles.modalCard}>
             <ScrollView
               contentContainerStyle={styles.modalScrollContent}
               keyboardShouldPersistTaps="handled"
@@ -660,7 +660,7 @@ export default function FreedomWallScreen({ navigation }) {
               {/* Modal Header with Close Button */}
               <View style={styles.modalHeader}>
                 <TouchableOpacity style={styles.closeButton} onPress={() => setShowModal(false)}>
-                  <Feather name="x" size={24} color="#fff" />
+                  <Feather name="x" size={24} color={palette.text} />
                 </TouchableOpacity>
               </View>
               {/* Preview Area */}
@@ -693,7 +693,7 @@ export default function FreedomWallScreen({ navigation }) {
                     value={customNickname}
                     onChangeText={setCustomNickname}
                     placeholder="Enter your nickname"
-                    placeholderTextColor="#8E8E93"
+                    placeholderTextColor={palette.textMuted}
                     maxLength={15}
                   />
                 </View>
@@ -704,7 +704,7 @@ export default function FreedomWallScreen({ navigation }) {
                     value={postContent}
                     onChangeText={setPostContent}
                     placeholder="What's on your mind?"
-                    placeholderTextColor="#8E8E93"
+                    placeholderTextColor={palette.textMuted}
                     multiline
                     textAlignVertical="top"
                     maxLength={100}
@@ -745,7 +745,7 @@ export default function FreedomWallScreen({ navigation }) {
                 </TouchableOpacity>
               </View>
             </ScrollView>
-          </BlurView>
+          </View>
         </KeyboardAvoidingView>
       </Modal>
 
@@ -780,7 +780,7 @@ export default function FreedomWallScreen({ navigation }) {
                   >
                     {option}
                   </Text>
-                  {sortBy === option && <Feather name="check" size={16} color="#34C759" />}
+                  {sortBy === option && <Feather name="check" size={16} color={palette.text} />}
                 </TouchableOpacity>
               )
             )}
@@ -799,7 +799,7 @@ const getRandomRotation = index => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: 'transparent',
+    backgroundColor: palette.background,
   },
   header: {
     flexDirection: 'row',
@@ -808,18 +808,18 @@ const styles = StyleSheet.create({
     paddingTop: Platform.OS === 'ios' ? 60 : 40,
     paddingBottom: 16,
     gap: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255, 255, 255, 0.1)',
+    borderBottomWidth: 3,
+    borderBottomColor: palette.border,
   },
   iconCircle: {
     width: 48,
     height: 48,
-    borderRadius: 24,
-    backgroundColor: 'rgba(34, 229, 132, 0.15)',
+    borderRadius: 16,
+    backgroundColor: screenAccents.freedomWall.secondary,
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: 'rgba(34, 229, 132, 0.3)',
+    borderWidth: 3,
+    borderColor: palette.border,
   },
   headerTextContainer: {
     flex: 1,
@@ -827,13 +827,14 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 22,
     fontFamily: 'Inter_600SemiBold',
-    color: '#FFFFFF',
+    color: palette.text,
     marginBottom: 2,
+    textTransform: 'uppercase',
   },
   headerSubtext: {
     fontSize: 13,
     fontFamily: 'Inter_400Regular',
-    color: 'rgba(255, 255, 255, 0.6)',
+    color: palette.textMuted,
   },
   sortButton: {
     padding: 8,
@@ -866,7 +867,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 40,
   },
   loadingText: {
-    color: '#D3D3D3',
+    color: palette.text,
     fontSize: 18,
     fontFamily: 'Inter_400Regular',
     marginTop: 20,
@@ -902,22 +903,20 @@ const styles = StyleSheet.create({
     right: 36,
     width: 56,
     height: 56,
-    borderRadius: 28,
-    backgroundColor: '#34C759',
+    borderRadius: 18,
+    backgroundColor: screenAccents.freedomWall.primary,
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 20,
+    borderWidth: 3,
+    borderColor: palette.border,
+    ...brutalShadow(),
     zIndex: 20,
   },
 
   characterCounter: {
     fontSize: 11,
     fontFamily: 'Inter_400Regular',
-    color: '#B0B3B8',
+    color: palette.textMuted,
     textAlign: 'right',
     marginTop: 4,
   },
@@ -936,7 +935,7 @@ const styles = StyleSheet.create({
     borderColor: 'transparent',
   },
   selectedColorCircle: {
-    borderColor: '#333333',
+    borderColor: palette.border,
     borderWidth: 3,
   },
   createNoteContainer: {
@@ -954,8 +953,9 @@ const styles = StyleSheet.create({
   previewLabel: {
     fontSize: 14,
     fontFamily: 'Inter_500Medium',
-    color: '#F5F5DC',
+    color: palette.text,
     marginBottom: 10,
+    textTransform: 'uppercase',
   },
   previewContainer: {
     alignItems: 'center',
@@ -975,42 +975,39 @@ const styles = StyleSheet.create({
   inputLabel: {
     fontSize: 13,
     fontFamily: 'Inter_500Medium',
-    color: '#FFFFFF',
+    color: palette.text,
     marginBottom: 6,
+    textTransform: 'uppercase',
   },
   formInput: {
     height: 44,
-    backgroundColor: 'rgba(255, 255, 255, 0.08)',
-    borderRadius: 10,
+    ...brutalInput(palette.white),
     paddingHorizontal: 14,
     fontSize: 15,
     fontFamily: 'Inter_400Regular',
-    color: '#FFFFFF',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.15)',
+    color: palette.text,
   },
   messageInput: {
     height: 80,
-    backgroundColor: 'rgba(255, 255, 255, 0.08)',
-    borderRadius: 10,
+    ...brutalInput(palette.white),
     paddingHorizontal: 14,
     paddingVertical: 10,
     fontSize: 15,
     fontFamily: 'Inter_400Regular',
-    color: '#FFFFFF',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.15)',
+    color: palette.text,
     textAlignVertical: 'top',
   },
   sortButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+    backgroundColor: screenAccents.freedomWall.secondary,
     paddingHorizontal: 12,
     paddingVertical: 8,
-    borderRadius: 8,
+    borderRadius: 12,
     marginTop: 12,
     gap: 6,
+    borderWidth: 3,
+    borderColor: palette.border,
   },
   sortButtonText: {
     fontSize: 14,
@@ -1019,17 +1016,17 @@ const styles = StyleSheet.create({
   },
   sortModalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    backgroundColor: 'rgba(43, 43, 43, 0.35)',
     alignItems: 'flex-end',
     paddingTop: Platform.OS === 'ios' ? 110 : 95,
     paddingRight: 20,
   },
   sortDropdown: {
-    backgroundColor: 'rgba(42, 42, 42, 0.95)',
-    borderRadius: 12,
+    backgroundColor: palette.surface,
+    borderRadius: 18,
     minWidth: 200,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.2)',
+    borderWidth: 3,
+    borderColor: palette.border,
   },
   sortOption: {
     flexDirection: 'row',
@@ -1037,19 +1034,19 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: 16,
     paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255, 255, 255, 0.1)',
+    borderBottomWidth: 3,
+    borderBottomColor: palette.border,
   },
   sortOptionSelected: {
-    backgroundColor: 'rgba(52, 199, 89, 0.1)',
+    backgroundColor: screenAccents.freedomWall.primary,
   },
   sortOptionText: {
     fontSize: 14,
     fontFamily: 'Inter_400Regular',
-    color: '#FFFFFF',
+    color: palette.text,
   },
   sortOptionTextSelected: {
-    color: '#34C759',
+    color: palette.text,
     fontFamily: 'Inter_500Medium',
   },
   createNoteHeader: {
@@ -1098,31 +1095,26 @@ const styles = StyleSheet.create({
     outline: 'none',
   },
   postButton: {
-    backgroundColor: '#34C759',
+    ...brutalButton(screenAccents.freedomWall.primary),
     paddingVertical: 14,
-    borderRadius: 12,
     alignItems: 'center',
     marginTop: 8,
-    shadowColor: '#34C759',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-    elevation: 3,
   },
   postButtonDisabled: {
-    backgroundColor: '#666666',
+    backgroundColor: palette.textMuted,
     opacity: 0.7,
   },
   postButtonText: {
     fontSize: 15,
     fontFamily: 'Inter_600SemiBold',
-    color: '#FFFFFF',
+    color: palette.text,
+    textTransform: 'uppercase',
   },
   postButtonTextDisabled: {
     color: '#666666',
   },
   cooldownText: {
-    color: '#FF3B30',
+    color: palette.text,
   },
   // New styles for the modern Freedom Wall screen
   mainCardContainer: {
@@ -1254,22 +1246,19 @@ const styles = StyleSheet.create({
   modalOverlay: {
     flex: 1,
     justifyContent: 'flex-end',
-    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    backgroundColor: 'rgba(43, 43, 43, 0.35)',
   },
   modalCard: {
     width: '100%',
     maxHeight: '92%',
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
+    borderTopLeftRadius: 28,
+    borderTopRightRadius: 28,
     borderBottomLeftRadius: 0,
     borderBottomRightRadius: 0,
     padding: 0,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: -4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 12,
-    elevation: 15,
-    backgroundColor: 'rgba(42, 42, 42, 0.95)',
+    backgroundColor: palette.surface,
+    borderWidth: 3,
+    borderColor: palette.border,
     overflow: 'hidden',
   },
   modalScrollContent: {
@@ -1285,10 +1274,12 @@ const styles = StyleSheet.create({
   closeButton: {
     width: 36,
     height: 36,
-    borderRadius: 18,
-    backgroundColor: 'rgba(255, 255, 255, 0.15)',
+    borderRadius: 12,
+    backgroundColor: screenAccents.freedomWall.secondary,
     alignItems: 'center',
     justifyContent: 'center',
+    borderWidth: 3,
+    borderColor: palette.border,
   },
   emptyContainerModern: {
     flex: 1,
@@ -1299,7 +1290,7 @@ const styles = StyleSheet.create({
   emptyTitleModern: {
     fontSize: 18,
     fontFamily: 'Inter_400Regular',
-    color: '#b6c2d1',
+    color: palette.text,
     textAlign: 'center',
     marginTop: 20,
     lineHeight: 24,
@@ -1313,14 +1304,14 @@ const styles = StyleSheet.create({
   paginationInfo: {
     paddingHorizontal: 20,
     paddingVertical: 12,
-    backgroundColor: 'rgba(34, 229, 132, 0.05)',
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255, 255, 255, 0.1)',
+    backgroundColor: palette.surface,
+    borderBottomWidth: 3,
+    borderBottomColor: palette.border,
   },
   paginationText: {
     fontSize: 13,
     fontFamily: 'Inter_500Medium',
-    color: 'rgba(255, 255, 255, 0.7)',
+    color: palette.textMuted,
     textAlign: 'center',
   },
   paginationControls: {
@@ -1329,9 +1320,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 16,
     paddingVertical: 16,
-    backgroundColor: 'rgba(255, 255, 255, 0.02)',
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(255, 255, 255, 0.1)',
+    backgroundColor: palette.surface,
+    borderTopWidth: 3,
+    borderTopColor: palette.border,
     marginBottom: 0,
   },
   pageButton: {
@@ -1340,26 +1331,28 @@ const styles = StyleSheet.create({
     gap: 6,
     paddingHorizontal: 16,
     paddingVertical: 10,
-    backgroundColor: 'rgba(34, 229, 132, 0.1)',
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: 'rgba(34, 229, 132, 0.3)',
+    backgroundColor: screenAccents.freedomWall.secondary,
+    borderRadius: 12,
+    borderWidth: 3,
+    borderColor: palette.border,
+    ...brutalShadow(),
   },
   pageButtonDisabled: {
-    backgroundColor: 'rgba(255, 255, 255, 0.03)',
-    borderColor: 'rgba(255, 255, 255, 0.1)',
+    backgroundColor: palette.surfaceAlt,
+    borderColor: palette.border,
   },
   pageButtonText: {
     fontSize: 14,
     fontFamily: 'Inter_600SemiBold',
-    color: '#22e584',
+    color: palette.text,
+    textTransform: 'uppercase',
   },
   pageButtonTextDisabled: {
-    color: '#555',
+    color: palette.textMuted,
   },
   pageIndicator: {
     fontSize: 14,
     fontFamily: 'Inter_600SemiBold',
-    color: '#FFFFFF',
+    color: palette.text,
   },
 });

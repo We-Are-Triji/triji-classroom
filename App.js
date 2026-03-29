@@ -28,6 +28,7 @@ import { setupNotificationListeners, registerForPushNotifications } from './src/
 import { stopAllListeners } from './src/utils/firestoreListeners';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from './src/config/firebaseConfig';
+import { palette } from './src/theme/neoBrutal';
 // Import Firebase to ensure it's initialized before the app starts
 import './src/config/firebaseConfig';
 
@@ -298,14 +299,26 @@ export default function App() {
   return (
     <ErrorBoundary>
       <NetworkProvider>
-        <View style={{ flex: 1, backgroundColor: '#1B2845' }}>
+        <View style={{ flex: 1, backgroundColor: palette.background }}>
           <OfflineBanner />
-          <NavigationContainer>
+          <NavigationContainer
+            theme={{
+              dark: false,
+              colors: {
+                primary: palette.teal,
+                background: palette.background,
+                card: palette.background,
+                text: palette.text,
+                border: palette.border,
+                notification: palette.coral,
+              },
+            }}
+          >
             <Stack.Navigator
               initialRouteName={initialRouteName}
               screenOptions={{
                 headerShown: false,
-                cardStyle: { backgroundColor: '#1B2845' },
+                cardStyle: { backgroundColor: palette.background },
                 animationEnabled: true,
                 animationTypeForReplace: 'push',
                 cardStyleInterpolator: ({ current, layouts }) => {

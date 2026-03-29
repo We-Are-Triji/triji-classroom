@@ -32,6 +32,7 @@ import { auth } from '../config/firebaseConfig';
 import * as Clipboard from 'expo-clipboard';
 import { useNetwork } from '../context/NetworkContext';
 import { showErrorAlert, logError } from '../utils/errorHandler';
+import { brutalButton, brutalCard, brutalInput, brutalShadow, palette, screenAccents } from '../theme/neoBrutal';
 
 export default function PostDetailScreen({ route, navigation }) {
   const { post } = route.params || {};
@@ -288,7 +289,7 @@ export default function PostDetailScreen({ route, navigation }) {
     return (
       <View style={styles.container}>
         <LinearGradient
-          colors={['#1B2845', '#23243a', '#22305a', '#3a5a8c', '#23243a']}
+          colors={[palette.background, palette.background]}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
           style={styles.backgroundGradient}
@@ -301,14 +302,14 @@ export default function PostDetailScreen({ route, navigation }) {
   return (
     <View style={styles.container}>
       <LinearGradient
-        colors={['#1B2845', '#23243a', '#22305a', '#3a5a8c', '#23243a']}
+        colors={[palette.background, palette.background]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         style={styles.backgroundGradient}
       />
       <View style={styles.header}>
         <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-          <Feather name="arrow-left" size={24} color="#FFFFFF" />
+          <Feather name="arrow-left" size={24} color={palette.text} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Note Details</Text>
         {(() => {
@@ -331,7 +332,7 @@ export default function PostDetailScreen({ route, navigation }) {
               <Feather
                 name={hasReported ? 'check' : 'alert-triangle'}
                 size={20}
-                color={hasReported ? '#34C759' : '#FF3B30'}
+                color={palette.text}
               />
             </TouchableOpacity>
           );
@@ -375,13 +376,13 @@ export default function PostDetailScreen({ route, navigation }) {
               <Feather
                 name={showCopied ? 'check' : 'copy'}
                 size={18}
-                color={showCopied ? '#34C759' : 'rgba(255,255,255,0.7)'}
+                color={showCopied ? palette.text : palette.text}
               />
               <Text style={styles.interactionText}>{showCopied ? 'Copied!' : 'Copy'}</Text>
             </TouchableOpacity>
 
             <TouchableOpacity style={styles.interactionButton} onPress={handleShare}>
-              <Feather name="share" size={18} color="rgba(255,255,255,0.7)" />
+              <Feather name="share" size={18} color={palette.text} />
               <Text style={styles.interactionText}>Share</Text>
             </TouchableOpacity>
           </View>
@@ -390,7 +391,7 @@ export default function PostDetailScreen({ route, navigation }) {
         {/* Countdown Info */}
         {countdown && (
           <View style={styles.countdownCard}>
-            <Feather name="clock" size={20} color="#FF6B35" />
+            <Feather name="clock" size={20} color={palette.text} />
             <Text style={styles.countdownText}>{countdown}</Text>
           </View>
         )}
@@ -406,7 +407,7 @@ export default function PostDetailScreen({ route, navigation }) {
         <View style={styles.reportModalContainer}>
           <View style={styles.reportHeader}>
             <TouchableOpacity style={styles.closeButton} onPress={() => setShowReportModal(false)}>
-              <Feather name="x" size={24} color="#FFFFFF" />
+              <Feather name="x" size={24} color={palette.text} />
             </TouchableOpacity>
             <Text style={styles.reportTitle}>Report Post</Text>
           </View>
@@ -436,7 +437,7 @@ export default function PostDetailScreen({ route, navigation }) {
                 >
                   {reason}
                 </Text>
-                {selectedReason === reason && <Feather name="check" size={16} color="#FF3B30" />}
+                {selectedReason === reason && <Feather name="check" size={16} color={palette.text} />}
               </TouchableOpacity>
             ))}
 
@@ -446,7 +447,7 @@ export default function PostDetailScreen({ route, navigation }) {
               value={description}
               onChangeText={setDescription}
               placeholder="Provide more details about this report..."
-              placeholderTextColor="#8E8E93"
+              placeholderTextColor={palette.textMuted}
               multiline
               textAlignVertical="top"
               maxLength={200}
@@ -474,7 +475,7 @@ export default function PostDetailScreen({ route, navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#121212',
+    backgroundColor: palette.background,
   },
   backgroundGradient: {
     position: 'absolute',
@@ -491,36 +492,42 @@ const styles = StyleSheet.create({
     paddingTop: 60,
     paddingBottom: 20,
     backgroundColor: 'transparent',
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255, 255, 255, 0.1)',
+    borderBottomWidth: 3,
+    borderBottomColor: palette.border,
   },
   backButton: {
     width: 40,
     height: 40,
-    borderRadius: 20,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    borderRadius: 16,
+    backgroundColor: screenAccents.freedomWall.secondary,
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 16,
+    borderWidth: 3,
+    borderColor: palette.border,
+    ...brutalShadow(),
   },
   headerTitle: {
     fontSize: 20,
     fontFamily: 'Inter_600SemiBold',
-    color: '#FFFFFF',
+    color: palette.text,
     flex: 1,
     textAlign: 'center',
     marginHorizontal: 16,
+    textTransform: 'uppercase',
   },
   moreButton: {
     width: 40,
     height: 40,
-    borderRadius: 20,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    borderRadius: 16,
+    backgroundColor: palette.coral,
     alignItems: 'center',
     justifyContent: 'center',
+    borderWidth: 3,
+    borderColor: palette.border,
   },
   reportedButton: {
-    backgroundColor: 'rgba(52, 199, 89, 0.2)',
+    backgroundColor: palette.sage,
   },
   content: {
     flex: 1,
@@ -528,10 +535,8 @@ const styles = StyleSheet.create({
     paddingTop: 16,
   },
   postCardContainer: {
-    backgroundColor: 'rgba(255, 255, 255, 0.06)',
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.12)',
+    ...brutalCard(screenAccents.freedomWall.tertiary),
+    borderRadius: 24,
     overflow: 'hidden',
   },
   authorHeader: {
@@ -543,10 +548,12 @@ const styles = StyleSheet.create({
   authorAvatar: {
     width: 44,
     height: 44,
-    borderRadius: 22,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    borderRadius: 14,
+    backgroundColor: palette.surfaceAlt,
     alignItems: 'center',
     justifyContent: 'center',
+    borderWidth: 3,
+    borderColor: palette.border,
   },
   authorInfo: {
     flex: 1,
@@ -554,13 +561,13 @@ const styles = StyleSheet.create({
   authorName: {
     fontSize: 16,
     fontFamily: 'Inter_600SemiBold',
-    color: '#FFFFFF',
+    color: palette.text,
     marginBottom: 2,
   },
   timestamp: {
     fontSize: 13,
     fontFamily: 'Inter_400Regular',
-    color: 'rgba(255, 255, 255, 0.6)',
+    color: palette.textMuted,
   },
   postCard: {
     minHeight: 200,
@@ -584,8 +591,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     paddingHorizontal: 8,
     paddingVertical: 12,
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(255, 255, 255, 0.1)',
+    borderTopWidth: 3,
+    borderTopColor: palette.border,
   },
   interactionButton: {
     flex: 1,
@@ -598,24 +605,24 @@ const styles = StyleSheet.create({
   interactionText: {
     fontSize: 14,
     fontFamily: 'Inter_500Medium',
-    color: 'rgba(255, 255, 255, 0.7)',
+    color: palette.text,
   },
   heartIcon: {
     fontSize: 22,
-    color: 'rgba(255, 255, 255, 0.7)',
+    color: palette.text,
   },
   heartLiked: {
-    color: '#FF3B30',
+    color: palette.coral,
   },
   countdownCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(255, 107, 53, 0.1)',
+    backgroundColor: palette.mustard,
     paddingHorizontal: 16,
     paddingVertical: 14,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 107, 53, 0.3)',
+    borderRadius: 16,
+    borderWidth: 3,
+    borderColor: palette.border,
     marginTop: 16,
     gap: 10,
   },
@@ -700,7 +707,7 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
   },
   loadingText: {
-    color: '#FFFFFF',
+    color: palette.text,
     fontSize: 18,
     textAlign: 'center',
     marginTop: 100,
@@ -751,11 +758,11 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(52, 199, 89, 0.4)',
   },
   copiedText: {
-    color: '#34C759',
+    color: palette.text,
   },
   reportModalContainer: {
     flex: 1,
-    backgroundColor: '#2A2A2A',
+    backgroundColor: palette.background,
   },
   reportHeader: {
     flexDirection: 'row',
@@ -763,25 +770,28 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: 60,
     paddingBottom: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255, 255, 255, 0.1)',
+    borderBottomWidth: 3,
+    borderBottomColor: palette.border,
   },
   closeButton: {
     width: 40,
     height: 40,
-    borderRadius: 20,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    borderRadius: 16,
+    backgroundColor: screenAccents.freedomWall.secondary,
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 16,
+    borderWidth: 3,
+    borderColor: palette.border,
   },
   reportTitle: {
     fontSize: 20,
     fontFamily: 'Inter_600SemiBold',
-    color: '#FFFFFF',
+    color: palette.text,
     flex: 1,
     textAlign: 'center',
     marginRight: 56,
+    textTransform: 'uppercase',
   },
   reportContent: {
     flex: 1,
@@ -791,9 +801,10 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 16,
     fontFamily: 'Inter_500Medium',
-    color: '#FFFFFF',
+    color: palette.text,
     marginBottom: 16,
     marginTop: 20,
+    textTransform: 'uppercase',
   },
   reasonOption: {
     flexDirection: 'row',
@@ -801,51 +812,48 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingVertical: 16,
     paddingHorizontal: 16,
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-    borderRadius: 8,
+    backgroundColor: palette.surface,
+    borderRadius: 14,
     marginBottom: 8,
-    borderWidth: 1,
-    borderColor: 'transparent',
+    borderWidth: 3,
+    borderColor: palette.border,
   },
   reasonOptionSelected: {
-    backgroundColor: 'rgba(255, 59, 48, 0.1)',
-    borderColor: '#FF3B30',
+    backgroundColor: palette.coral,
+    borderColor: palette.border,
   },
   reasonText: {
     fontSize: 14,
     fontFamily: 'Inter_400Regular',
-    color: '#FFFFFF',
+    color: palette.text,
   },
   reasonTextSelected: {
-    color: '#FF3B30',
+    color: palette.text,
     fontFamily: 'Inter_500Medium',
   },
   descriptionInput: {
     height: 100,
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-    borderRadius: 8,
+    ...brutalInput(palette.white),
     paddingHorizontal: 16,
     paddingVertical: 12,
     fontSize: 14,
     fontFamily: 'Inter_400Regular',
-    color: '#FFFFFF',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
+    color: palette.text,
     marginBottom: 30,
   },
   submitButton: {
-    backgroundColor: '#FF3B30',
+    ...brutalButton(palette.coral),
     paddingVertical: 16,
-    borderRadius: 8,
     alignItems: 'center',
     marginBottom: 40,
   },
   submitButtonDisabled: {
-    backgroundColor: '#666666',
+    backgroundColor: palette.textMuted,
   },
   submitButtonText: {
     fontSize: 16,
     fontFamily: 'Inter_600SemiBold',
-    color: '#FFFFFF',
+    color: palette.text,
+    textTransform: 'uppercase',
   },
 });
