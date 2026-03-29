@@ -12,8 +12,6 @@ import {
   TouchableWithoutFeedback,
   Keyboard,
   Dimensions,
-  Alert,
-  Image,
   ScrollView,
 } from 'react-native';
 import {
@@ -34,6 +32,8 @@ import {
 import { doc, getDoc } from 'firebase/firestore';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { LinearGradient } from 'expo-linear-gradient';
+import { FeedbackModal } from '../components';
+import { getUserMessage } from '../utils/errorHandler';
 import { brutalButton, brutalCard, brutalInput, palette, screenAccents } from '../theme/neoBrutal';
 
 const { width, height } = Dimensions.get('window');
@@ -56,6 +56,7 @@ export default function LoginScreen({ navigation }) {
   const [resetSuccess, setResetSuccess] = useState(false);
   const [lastResetTime, setLastResetTime] = useState(null);
   const [rememberMe, setRememberMe] = useState(false);
+  const [feedback, setFeedback] = useState({ visible: false, title: '', message: '', tone: 'error' });
 
   // Load saved credentials on mount
   React.useEffect(() => {
@@ -144,12 +145,24 @@ export default function LoginScreen({ navigation }) {
   };
 
   const handleLogin = async () => {
+    const trimmedEmail = email.trim();
+
+    if (!trimmedEmail || !password.trim()) {
+      setFeedback({
+        visible: true,
+        title: 'Missing details',
+        message: 'Enter both your school email and password before signing in.',
+        tone: 'error',
+      });
+      return;
+    }
+
     setLoading(true);
     setError('');
 
     try {
       // Perform Firebase authentication (fast, cached locally)
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const userCredential = await signInWithEmailAndPassword(auth, trimmedEmail, password);
       const user = userCredential.user;
 
       // Check email verification first (no network call)
@@ -161,9 +174,15 @@ export default function LoginScreen({ navigation }) {
           console.log('Error sending verification email:', verificationError);
         }
         await signOut(auth);
-        setError(
-          'Please verify your email address before logging in. A new verification link has been sent.'
-        );
+        const message =
+          'Please verify your email before logging in. A fresh verification link was sent to your inbox.';
+        setError(message);
+        setFeedback({
+          visible: true,
+          title: 'Email not verified',
+          message,
+          tone: 'info',
+        });
         setLoading(false);
         return;
       }
@@ -172,7 +191,7 @@ export default function LoginScreen({ navigation }) {
       // Firebase Auth handles session persistence automatically via AsyncStorage
       if (rememberMe) {
         AsyncStorage.multiSet([
-          ['saved_email', email],
+          ['saved_email', trimmedEmail],
           ['remember_me', 'true'],
         ]).catch(err => console.log('Error saving email:', err));
       } else {
@@ -197,28 +216,27 @@ export default function LoginScreen({ navigation }) {
     } catch (error) {
       console.log('Login error:', error.code, error.message);
 
-      // Handle specific Firebase auth errors
-      switch (error.code) {
-        case 'auth/invalid-email':
-          setError('Invalid email address format.');
-          break;
-        case 'auth/user-disabled':
-          setError('This account has been disabled. Please contact support.');
-          break;
-        case 'auth/user-not-found':
-        case 'auth/wrong-password':
-        case 'auth/invalid-credential':
-          setError('Invalid email or password. Please try again.');
-          break;
-        case 'auth/too-many-requests':
-          setError('Too many failed attempts. Please try again later.');
-          break;
-        case 'auth/network-request-failed':
-          setError('Network error. Please check your connection and try again.');
-          break;
-        default:
-          setError('Login failed. Please try again.');
+      let message = getUserMessage(error, 'Login failed. Please try again.');
+      let title = 'Login failed';
+
+      if (error.code === 'auth/wrong-password') {
+        message = 'That password is incorrect. Double-check it and try again.';
+      } else if (error.code === 'auth/invalid-credential') {
+        message = 'Your email or password does not match this account.';
+      } else if (error.code === 'auth/user-not-found') {
+        message = 'No account was found for that email address.';
+      } else if (error.code === 'auth/network-request-failed') {
+        title = 'Connection issue';
+        message = 'We could not reach the server. If you already have a saved session, cached content is still available offline.';
       }
+
+      setError(message);
+      setFeedback({
+        visible: true,
+        title,
+        message,
+        tone: 'error',
+      });
     } finally {
       setLoading(false);
     }
@@ -266,11 +284,13 @@ export default function LoginScreen({ navigation }) {
           <View style={styles.inputWrapper}>
             <TextInput
               style={styles.input}
-              placeholder="username"
+              placeholder="School email address"
               placeholderTextColor={palette.textMuted}
               value={email}
               onChangeText={setEmail}
               autoCapitalize="none"
+              autoCorrect={false}
+              keyboardType="email-address"
             />
             <Feather name="user" size={20} color={palette.textMuted} style={styles.inputIcon} />
           </View>
@@ -278,7 +298,7 @@ export default function LoginScreen({ navigation }) {
           <View style={styles.inputWrapper}>
             <TextInput
               style={styles.input}
-              placeholder="password"
+              placeholder="Account password"
               placeholderTextColor={palette.textMuted}
               secureTextEntry={!showPassword}
               value={password}
@@ -362,7 +382,7 @@ export default function LoginScreen({ navigation }) {
                     />
                     <TextInput
                       style={styles.modalInput}
-                      placeholder="Email Address"
+                      placeholder="Your school email address"
                       placeholderTextColor={palette.textMuted}
                       value={resetEmail}
                       onChangeText={setResetEmail}
@@ -413,6 +433,14 @@ export default function LoginScreen({ navigation }) {
             </View>
           </TouchableWithoutFeedback>
         </Modal>
+
+        <FeedbackModal
+          visible={feedback.visible}
+          title={feedback.title}
+          message={feedback.message}
+          tone={feedback.tone}
+          onClose={() => setFeedback(prev => ({ ...prev, visible: false }))}
+        />
       </LinearGradient>
     </KeyboardAvoidingView>
   );
@@ -607,9 +635,10 @@ const styles = StyleSheet.create({
   },
   errorText: {
     color: palette.error,
-    fontSize: 14,
-    fontFamily: 'Inter_400Regular',
-    marginVertical: 12,
+    fontSize: 13,
+    fontFamily: 'Inter_500Medium',
+    marginTop: -4,
+    marginBottom: 12,
     textAlign: 'center',
     paddingHorizontal: 8,
   },

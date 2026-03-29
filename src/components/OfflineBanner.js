@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Animated, Modal } from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Animated, Modal, Platform } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { useNetwork } from '../context/NetworkContext';
 import { brutalButton, brutalCard, palette } from '../theme/neoBrutal';
@@ -9,7 +9,7 @@ export default function OfflineBanner() {
   const [wasOffline, setWasOffline] = useState(false);
   const [showBackOnline, setShowBackOnline] = useState(false);
   const [showHelpModal, setShowHelpModal] = useState(false);
-  const fadeAnim = new Animated.Value(1);
+  const fadeAnim = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
     if (isConnected === false) {
@@ -46,7 +46,7 @@ export default function OfflineBanner() {
       <>
         <View style={[styles.banner, styles.offlineBanner]}>
           <Feather name="wifi-off" size={16} color={palette.text} />
-          <Text style={styles.offlineText}>No Internet Connection</Text>
+          <Text style={styles.offlineText}>Offline mode: showing your last cached updates</Text>
           <TouchableOpacity style={styles.infoButton} onPress={() => setShowHelpModal(true)}>
             <Feather name="help-circle" size={16} color={palette.text} />
           </TouchableOpacity>
@@ -77,11 +77,11 @@ export default function OfflineBanner() {
                   <Feather name="x-circle" size={18} color={palette.error} />
                   <Text style={styles.sectionTitle}>Unavailable Features</Text>
                 </View>
-                <Text style={styles.featureItem}>• View or post announcements</Text>
+                <Text style={styles.featureItem}>• Publish new announcements or edits</Text>
                 <Text style={styles.featureItem}>• Create or update tasks</Text>
                 <Text style={styles.featureItem}>• Post to Freedom Wall</Text>
                 <Text style={styles.featureItem}>• Update profile information</Text>
-                <Text style={styles.featureItem}>• Receive push notifications</Text>
+                <Text style={styles.featureItem}>• Receive live remote notifications</Text>
               </View>
 
               <View style={styles.section}>
@@ -90,7 +90,8 @@ export default function OfflineBanner() {
                   <Text style={styles.sectionTitle}>What You Can Do</Text>
                 </View>
                 <Text style={styles.featureItem}>• Use the Grade Calculator</Text>
-                <Text style={styles.featureItem}>• View your profile (cached data)</Text>
+                <Text style={styles.featureItem}>• Browse your cached dashboard updates</Text>
+                <Text style={styles.featureItem}>• Stay signed in with your saved session</Text>
                 <Text style={styles.featureItem}>• Browse app settings</Text>
               </View>
 
@@ -116,18 +117,13 @@ export default function OfflineBanner() {
 
 const styles = StyleSheet.create({
   banner: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 8,
+    paddingTop: Platform.OS === 'ios' ? 14 : 10,
+    paddingBottom: 10,
     paddingHorizontal: 16,
     gap: 8,
-    zIndex: 9999,
-    elevation: 10,
     borderBottomWidth: 3,
     borderBottomColor: palette.border,
   },
@@ -139,13 +135,15 @@ const styles = StyleSheet.create({
   },
   offlineText: {
     color: palette.text,
-    fontSize: 14,
-    fontWeight: '500',
+    flex: 1,
+    fontSize: 13,
+    fontFamily: 'Inter_500Medium',
+    textAlign: 'center',
   },
   onlineText: {
     color: palette.text,
     fontSize: 14,
-    fontWeight: '500',
+    fontFamily: 'Inter_500Medium',
   },
   infoButton: {
     padding: 4,
@@ -171,7 +169,7 @@ const styles = StyleSheet.create({
   },
   modalTitle: {
     fontSize: 20,
-    fontWeight: '700',
+    fontFamily: 'Inter_600SemiBold',
     color: palette.text,
     flex: 1,
     marginLeft: 12,
@@ -187,11 +185,12 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 16,
-    fontWeight: '600',
+    fontFamily: 'Inter_600SemiBold',
     color: palette.text,
   },
   featureItem: {
     fontSize: 14,
+    fontFamily: 'Inter_400Regular',
     color: palette.textMuted,
     marginBottom: 6,
     lineHeight: 20,
@@ -209,6 +208,7 @@ const styles = StyleSheet.create({
   },
   tipText: {
     fontSize: 13,
+    fontFamily: 'Inter_500Medium',
     color: palette.text,
     flex: 1,
     lineHeight: 18,
@@ -220,7 +220,7 @@ const styles = StyleSheet.create({
   },
   closeButtonText: {
     fontSize: 16,
-    fontWeight: '600',
+    fontFamily: 'Inter_600SemiBold',
     color: palette.text,
   },
 });

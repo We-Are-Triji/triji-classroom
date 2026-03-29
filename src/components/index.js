@@ -6,3 +6,5 @@ export { default as ProfileSection } from './ProfileSection';
 export { default as InfoRow } from './InfoRow';
 export { default as ErrorBoundary } from './ErrorBoundary';
 export { default as OfflineBanner } from './OfflineBanner';
+export { default as FeedbackModal } from './FeedbackModal';
+export { default as RecentUpdatesSkeleton } from './RecentUpdatesSkeleton';

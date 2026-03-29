@@ -17,12 +17,26 @@ import {
 } from '@expo-google-fonts/inter';
 import { Feather } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { db, auth } from '../config/firebaseConfig';
 import { collection, query, orderBy, limit, getDocs, doc, getDoc } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
+import { RecentUpdatesSkeleton } from '../components';
 import { brutalCard, brutalShadow, palette, screenAccents } from '../theme/neoBrutal';
 
 const { width, height } = Dimensions.get('window');
+const DASHBOARD_CACHE_KEY = 'dashboard_cache_v1';
+const CACHE_DURATION = 30 * 1000;
+const CACHE_MAX_AGE = 1000 * 60 * 60 * 12;
+
+function serializeUpdate(item) {
+  const timestamp = item.timestamp?.toDate ? item.timestamp.toDate().toISOString() : item.timestamp;
+  return { ...item, timestamp };
+}
+
+function restoreUpdate(item) {
+  return item ? { ...item, timestamp: item.timestamp || null } : null;
+}
 
 export default function DashboardScreen({ navigation }) {
   const [recentUpdates, setRecentUpdates] = useState([]);
@@ -34,7 +48,7 @@ export default function DashboardScreen({ navigation }) {
   const [userName, setUserName] = useState('');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [lastFetchTime, setLastFetchTime] = useState(0);
-  const CACHE_DURATION = 30 * 1000; // 30 seconds cache
+  const [usingCachedContent, setUsingCachedContent] = useState(false);
   let [fontsLoaded] = useFonts({
     Inter_400Regular,
     Inter_500Medium,
@@ -52,6 +66,11 @@ export default function DashboardScreen({ navigation }) {
       if (user) {
         setIsAuthenticated(true);
 
+        const cachedDashboard = await loadDashboardCache();
+        if (isMounted && cachedDashboard) {
+          applyCachedDashboard(cachedDashboard);
+        }
+
         // Fetch user's first name from Firestore
         try {
           const userDoc = await getDoc(doc(db, 'users', user.uid));
@@ -59,6 +78,13 @@ export default function DashboardScreen({ navigation }) {
             const userData = userDoc.data();
             const firstName = userData.firstName || userData.displayName?.split(' ')[0] || 'User';
             setUserName(firstName);
+            saveDashboardCache({
+              recentUpdates,
+              totalTasks,
+              totalAnnouncements,
+              totalPosts,
+              userName: firstName,
+            }).catch(() => { });
           } else if (isMounted) {
             setUserName(user.displayName?.split(' ')[0] || 'User');
           }
@@ -84,6 +110,7 @@ export default function DashboardScreen({ navigation }) {
           setTotalTasks(0);
           setTotalAnnouncements(0);
           setTotalPosts(0);
+          setUsingCachedContent(false);
           setLoading(false);
           navigation.replace('Login');
         }
@@ -201,6 +228,7 @@ export default function DashboardScreen({ navigation }) {
               id: doc.id,
               ...data,
               type: 'announcement',
+              announcementCategory: data.type || 'General',
               timestamp: data.createdAt,
             });
           }
@@ -209,6 +237,7 @@ export default function DashboardScreen({ navigation }) {
             id: doc.id,
             ...data,
             type: 'announcement',
+            announcementCategory: data.type || 'General',
             timestamp: data.createdAt,
           });
         }
@@ -241,7 +270,17 @@ export default function DashboardScreen({ navigation }) {
         const bTime = b.timestamp?.toDate ? b.timestamp.toDate() : new Date(b.timestamp);
         return bTime - aTime;
       });
-      setRecentUpdates(combined.slice(0, 5));
+      const trimmedUpdates = combined.slice(0, 5);
+      setRecentUpdates(trimmedUpdates);
+      setUsingCachedContent(false);
+
+      await saveDashboardCache({
+        recentUpdates: trimmedUpdates,
+        totalTasks: pendingTasksCount,
+        totalAnnouncements: activeAnnouncementsCount,
+        totalPosts: activePostsCount,
+        userName,
+      });
 
       // Update cache timestamp
       setLastFetchTime(Date.now());
@@ -251,6 +290,10 @@ export default function DashboardScreen({ navigation }) {
       return [];
     } catch (error) {
       console.log('Error fetching data:', error);
+      const cachedDashboard = await loadDashboardCache();
+      if (cachedDashboard) {
+        applyCachedDashboard(cachedDashboard);
+      }
       setLoading(false);
       setRefreshing(false);
       return [];
@@ -324,10 +367,11 @@ export default function DashboardScreen({ navigation }) {
         break;
       case 'announcement':
         icon = 'bell';
-        const badgeColors = getBadgeColors(item.announcementType || item.type);
+        const announcementType = item.announcementCategory || item.announcementType || 'General';
+        const badgeColors = getBadgeColors(announcementType);
         iconColor = badgeColors.text;
         title = item.title || 'Untitled Announcement';
-        subtitle = item.announcementType || item.type || 'General';
+        subtitle = announcementType;
         onPress = () => navigation.navigate('AnnouncementDetail', { announcementId: item.id });
         break;
       case 'post':
@@ -410,7 +454,9 @@ export default function DashboardScreen({ navigation }) {
           <Text style={styles.userName} numberOfLines={1}>
             {userName}
           </Text>
-          <Text style={styles.subGreeting}>Here's what's new</Text>
+          <Text style={styles.subGreeting}>
+            {usingCachedContent ? "You're viewing your cached home feed" : "Here's what's new"}
+          </Text>
         </View>
         <TouchableOpacity
           style={styles.settingsButton}
@@ -451,7 +497,12 @@ export default function DashboardScreen({ navigation }) {
           />
         }
       >
-        {recentUpdates.length > 0 ? (
+        {loading && recentUpdates.length === 0 ? (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Recent Updates</Text>
+            <RecentUpdatesSkeleton />
+          </View>
+        ) : recentUpdates.length > 0 ? (
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Recent Updates</Text>
             <View style={styles.updatesContainer}>{recentUpdates.map(renderUpdateItem)}</View>
@@ -466,6 +517,54 @@ export default function DashboardScreen({ navigation }) {
       </ScrollView>
     </View>
   );
+
+  async function saveDashboardCache(payload) {
+    try {
+      const cachePayload = {
+        ...payload,
+        savedAt: Date.now(),
+        recentUpdates: (payload.recentUpdates || []).slice(0, 5).map(serializeUpdate),
+      };
+      await AsyncStorage.setItem(DASHBOARD_CACHE_KEY, JSON.stringify(cachePayload));
+    } catch (storageError) {
+      console.log('Error saving dashboard cache:', storageError);
+    }
+  }
+
+  async function loadDashboardCache() {
+    try {
+      const rawCache = await AsyncStorage.getItem(DASHBOARD_CACHE_KEY);
+      if (!rawCache) return null;
+
+      const parsedCache = JSON.parse(rawCache);
+      if (!parsedCache?.savedAt || Date.now() - parsedCache.savedAt > CACHE_MAX_AGE) {
+        await AsyncStorage.removeItem(DASHBOARD_CACHE_KEY);
+        return null;
+      }
+
+      return {
+        ...parsedCache,
+        recentUpdates: Array.isArray(parsedCache.recentUpdates)
+          ? parsedCache.recentUpdates.map(restoreUpdate).filter(Boolean)
+          : [],
+      };
+    } catch (storageError) {
+      console.log('Error loading dashboard cache:', storageError);
+      return null;
+    }
+  }
+
+  function applyCachedDashboard(cache) {
+    setRecentUpdates(cache.recentUpdates || []);
+    setTotalTasks(cache.totalTasks || 0);
+    setTotalAnnouncements(cache.totalAnnouncements || 0);
+    setTotalPosts(cache.totalPosts || 0);
+    if (cache.userName) {
+      setUserName(cache.userName);
+    }
+    setUsingCachedContent(true);
+    setLoading(false);
+  }
 }
 
 const styles = StyleSheet.create({

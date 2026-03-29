@@ -2,6 +2,8 @@ import * as Notifications from 'expo-notifications';
 import Constants from 'expo-constants';
 import { Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { doc, setDoc } from 'firebase/firestore';
+import { auth, db } from '../config/firebaseConfig';
 
 // Configure how notifications are displayed when app is in foreground
 Notifications.setNotificationHandler({
@@ -19,8 +21,14 @@ Notifications.setNotificationHandler({
 export async function registerForPushNotifications() {
   let token = null;
   const isExpoGo = Constants.executionEnvironment === 'storeClient';
+  const projectId =
+    Constants.expoConfig?.extra?.eas?.projectId || Constants.easConfig?.projectId || null;
 
   try {
+    if (Platform.OS === 'android') {
+      await configureAndroidNotificationChannels();
+    }
+
     const { status: existingStatus } = await Notifications.getPermissionsAsync();
     let finalStatus = existingStatus;
 
@@ -38,9 +46,15 @@ export async function registerForPushNotifications() {
     // Skip in Expo Go which doesn't support remote notifications in SDK 53+
     if (finalStatus === 'granted' && !isExpoGo) {
       try {
-        const tokenData = await Notifications.getExpoPushTokenAsync();
+        if (!projectId) {
+          console.log('Missing EAS project ID. Expo push token cannot be generated.');
+          return null;
+        }
+
+        const tokenData = await Notifications.getExpoPushTokenAsync({ projectId });
         token = tokenData.data;
         console.log('Push notification token:', token);
+        await syncPushTokenToProfile(token);
       } catch (error) {
         console.log('Could not get push token:', error.message);
       }
@@ -55,41 +69,57 @@ export async function registerForPushNotifications() {
     return null;
   }
 
-  // Android-specific configuration
-  if (Platform.OS === 'android') {
-    // Create multiple channels for different notification types
-    await Notifications.setNotificationChannelAsync('tasks', {
-      name: 'Tasks',
-      importance: Notifications.AndroidImportance.HIGH,
-      vibrationPattern: [0, 250, 250, 250],
-      lightColor: '#22e584',
-      sound: 'default',
-      enableVibrate: true,
-      showBadge: true,
-    });
-
-    await Notifications.setNotificationChannelAsync('announcements', {
-      name: 'Announcements',
-      importance: Notifications.AndroidImportance.HIGH,
-      vibrationPattern: [0, 250, 250, 250],
-      lightColor: '#EF4444',
-      sound: 'default',
-      enableVibrate: true,
-      showBadge: true,
-    });
-
-    await Notifications.setNotificationChannelAsync('freedomwall', {
-      name: 'Freedom Wall',
-      importance: Notifications.AndroidImportance.DEFAULT,
-      vibrationPattern: [0, 250, 250, 250],
-      lightColor: '#3498DB',
-      sound: 'default',
-      enableVibrate: true,
-      showBadge: true,
-    });
-  }
-
   return token;
+}
+
+async function configureAndroidNotificationChannels() {
+  await Notifications.setNotificationChannelAsync('tasks', {
+    name: 'Tasks',
+    importance: Notifications.AndroidImportance.HIGH,
+    vibrationPattern: [0, 250, 250, 250],
+    lightColor: '#22e584',
+    sound: 'default',
+    enableVibrate: true,
+    showBadge: true,
+  });
+
+  await Notifications.setNotificationChannelAsync('announcements', {
+    name: 'Announcements',
+    importance: Notifications.AndroidImportance.HIGH,
+    vibrationPattern: [0, 250, 250, 250],
+    lightColor: '#EF4444',
+    sound: 'default',
+    enableVibrate: true,
+    showBadge: true,
+  });
+
+  await Notifications.setNotificationChannelAsync('freedomwall', {
+    name: 'Freedom Wall',
+    importance: Notifications.AndroidImportance.DEFAULT,
+    vibrationPattern: [0, 250, 250, 250],
+    lightColor: '#3498DB',
+    sound: 'default',
+    enableVibrate: true,
+    showBadge: true,
+  });
+}
+
+async function syncPushTokenToProfile(token) {
+  try {
+    if (!token || !auth.currentUser) return;
+
+    await setDoc(
+      doc(db, 'users', auth.currentUser.uid),
+      {
+        expoPushToken: token,
+        notificationPermissionStatus: 'granted',
+        notificationTokenUpdatedAt: new Date().toISOString(),
+      },
+      { merge: true }
+    );
+  } catch (error) {
+    console.log('Could not sync push token to user profile:', error.message);
+  }
 }
 
 /**

@@ -1,7 +1,7 @@
-import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Dimensions, Alert } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, Dimensions, Alert, ScrollView } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { MaterialIcons } from '@expo/vector-icons';
+import { Feather, MaterialCommunityIcons } from '@expo/vector-icons';
 import {
   useFonts,
   Inter_400Regular,
@@ -10,36 +10,37 @@ import {
 } from '@expo-google-fonts/inter';
 import { auth } from '../config/firebaseConfig';
 import { sendEmailVerification } from 'firebase/auth';
-import { useState } from 'react';
-import { brutalButton, brutalCard, palette, screenAccents } from '../theme/neoBrutal';
+import { brutalButton, brutalCard, brutalShadow, palette, screenAccents } from '../theme/neoBrutal';
 
 const { width, height } = Dimensions.get('window');
 
 export default function VerificationScreen({ navigation }) {
-  let [fontsLoaded] = useFonts({
+  const [resendLoading, setResendLoading] = useState(false);
+  const [resendMessage, setResendMessage] = useState('');
+  const [resendDisabled, setResendDisabled] = useState(false);
+
+  const [fontsLoaded] = useFonts({
     Inter_400Regular,
     Inter_500Medium,
     Inter_600SemiBold,
   });
 
-  const [resendLoading, setResendLoading] = useState(false);
-  const [resendMessage, setResendMessage] = useState('');
-  const [resendDisabled, setResendDisabled] = useState(false);
-
   const handleResend = async () => {
     setResendLoading(true);
     setResendMessage('');
+
     try {
       if (auth.currentUser) {
         await sendEmailVerification(auth.currentUser);
-        setResendMessage('Verification email sent! Please check your inbox.');
+
+        setResendMessage('Fresh verification email sent. Check inbox, spam, and promotions.');
         Alert.alert(
           'Email Sent',
-          'Verification email sent successfully! Please check your inbox and spam folder.',
-          [{ text: 'OK' }]
+          'Verification email sent successfully. Please check your inbox and spam folder.'
         );
+
         setResendDisabled(true);
-        setTimeout(() => setResendDisabled(false), 30000); // 30 seconds cooldown
+        setTimeout(() => setResendDisabled(false), 30000);
       } else {
         setResendMessage('No user is currently logged in.');
         Alert.alert(
@@ -49,11 +50,11 @@ export default function VerificationScreen({ navigation }) {
         );
       }
     } catch (error) {
-      console.error('Error resending verification email:', error);
       const errorMessage =
         error.code === 'auth/too-many-requests'
-          ? 'Too many requests. Please try again later.'
+          ? 'Too many requests. Please wait before asking for another email.'
           : 'Failed to resend verification email. Please try again.';
+
       setResendMessage(errorMessage);
       Alert.alert('Error', errorMessage);
     } finally {
@@ -64,9 +65,14 @@ export default function VerificationScreen({ navigation }) {
   if (!fontsLoaded) {
     return (
       <View style={styles.container}>
-        <View style={styles.backgroundGradient} />
-        <View style={styles.loadingContainer}>
-          <Text style={styles.loadingText}>Loading...</Text>
+        <LinearGradient
+          colors={[palette.background, '#EFE7DC']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={StyleSheet.absoluteFill}
+        />
+        <View style={styles.centerState}>
+          <Text style={styles.loadingText}>Loading verification screen...</Text>
         </View>
       </View>
     );
@@ -74,51 +80,71 @@ export default function VerificationScreen({ navigation }) {
 
   return (
     <View style={styles.container}>
-      {/* Multi-color gradient background */}
       <LinearGradient
-        colors={[palette.background, palette.background]}
+        colors={[palette.background, '#EFE7DC']}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         style={StyleSheet.absoluteFill}
       />
-      <View style={[styles.floatingShape, styles.shape1]} />
-      <View style={[styles.floatingShape, styles.shape2]} />
-      <View style={[styles.floatingShape, styles.shape3]} />
-      <View style={styles.glassCard}>
-        <View style={styles.iconWrapper}>
-          <MaterialIcons
-            name="mark-email-read"
-            size={54}
-            color={palette.text}
-            style={styles.iconShadow}
-          />
+      <View style={[styles.shape, styles.shapeTop]} />
+      <View style={[styles.shape, styles.shapeMiddle]} />
+      <View style={[styles.shape, styles.shapeBottom]} />
+
+      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+        <View style={styles.heroBadge}>
+          <Feather name="mail" size={16} color={palette.text} />
+          <Text style={styles.heroBadgeText}>Almost there</Text>
         </View>
-        <Text style={styles.headline}>Verify Your Email</Text>
-        <Text style={styles.message}>
-          We’ve sent a verification link to your email address. Please check your inbox and click
-          the link to verify your account.
-        </Text>
-        <Text style={styles.trustMessage}>
-          Didn’t receive the email? You can resend it below. Make sure to check your spam or
-          promotions folder as well.
-        </Text>
-        <TouchableOpacity style={styles.backButton} onPress={() => navigation.navigate('Login')}>
-          <View style={styles.buttonGradient}>
-            <Text style={styles.backButtonText}>Back to Login</Text>
+
+        <View style={styles.mainCard}>
+          <View style={styles.iconTile}>
+            <MaterialCommunityIcons name="email-check-outline" size={48} color={palette.text} />
           </View>
-        </TouchableOpacity>
-        {/* Resend Verification Email Button */}
-        <TouchableOpacity
-          style={[styles.resendButton, resendDisabled && styles.resendButtonDisabled]}
-          onPress={handleResend}
-          disabled={resendLoading || resendDisabled}
-        >
-          <Text style={styles.resendButtonText}>
-            {resendLoading ? 'Sending...' : 'Resend Verification Email'}
+
+          <Text style={styles.title}>Verify your email</Text>
+          <Text style={styles.body}>
+            We already sent a verification link to your inbox. Open it, confirm your address, then
+            come back and log in.
           </Text>
-        </TouchableOpacity>
-        {resendMessage ? <Text style={styles.resendMessage}>{resendMessage}</Text> : null}
-      </View>
+
+          <View style={styles.tipCard}>
+            <View style={styles.tipRow}>
+              <Feather name="inbox" size={16} color={palette.text} />
+              <Text style={styles.tipText}>Check inbox, spam, and promotions folders.</Text>
+            </View>
+            <View style={styles.tipRow}>
+              <Feather name="refresh-cw" size={16} color={palette.text} />
+              <Text style={styles.tipText}>Need another link? You can resend it below.</Text>
+            </View>
+            <View style={styles.tipRow}>
+              <Feather name="shield" size={16} color={palette.text} />
+              <Text style={styles.tipText}>Verified accounts help keep the classroom secure.</Text>
+            </View>
+          </View>
+
+          <TouchableOpacity style={styles.primaryButton} onPress={() => navigation.navigate('Login')}>
+            <Feather name="arrow-left" size={18} color={palette.text} />
+            <Text style={styles.primaryButtonText}>Back to Login</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[styles.secondaryButton, resendDisabled && styles.secondaryButtonDisabled]}
+            onPress={handleResend}
+            disabled={resendLoading || resendDisabled}
+          >
+            <Feather name="send" size={18} color={palette.text} />
+            <Text style={styles.secondaryButtonText}>
+              {resendLoading ? 'Sending...' : resendDisabled ? 'Wait 30 seconds' : 'Resend email'}
+            </Text>
+          </TouchableOpacity>
+
+          {resendMessage ? (
+            <View style={styles.feedbackCard}>
+              <Text style={styles.feedbackText}>{resendMessage}</Text>
+            </View>
+          ) : null}
+        </View>
+      </ScrollView>
     </View>
   );
 }
@@ -127,151 +153,186 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: palette.background,
-    alignItems: 'center',
+  },
+  scrollContent: {
+    flexGrow: 1,
     justifyContent: 'center',
-  },
-  backgroundGradient: {
-    ...StyleSheet.absoluteFillObject,
-    zIndex: -2,
-  },
-  floatingShape: {
-    position: 'absolute',
-    borderRadius: 100,
-    opacity: 0.25,
-    zIndex: -1,
-  },
-  shape1: {
-    width: 180,
-    height: 180,
-    top: height * 0.1,
-    left: width * 0.1,
-    backgroundColor: screenAccents.auth.secondary,
-  },
-  shape2: {
-    width: 120,
-    height: 120,
-    bottom: height * 0.18,
-    right: width * 0.15,
-    backgroundColor: screenAccents.auth.primary,
-  },
-  shape3: {
-    width: 90,
-    height: 90,
-    top: height * 0.5,
-    right: width * 0.25,
-    backgroundColor: screenAccents.auth.tertiary,
-  },
-  glassCard: {
-    width: '92%',
-    maxWidth: 420,
-    padding: 38,
     alignItems: 'center',
-    marginTop: 12,
-    ...brutalCard(screenAccents.auth.secondary),
+    paddingHorizontal: 18,
+    paddingVertical: 40,
   },
-  iconWrapper: {
-    width: 90,
-    height: 90,
-    borderRadius: 24,
+  heroBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
     backgroundColor: palette.mustard,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 28,
     borderWidth: 3,
     borderColor: palette.border,
+    borderRadius: 18,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    marginBottom: 16,
+    ...brutalShadow(),
   },
-  iconShadow: {
-    textShadowColor: 'transparent',
-    textShadowOffset: { width: 0, height: 2 },
-    textShadowRadius: 0,
-  },
-  headline: {
-    fontSize: 28,
+  heroBadgeText: {
+    fontSize: 13,
     fontFamily: 'Inter_600SemiBold',
     color: palette.text,
-    marginBottom: 14,
-    textAlign: 'center',
-    letterSpacing: 0.2,
+    textTransform: 'uppercase',
+    letterSpacing: 0.8,
   },
-  message: {
-    fontSize: 17,
+  mainCard: {
+    width: '100%',
+    maxWidth: 470,
+    ...brutalCard('#F7E4D8'),
+    borderRadius: 32,
+    padding: 26,
+    alignItems: 'center',
+  },
+  iconTile: {
+    width: 96,
+    height: 96,
+    borderRadius: 28,
+    backgroundColor: screenAccents.auth.secondary,
+    borderWidth: 3,
+    borderColor: palette.border,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 20,
+  },
+  title: {
+    fontSize: 30,
+    lineHeight: 36,
+    fontFamily: 'Inter_600SemiBold',
+    color: palette.text,
+    marginBottom: 12,
+    textAlign: 'center',
+    textTransform: 'uppercase',
+  },
+  body: {
+    fontSize: 16,
+    lineHeight: 25,
     fontFamily: 'Inter_400Regular',
     color: palette.text,
     textAlign: 'center',
-    lineHeight: 26,
-    marginBottom: 10,
-    marginHorizontal: 4,
+    marginBottom: 18,
   },
-  trustMessage: {
+  tipCard: {
+    width: '100%',
+    backgroundColor: palette.surface,
+    borderWidth: 3,
+    borderColor: palette.border,
+    borderRadius: 24,
+    padding: 18,
+    gap: 12,
+    marginBottom: 22,
+  },
+  tipRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 10,
+  },
+  tipText: {
+    flex: 1,
     fontSize: 15,
+    lineHeight: 22,
     fontFamily: 'Inter_400Regular',
-    color: palette.textMuted,
-    textAlign: 'center',
-    marginBottom: 30,
-    marginHorizontal: 4,
+    color: palette.text,
   },
-  backButton: {
+  primaryButton: {
     width: '100%',
-    height: 54,
-    borderRadius: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
-    overflow: 'hidden',
-    marginTop: 8,
-    marginBottom: 2,
-  },
-  buttonGradient: {
-    width: '100%',
-    height: '100%',
-    alignItems: 'center',
-    justifyContent: 'center',
+    minHeight: 54,
     ...brutalButton(screenAccents.auth.primary),
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    marginBottom: 12,
   },
-  backButtonText: {
-    fontSize: 16,
+  primaryButtonText: {
+    fontSize: 15,
+    fontFamily: 'Inter_600SemiBold',
+    color: palette.text,
+    textTransform: 'uppercase',
+  },
+  secondaryButton: {
+    width: '100%',
+    minHeight: 52,
+    backgroundColor: palette.white,
+    borderWidth: 3,
+    borderColor: palette.border,
+    borderRadius: 18,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+  },
+  secondaryButtonDisabled: {
+    opacity: 0.6,
+  },
+  secondaryButtonText: {
+    fontSize: 15,
+    fontFamily: 'Inter_600SemiBold',
+    color: palette.text,
+    textTransform: 'uppercase',
+  },
+  feedbackCard: {
+    width: '100%',
+    marginTop: 14,
+    backgroundColor: '#EEF5F8',
+    borderWidth: 3,
+    borderColor: palette.border,
+    borderRadius: 20,
+    padding: 14,
+  },
+  feedbackText: {
+    fontSize: 14,
+    lineHeight: 20,
     fontFamily: 'Inter_500Medium',
     color: palette.text,
-    letterSpacing: 0.3,
-    textShadowColor: 'transparent',
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 0,
+    textAlign: 'center',
   },
-  loadingContainer: {
+  centerState: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
   },
   loadingText: {
-    color: palette.text,
     fontSize: 18,
-  },
-  resendButton: {
-    width: '100%',
-    height: 48,
-    backgroundColor: palette.powder,
-    borderRadius: 14,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 10,
-    marginBottom: 2,
-    borderWidth: 3,
-    borderColor: palette.border,
-  },
-  resendButtonDisabled: {
-    opacity: 0.5,
-  },
-  resendButtonText: {
-    fontSize: 15,
     fontFamily: 'Inter_500Medium',
     color: palette.text,
-    letterSpacing: 0.2,
   },
-  resendMessage: {
-    fontSize: 14,
-    fontFamily: 'Inter_400Regular',
-    color: palette.success,
-    textAlign: 'center',
-    marginTop: 8,
-    marginBottom: 2,
+  shape: {
+    position: 'absolute',
+    borderWidth: 3,
+    borderColor: palette.border,
+    zIndex: -1,
+  },
+  shapeTop: {
+    width: 130,
+    height: 130,
+    borderRadius: 30,
+    backgroundColor: screenAccents.auth.secondary,
+    top: height * 0.1,
+    right: -24,
+    transform: [{ rotate: '14deg' }],
+  },
+  shapeMiddle: {
+    width: 84,
+    height: 84,
+    borderRadius: 22,
+    backgroundColor: screenAccents.auth.primary,
+    left: -14,
+    top: height * 0.43,
+    transform: [{ rotate: '-10deg' }],
+  },
+  shapeBottom: {
+    width: 124,
+    height: 56,
+    borderRadius: 22,
+    backgroundColor: '#D7C3EF',
+    bottom: height * 0.09,
+    right: width * 0.08,
+    transform: [{ rotate: '-8deg' }],
   },
 });

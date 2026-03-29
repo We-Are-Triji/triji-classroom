@@ -30,10 +30,12 @@ import {
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import SettingsRow from '../components/SettingsRow';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as Updates from 'expo-updates';
 import {
   registerForPushNotifications,
   setNotificationPreference,
   getNotificationPreference,
+  checkNotificationPermissions,
 } from '../utils/notifications';
 import { stopAllListeners } from '../utils/firestoreListeners';
 import { showErrorAlert, logError } from '../utils/errorHandler';
@@ -51,8 +53,9 @@ export default function AccountSettingsScreen({ navigation }) {
   const [tasksNotifications, setTasksNotifications] = useState(true);
   const [announcementsNotifications, setAnnouncementsNotifications] = useState(true);
   const [freedomWallNotifications, setFreedomWallNotifications] = useState(true);
-  const [latestVersion, setLatestVersion] = useState(null);
-  const [loadingVersion, setLoadingVersion] = useState(true);
+  const [checkingForUpdates, setCheckingForUpdates] = useState(true);
+  const [updateAvailable, setUpdateAvailable] = useState(false);
+  const [otaMessage, setOtaMessage] = useState('Checking OTA status...');
 
   let [fontsLoaded] = useFonts({
     Inter_400Regular,
@@ -64,20 +67,44 @@ export default function AccountSettingsScreen({ navigation }) {
     fetchUserData();
     loadNotificationPreferences();
     requestNotificationPermissions();
-    fetchLatestVersion();
+    checkForOtaUpdate();
   }, []);
 
-  const fetchLatestVersion = async () => {
+  const checkForOtaUpdate = async () => {
+    if (__DEV__) {
+      setOtaMessage('OTA checks work in production builds only.');
+      setCheckingForUpdates(false);
+      setUpdateAvailable(false);
+      return;
+    }
+
     try {
-      const response = await fetch('https://api.github.com/repos/gauciv/triji-app/releases/latest');
-      if (response.ok) {
-        const data = await response.json();
-        setLatestVersion(data.tag_name.replace('v', '')); // Remove 'v' prefix
-      }
+      setCheckingForUpdates(true);
+      const result = await Updates.checkForUpdateAsync();
+      setUpdateAvailable(result.isAvailable);
+      setOtaMessage(
+        result.isAvailable
+          ? 'A live OTA update is ready for this build.'
+          : 'This build is already on the latest OTA update.'
+      );
     } catch (error) {
       logError(error, 'Fetch Latest Version');
+      setUpdateAvailable(false);
+      setOtaMessage('Could not verify OTA updates right now.');
     } finally {
-      setLoadingVersion(false);
+      setCheckingForUpdates(false);
+    }
+  };
+
+  const applyOtaUpdate = async () => {
+    try {
+      setCheckingForUpdates(true);
+      await Updates.fetchUpdateAsync();
+      await Updates.reloadAsync();
+    } catch (error) {
+      logError(error, 'Apply OTA Update');
+      Alert.alert('Update Failed', 'The OTA update could not be applied right now.');
+      setCheckingForUpdates(false);
     }
   };
 
@@ -99,6 +126,42 @@ export default function AccountSettingsScreen({ navigation }) {
     await registerForPushNotifications();
   };
 
+  const toggleNotificationSetting = async (type, value, setPreferenceState) => {
+    if (value) {
+      const alreadyGranted = await checkNotificationPermissions();
+      if (!alreadyGranted) {
+        const token = await registerForPushNotifications();
+        const grantedNow = await checkNotificationPermissions();
+
+        if (!grantedNow && !token) {
+          Alert.alert(
+            'Notifications Off',
+            'Enable notification permission in your phone settings if you want alerts to arrive.'
+          );
+          setPreferenceState(false);
+          await setNotificationPreference(type, false);
+          return;
+        }
+      }
+    }
+
+    setPreferenceState(value);
+    await setNotificationPreference(type, value);
+    await syncNotificationPreferenceToProfile(type, value);
+  };
+
+  const syncNotificationPreferenceToProfile = async (type, value) => {
+    try {
+      if (!auth.currentUser) return;
+
+      await updateDoc(doc(db, 'users', auth.currentUser.uid), {
+        [`notificationPreferences.${type}`]: value,
+      });
+    } catch (error) {
+      logError(error, 'Sync Notification Preference');
+    }
+  };
+
   const loadNotificationPreferences = async () => {
     try {
       const tasks = await getNotificationPreference('tasks');
@@ -114,18 +177,15 @@ export default function AccountSettingsScreen({ navigation }) {
   };
 
   const toggleTasksNotifications = async value => {
-    setTasksNotifications(value);
-    await setNotificationPreference('tasks', value);
+    await toggleNotificationSetting('tasks', value, setTasksNotifications);
   };
 
   const toggleAnnouncementsNotifications = async value => {
-    setAnnouncementsNotifications(value);
-    await setNotificationPreference('announcements', value);
+    await toggleNotificationSetting('announcements', value, setAnnouncementsNotifications);
   };
 
   const toggleFreedomWallNotifications = async value => {
-    setFreedomWallNotifications(value);
-    await setNotificationPreference('freedom_wall', value);
+    await toggleNotificationSetting('freedom_wall', value, setFreedomWallNotifications);
   };
 
   const handleLogout = async () => {
@@ -261,7 +321,7 @@ export default function AccountSettingsScreen({ navigation }) {
         {/* Account Section */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Account</Text>
-          <View style={styles.group}>
+          <View style={styles.stackGroup}>
             <SettingsRow
               icon="edit-3"
               title="Edit Name"
@@ -280,7 +340,7 @@ export default function AccountSettingsScreen({ navigation }) {
         {/* Preferences Section */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Notifications</Text>
-          <View style={styles.group}>
+          <View style={styles.switchGroup}>
             <View style={styles.settingRow}>
               <View style={styles.settingLeft}>
                 <View style={styles.iconCircle}>
@@ -340,7 +400,7 @@ export default function AccountSettingsScreen({ navigation }) {
         {/* Actions Section */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Actions</Text>
-          <View style={styles.group}>
+          <View style={styles.stackGroup}>
             <SettingsRow
               icon="log-out"
               title="Log Out"
@@ -359,28 +419,32 @@ export default function AccountSettingsScreen({ navigation }) {
             <Text style={styles.versionText}>v{appVersion}</Text>
           </View>
           <View style={styles.versionRow}>
-            <Text style={styles.versionLabel}>Latest Release</Text>
-            {loadingVersion ? (
+            <Text style={styles.versionLabel}>OTA Status</Text>
+            {checkingForUpdates ? (
               <ActivityIndicator size="small" color={palette.text} />
             ) : (
-              <Text style={styles.versionText}>v{latestVersion || appVersion}</Text>
+              <Text style={styles.versionText}>{updateAvailable ? 'Available' : 'Current'}</Text>
             )}
           </View>
-          {!loadingVersion && latestVersion && latestVersion !== appVersion && (
+          <Text style={styles.otaNote}>{otaMessage}</Text>
+          {!checkingForUpdates && updateAvailable && (
             <TouchableOpacity
               style={styles.updateButton}
-              onPress={() => Linking.openURL('https://github.com/gauciv/triji-app/releases/latest')}
+              onPress={applyOtaUpdate}
             >
               <Feather name="download" size={16} color={palette.text} />
-              <Text style={styles.updateButtonText}>Update Available</Text>
+              <Text style={styles.updateButtonText}>Apply OTA Update</Text>
             </TouchableOpacity>
           )}
-          {!loadingVersion && latestVersion && latestVersion === appVersion && (
+          {!checkingForUpdates && !updateAvailable && (
             <View style={styles.upToDateBadge}>
               <Feather name="check-circle" size={16} color={palette.text} />
-              <Text style={styles.upToDateText}>Up to date</Text>
+              <Text style={styles.upToDateText}>No OTA waiting</Text>
             </View>
           )}
+          <TouchableOpacity style={styles.secondaryUpdateButton} onPress={checkForOtaUpdate}>
+            <Text style={styles.secondaryUpdateButtonText}>Check Again</Text>
+          </TouchableOpacity>
         </View>
 
         <Text style={styles.copyright}>© 2025 Triji. All rights reserved.</Text>
@@ -563,7 +627,11 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     marginLeft: 20,
   },
-  group: {
+  stackGroup: {
+    marginHorizontal: 20,
+    gap: 12,
+  },
+  switchGroup: {
     marginHorizontal: 20,
     overflow: 'hidden',
     ...brutalCard(palette.surface),
@@ -727,6 +795,12 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter_600SemiBold',
     color: palette.text,
   },
+  otaNote: {
+    fontSize: 13,
+    lineHeight: 19,
+    fontFamily: 'Inter_400Regular',
+    color: palette.textMuted,
+  },
   updateButton: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -741,6 +815,22 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontFamily: 'Inter_600SemiBold',
     color: palette.text,
+  },
+  secondaryUpdateButton: {
+    marginTop: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 10,
+    borderRadius: 16,
+    borderWidth: 3,
+    borderColor: palette.border,
+    backgroundColor: palette.white,
+  },
+  secondaryUpdateButtonText: {
+    fontSize: 13,
+    fontFamily: 'Inter_600SemiBold',
+    color: palette.text,
+    textTransform: 'uppercase',
   },
   upToDateBadge: {
     flexDirection: 'row',

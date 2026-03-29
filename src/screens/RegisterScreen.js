@@ -138,7 +138,7 @@ export default function RegisterScreen({ navigation }) {
                 <FontAwesome name="user-o" size={18} color={palette.textMuted} style={styles.inputIcon} />
                 <TextInput
                   style={styles.input}
-                  placeholder="First Name"
+                  placeholder="Given name"
                   placeholderTextColor={palette.textMuted}
                   value={firstName}
                   onChangeText={setFirstName}
@@ -151,7 +151,7 @@ export default function RegisterScreen({ navigation }) {
                 <FontAwesome name="user-o" size={18} color={palette.textMuted} style={styles.inputIcon} />
                 <TextInput
                   style={styles.input}
-                  placeholder="Last Name"
+                  placeholder="Family name"
                   placeholderTextColor={palette.textMuted}
                   value={lastName}
                   onChangeText={setLastName}
@@ -164,7 +164,7 @@ export default function RegisterScreen({ navigation }) {
                 <Feather name="mail" size={18} color={palette.textMuted} style={styles.inputIcon} />
                 <TextInput
                   style={styles.input}
-                  placeholder="Email"
+                  placeholder="School email address"
                   placeholderTextColor={palette.textMuted}
                   keyboardType="email-address"
                   value={email}
@@ -178,7 +178,7 @@ export default function RegisterScreen({ navigation }) {
                 <Feather name="lock" size={18} color={palette.textMuted} style={styles.inputIcon} />
                 <TextInput
                   style={styles.input}
-                  placeholder="Password"
+                  placeholder="Create a password"
                   placeholderTextColor={palette.textMuted}
                   secureTextEntry={!showPassword}
                   value={password}
@@ -198,7 +198,7 @@ export default function RegisterScreen({ navigation }) {
                 <Feather name="lock" size={18} color={palette.textMuted} style={styles.inputIcon} />
                 <TextInput
                   style={styles.input}
-                  placeholder="Confirm Password"
+                  placeholder="Re-enter your password"
                   placeholderTextColor={palette.textMuted}
                   secureTextEntry={!showConfirmPassword}
                   value={confirmPassword}
@@ -259,13 +259,6 @@ export default function RegisterScreen({ navigation }) {
             </TouchableOpacity>
             {error ? <Text style={styles.errorText}>{error}</Text> : null}
             <View style={styles.bottomSection}>
-              <View style={styles.logoBottom}>
-                <Image
-                  source={require('../../assets/icon.png')}
-                  style={styles.logoImageBottom}
-                  resizeMode="contain"
-                />
-              </View>
               <View style={styles.loginContainer}>
                 <Text style={styles.linkText}>Already have an account? </Text>
                 <TouchableOpacity onPress={() => navigation.navigate('Login')}>
@@ -301,11 +294,11 @@ const styles = StyleSheet.create({
     bottom: 0,
   },
   glassCard: {
-    width: '92%',
+    width: '95%',
     maxWidth: 400,
-    padding: 28,
-    paddingTop: 32,
-    paddingBottom: 24,
+    padding: 38,
+    paddingTop: 20,
+    paddingBottom: 20,
     alignItems: 'center',
     ...brutalCard(screenAccents.auth.secondary),
   },

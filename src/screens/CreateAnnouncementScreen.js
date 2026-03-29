@@ -16,15 +16,59 @@ import {
   Inter_500Medium,
   Inter_600SemiBold,
 } from '@expo-google-fonts/inter';
-import { Feather } from '@expo/vector-icons';
+import { Feather, MaterialCommunityIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { auth, db } from '../config/firebaseConfig';
 import { collection, addDoc, doc, getDoc } from 'firebase/firestore';
 import { useNetwork } from '../context/NetworkContext';
 import { showErrorAlert, logError } from '../utils/errorHandler';
-import { brutalButton, brutalCard, brutalInput, brutalShadow, palette, screenAccents } from '../theme/neoBrutal';
+import { brutalButton, brutalCard, brutalInput, brutalShadow, palette } from '../theme/neoBrutal';
+
+const announcementTypes = ['General', 'Reminder', 'Event', 'Critical'];
+
+const typeThemes = {
+  Critical: {
+    accent: palette.coral,
+    cardBackground: '#F8DBD1',
+    badgeBackground: '#F3BCA9',
+    previewBackground: '#F7EBE4',
+    icon: 'alert-octagon',
+  },
+  Event: {
+    accent: palette.lavender,
+    cardBackground: '#EBE0F7',
+    badgeBackground: '#D7C3EF',
+    previewBackground: '#F5EEFB',
+    icon: 'calendar-star',
+  },
+  Reminder: {
+    accent: palette.peach,
+    cardBackground: '#F8E2CC',
+    badgeBackground: '#F2C291',
+    previewBackground: '#FBF0E3',
+    icon: 'clock-time-four-outline',
+  },
+  General: {
+    accent: palette.sky,
+    cardBackground: '#DDEAF2',
+    badgeBackground: '#B9D0E1',
+    previewBackground: '#EEF5F8',
+    icon: 'bullhorn-outline',
+  },
+};
+
+function getTypeTheme(type) {
+  return typeThemes[type] || typeThemes.General;
+}
+
+function formatDateLabel(date) {
+  return date.toLocaleDateString('en-US', {
+    month: 'long',
+    day: 'numeric',
+    year: 'numeric',
+  });
+}
 
 export default function CreateAnnouncementScreen({ navigation }) {
   const { isConnected } = useNetwork();
@@ -32,31 +76,17 @@ export default function CreateAnnouncementScreen({ navigation }) {
   const [content, setContent] = useState('');
   const [selectedType, setSelectedType] = useState('General');
   const [loading, setLoading] = useState(false);
-  const [expiresAt, setExpiresAt] = useState(new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)); // Default 7 days
+  const [expiresAt, setExpiresAt] = useState(new Date(Date.now() + 7 * 24 * 60 * 60 * 1000));
   const [showDatePicker, setShowDatePicker] = useState(false);
-  const [step, setStep] = useState(1);
   const [noExpiry, setNoExpiry] = useState(false);
 
-  const announcementTypes = ['General', 'Reminder', 'Event', 'Critical'];
-
-  const getTypeColor = type => {
-    switch (type) {
-      case 'Critical':
-        return palette.coral;
-      case 'Event':
-        return palette.lavender;
-      case 'Reminder':
-        return palette.peach;
-      default:
-        return palette.sky;
-    }
-  };
-
-  let [fontsLoaded] = useFonts({
+  const [fontsLoaded] = useFonts({
     Inter_400Regular,
     Inter_500Medium,
     Inter_600SemiBold,
   });
+
+  const theme = getTypeTheme(selectedType);
 
   const handleCreateAnnouncement = async () => {
     if (!title.trim()) {
@@ -81,10 +111,10 @@ export default function CreateAnnouncementScreen({ navigation }) {
     }
 
     setLoading(true);
+
     try {
       let authorName = 'Anonymous';
 
-      // Fetch user's full name from profile
       try {
         const userDoc = await getDoc(doc(db, 'users', user.uid));
         if (userDoc.exists()) {
@@ -96,23 +126,25 @@ export default function CreateAnnouncementScreen({ navigation }) {
         }
       } catch (userError) {
         logError(userError, 'Fetch User Data');
-        // Continue with 'Anonymous' as fallback
       }
 
-      const announcementData = {
+      await addDoc(collection(db, 'announcements'), {
         title: title.trim(),
         content: content.trim(),
         type: selectedType,
-        authorName: authorName,
+        authorName,
         authorId: user.uid,
         authorPhotoURL: '',
         createdAt: new Date(),
-        expiresAt: noExpiry ? new Date(Date.now() + 100 * 365 * 24 * 60 * 60 * 1000) : expiresAt, // 100 years if no expiry
-      };
+        expiresAt: noExpiry ? new Date(Date.now() + 100 * 365 * 24 * 60 * 60 * 1000) : expiresAt,
+      });
 
-      await addDoc(collection(db, 'announcements'), announcementData);
-
-      navigation.goBack();
+      Alert.alert('Announcement Published', 'Your announcement is now on the board.', [
+        {
+          text: 'OK',
+          onPress: () => navigation.goBack(),
+        },
+      ]);
     } catch (error) {
       showErrorAlert(error, 'Create Announcement', 'Creation Failed');
     } finally {
@@ -124,750 +156,550 @@ export default function CreateAnnouncementScreen({ navigation }) {
     return (
       <View style={styles.container}>
         <LinearGradient
-          colors={[palette.background, palette.background]}
-          start={{ x: 0.5, y: 0 }}
-          end={{ x: 0.5, y: 1 }}
-          style={styles.shiningGradient}
+          colors={[palette.background, '#EFE7DC']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={StyleSheet.absoluteFill}
         />
-        <View style={styles.loadingContainer}>
-          <Text style={styles.loadingText}>Loading...</Text>
+        <View style={styles.centerState}>
+          <Text style={styles.loadingText}>Loading composer...</Text>
         </View>
       </View>
     );
   }
 
   return (
-    <View style={styles.outerContainer}>
+    <View style={styles.container}>
       <LinearGradient
-        colors={[palette.background, palette.background]}
+        colors={[palette.background, '#EFE7DC']}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
-        style={styles.shiningGradient}
+        style={StyleSheet.absoluteFill}
       />
-      <TouchableOpacity
-        style={styles.floatingBackButton}
-        onPress={() => (step === 1 ? navigation.goBack() : setStep(1))}
-      >
-        <Feather name="arrow-left" size={24} color={palette.text} />
-      </TouchableOpacity>
-      {step === 1 ? (
-        <View style={styles.centerCardWrapper}>
-          <View
-            style={[
-              styles.cardModernPolished,
-              {
-                borderLeftColor: getTypeColor(selectedType),
-                boxShadow:
-                  Platform.OS === 'web'
-                    ? `0px 0px 32px 0px ${getTypeColor(selectedType)}55, 0px 8px 32px 0px ${getTypeColor(selectedType)}22`
-                    : undefined,
-                shadowColor: getTypeColor(selectedType),
-              },
-              styles.cardWithMargin,
-            ]}
-          >
-            <View style={styles.iconTitleWrapperCard}>
-              <View
-                style={[
-                  styles.glowIconContainer,
-                  {
-                    borderColor: getTypeColor(selectedType),
-                    shadowColor: getTypeColor(selectedType),
-                    boxShadow:
-                      Platform.OS === 'web'
-                        ? `0 0 32px 0 ${getTypeColor(selectedType)}99, 0 0 12px 0 ${getTypeColor(selectedType)}55`
-                        : undefined,
-                  },
-                ]}
-              >
-                <MaterialCommunityIcons
-                  name="bell-ring"
-                  size={32}
-                  color={getTypeColor(selectedType)}
-                  style={styles.bellIcon}
-                />
-                <Feather name="plus-circle" size={16} color="#fff" style={styles.plusIconOverlay} />
-              </View>
-              <Text style={styles.screenTitle}>New Announcement</Text>
-            </View>
-            <ScrollView
-              style={{ width: '100%' }}
-              contentContainerStyle={styles.scrollContent}
-              showsVerticalScrollIndicator={false}
-            >
-              <View style={styles.inputGroup}>
-                <Text style={styles.label}>Title</Text>
-                <TextInput
-                  style={styles.input}
-                  value={title}
-                  onChangeText={setTitle}
-                  placeholder="What's this announcement about?"
-                  placeholderTextColor={palette.textMuted}
-                />
-              </View>
-              <View style={styles.inputGroup}>
-                <Text style={styles.label}>Type</Text>
-                <View style={styles.typeGrid}>
-                  {announcementTypes.map(type => (
-                    <TouchableOpacity
-                      key={type}
-                      style={[
-                        styles.typeCard,
-                        {
-                          backgroundColor:
-                            selectedType === type
-                              ? getTypeColor(type)
-                              : 'rgba(255, 255, 255, 0.03)',
-                          borderColor:
-                            selectedType === type ? getTypeColor(type) : 'rgba(255, 255, 255, 0.1)',
-                        },
-                        selectedType === type && styles.typeCardSelected,
-                      ]}
-                      onPress={() => setSelectedType(type)}
-                    >
-                      <Text
-                        style={[
-                          styles.typeCardText,
-                          selectedType === type && styles.typeCardTextSelected,
-                        ]}
-                      >
-                        {type}
-                      </Text>
-                    </TouchableOpacity>
-                  ))}
-                </View>
-              </View>
-              <View style={styles.inputGroup}>
-                <Text style={styles.label}>Expires On</Text>
-                <TouchableOpacity style={styles.checkboxRow} onPress={() => setNoExpiry(!noExpiry)}>
-                  <View style={[styles.checkbox, noExpiry && styles.checkboxChecked]}>
-                    {noExpiry && <Feather name="check" size={16} color={palette.text} />}
-                  </View>
-                  <Text style={styles.checkboxLabel}>No expiry date (indefinite)</Text>
-                </TouchableOpacity>
-                {!noExpiry &&
-                  (Platform.OS === 'web' ? (
-                    <input
-                      type="date"
-                      value={expiresAt.toISOString().split('T')[0]}
-                      onChange={e => setExpiresAt(new Date(e.target.value))}
-                      min={new Date().toISOString().split('T')[0]}
-                      style={{
-                        height: '52px',
-                        backgroundColor: 'rgba(255, 255, 255, 0.06)',
-                        border: '1px solid rgba(255, 255, 255, 0.15)',
-                        borderRadius: '14px',
-                        padding: '0 18px',
-                        fontSize: '15px',
-                        color: '#FFFFFF',
-                        fontFamily: 'Inter_400Regular',
-                        width: '100%',
-                        boxSizing: 'border-box',
-                      }}
-                    />
-                  ) : (
-                    <>
-                      <TouchableOpacity
-                        style={styles.dateButton}
-                        onPress={() => setShowDatePicker(true)}
-                      >
-                        <Feather name="calendar" size={20} color={palette.textMuted} />
-                        <Text style={styles.dateButtonText}>{expiresAt.toLocaleDateString()}</Text>
-                      </TouchableOpacity>
-                      {showDatePicker && (
-                        <DateTimePicker
-                          value={expiresAt}
-                          mode="date"
-                          display="default"
-                          onChange={(event, selectedDate) => {
-                            setShowDatePicker(false);
-                            if (selectedDate) {
-                              setExpiresAt(selectedDate);
-                            }
-                          }}
-                          minimumDate={new Date()}
-                        />
-                      )}
-                    </>
-                  ))}
-              </View>
-              <TouchableOpacity
-                style={[styles.actionButtonGlow, !title.trim() && styles.actionButtonGlowDisabled]}
-                onPress={() => setStep(2)}
-                disabled={!title.trim()}
-              >
-                <Feather name="arrow-right" size={18} color={palette.text} style={{ marginRight: 8 }} />
-                <Text style={styles.actionButtonTextGlow}>Next</Text>
-              </TouchableOpacity>
-            </ScrollView>
-          </View>
+      <View style={[styles.shape, styles.shapeTop]} />
+      <View style={[styles.shape, styles.shapeBottom]} />
+
+      <View style={styles.header}>
+        <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+          <Feather name="arrow-left" size={22} color={palette.text} />
+        </TouchableOpacity>
+
+        <View style={styles.headerCopy}>
+          <Text style={styles.headerTitle}>Compose Announcement</Text>
+          <Text style={styles.headerSubtext}>
+            A brighter, clearer notice-board draft with a live preview.
+          </Text>
         </View>
-      ) : (
-        <View style={styles.centerCardWrapper}>
-          <View
-            style={[
-              styles.cardModernPolished,
-              styles.cardFinalizeStep,
-              {
-                borderLeftColor: getTypeColor(selectedType),
-                boxShadow:
-                  Platform.OS === 'web'
-                    ? `0px 0px 32px 0px ${getTypeColor(selectedType)}55, 0px 8px 32px 0px ${getTypeColor(selectedType)}22`
-                    : undefined,
-                shadowColor: getTypeColor(selectedType),
-              },
-              styles.cardWithMargin,
-            ]}
-          >
-            <View style={styles.iconTitleWrapperCard}>
-              <View
-                style={[
-                  styles.glowIconContainer,
-                  {
-                    borderColor: getTypeColor(selectedType),
-                    shadowColor: getTypeColor(selectedType),
-                    boxShadow:
-                      Platform.OS === 'web'
-                        ? `0 0 32px 0 ${getTypeColor(selectedType)}99, 0 0 12px 0 ${getTypeColor(selectedType)}55`
-                        : undefined,
-                  },
-                ]}
-              >
-                <MaterialCommunityIcons
-                  name="bell-ring"
-                  size={32}
-                  color={getTypeColor(selectedType)}
-                  style={styles.bellIcon}
-                />
-                <Feather name="plus-circle" size={16} color={palette.text} style={styles.plusIconOverlay} />
+      </View>
+
+      <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={[styles.previewCard, { backgroundColor: theme.cardBackground }]}>
+          <View style={[styles.previewAccent, { backgroundColor: theme.accent }]} />
+
+          <View style={styles.previewBody}>
+            <View style={styles.previewHeader}>
+              <View style={[styles.typeBadge, { backgroundColor: theme.badgeBackground }]}>
+                <MaterialCommunityIcons name={theme.icon} size={18} color={palette.text} />
+                <Text style={styles.typeBadgeText}>{selectedType}</Text>
               </View>
-              <Text style={styles.screenTitle}>New Announcement</Text>
+
+              <View style={styles.previewPin}>
+                <Feather name="edit-3" size={15} color={palette.text} />
+              </View>
             </View>
-            <View style={styles.twitterHeader}>
-              <Text style={styles.twitterTitle}>{title}</Text>
-              <View style={styles.twitterMeta}>
-                <View
-                  style={[
-                    styles.twitterTypeChip,
-                    { backgroundColor: getTypeColor(selectedType) + '22' },
-                  ]}
-                >
-                  <Text style={[styles.twitterTypeText, { color: getTypeColor(selectedType) }]}>
-                    {selectedType}
-                  </Text>
-                </View>
-                <Text style={styles.twitterExpiry}>
-                  {noExpiry ? 'No expiry' : `Expires ${expiresAt.toLocaleDateString()}`}
+
+            <Text style={styles.previewEyebrow}>Live preview</Text>
+            <Text style={styles.previewTitle}>
+              {title.trim() || 'Your title will appear here'}
+            </Text>
+            <Text style={styles.previewContent}>
+              {content.trim() ||
+                'Start writing to see how your announcement will look once it reaches the board.'}
+            </Text>
+
+            <View style={styles.previewFooter}>
+              <View style={[styles.previewPill, { backgroundColor: theme.previewBackground }]}>
+                <Feather name="calendar" size={14} color={palette.text} />
+                <Text style={styles.previewPillText}>
+                  {noExpiry ? 'No expiry date' : formatDateLabel(expiresAt)}
                 </Text>
               </View>
+
+              <View style={[styles.previewPill, styles.previewPillCompact]}>
+                <Feather name="type" size={14} color={palette.text} />
+                <Text style={styles.previewPillText}>{content.length}/500</Text>
+              </View>
             </View>
-            <TextInput
-              style={styles.twitterTextArea}
-              value={content}
-              onChangeText={setContent}
-              placeholder="What do you want to announce?"
-              placeholderTextColor={palette.textMuted}
-              multiline
-              textAlignVertical="top"
-              autoFocus
-            />
-            <TouchableOpacity
-              style={[
-                styles.actionButtonGlow,
-                (!content.trim() || loading) && styles.actionButtonGlowDisabled,
-              ]}
-              onPress={handleCreateAnnouncement}
-              disabled={!content.trim() || loading}
-            >
-              {loading ? (
-                <ActivityIndicator color="#FFFFFF" size="small" />
-              ) : (
-                <>
-                  <Feather name="check" size={18} color={palette.text} style={{ marginRight: 8 }} />
-                  <Text style={styles.actionButtonTextGlow}>Publish</Text>
-                </>
-              )}
-            </TouchableOpacity>
           </View>
         </View>
-      )}
+
+        <View style={styles.formCard}>
+          <Text style={styles.sectionTitle}>Headline</Text>
+          <TextInput
+            value={title}
+            onChangeText={text => setTitle(text.slice(0, 100))}
+            style={styles.titleInput}
+            placeholder="What should everyone notice first?"
+            placeholderTextColor={palette.textMuted}
+          />
+
+          <Text style={styles.sectionTitle}>Body</Text>
+          <TextInput
+            value={content}
+            onChangeText={text => setContent(text.slice(0, 500))}
+            style={styles.contentInput}
+            placeholder="Write the full announcement here."
+            placeholderTextColor={palette.textMuted}
+            multiline
+            textAlignVertical="top"
+          />
+
+          <View style={styles.helperRow}>
+            <Text style={styles.helperText}>Keep it direct, warm, and easy to scan.</Text>
+            <Text style={styles.helperCount}>{title.length}/100</Text>
+          </View>
+
+          <Text style={styles.sectionTitle}>Announcement type</Text>
+          <View style={styles.typeGrid}>
+            {announcementTypes.map(type => {
+              const optionTheme = getTypeTheme(type);
+              const isSelected = selectedType === type;
+
+              return (
+                <TouchableOpacity
+                  key={type}
+                  style={[
+                    styles.typeOption,
+                    { backgroundColor: isSelected ? optionTheme.badgeBackground : palette.white },
+                  ]}
+                  onPress={() => setSelectedType(type)}
+                >
+                  <MaterialCommunityIcons
+                    name={optionTheme.icon}
+                    size={18}
+                    color={palette.text}
+                  />
+                  <Text style={styles.typeOptionText}>{type}</Text>
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+        </View>
+
+        <View style={styles.optionsCard}>
+          <Text style={styles.sectionTitle}>Visibility</Text>
+          <TouchableOpacity style={styles.toggleRow} onPress={() => setNoExpiry(prev => !prev)}>
+            <View style={[styles.checkbox, noExpiry && styles.checkboxChecked]}>
+              {noExpiry ? <Feather name="check" size={16} color={palette.text} /> : null}
+            </View>
+            <View style={styles.toggleCopy}>
+              <Text style={styles.toggleTitle}>Keep this on the board longer</Text>
+              <Text style={styles.toggleBody}>
+                Switch this on if the announcement should stay without an end date.
+              </Text>
+            </View>
+          </TouchableOpacity>
+
+          {!noExpiry ? (
+            Platform.OS === 'web' ? (
+              <input
+                type="date"
+                value={expiresAt.toISOString().split('T')[0]}
+                onChange={event => setExpiresAt(new Date(event.target.value))}
+                min={new Date().toISOString().split('T')[0]}
+                style={{
+                  height: '52px',
+                  backgroundColor: '#FFFFFF',
+                  border: `3px solid ${palette.border}`,
+                  borderRadius: '18px',
+                  padding: '0 16px',
+                  fontSize: '15px',
+                  color: palette.text,
+                  fontFamily: 'Inter_400Regular',
+                  width: '100%',
+                  boxSizing: 'border-box',
+                  marginTop: '14px',
+                }}
+              />
+            ) : (
+              <>
+                <TouchableOpacity
+                  style={styles.dateButton}
+                  onPress={() => setShowDatePicker(true)}
+                >
+                  <View style={styles.dateButtonLeft}>
+                    <Feather name="calendar" size={18} color={palette.text} />
+                    <Text style={styles.dateButtonText}>{formatDateLabel(expiresAt)}</Text>
+                  </View>
+                  <Feather name="chevron-down" size={18} color={palette.textMuted} />
+                </TouchableOpacity>
+
+                {showDatePicker ? (
+                  <DateTimePicker
+                    value={expiresAt}
+                    mode="date"
+                    display="default"
+                    onChange={(event, selectedDate) => {
+                      setShowDatePicker(false);
+                      if (selectedDate) {
+                        setExpiresAt(selectedDate);
+                      }
+                    }}
+                    minimumDate={new Date()}
+                  />
+                ) : null}
+              </>
+            )
+          ) : null}
+        </View>
+
+        <TouchableOpacity
+          style={[styles.publishButton, loading && styles.publishButtonDisabled]}
+          onPress={handleCreateAnnouncement}
+          disabled={loading}
+        >
+          {loading ? (
+            <ActivityIndicator color={palette.text} size="small" />
+          ) : (
+            <>
+              <Feather name="send" size={18} color={palette.text} />
+              <Text style={styles.publishButtonText}>Publish Announcement</Text>
+            </>
+          )}
+        </TouchableOpacity>
+      </ScrollView>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  outerContainer: {
+  container: {
     flex: 1,
     backgroundColor: palette.background,
   },
-  container: {
-    flex: 1,
-    backgroundColor: 'transparent',
+  header: {
+    paddingTop: Platform.OS === 'ios' ? 56 : 34,
+    paddingHorizontal: 18,
+    paddingBottom: 12,
+    flexDirection: 'row',
+    gap: 14,
   },
-  centerCardWrapper: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: '100%',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-  },
-  shiningGradient: {
-    ...StyleSheet.absoluteFillObject,
-    zIndex: 0,
-  },
-  iconTitleWrapper: {
-    alignItems: 'center',
-    marginTop: 38,
-    marginBottom: 8,
-    zIndex: 2,
-  },
-  bellPlusWrapper: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 8,
-  },
-  glowIconContainer: {
-    width: 56,
-    height: 56,
+  backButton: {
+    width: 50,
+    height: 50,
     borderRadius: 18,
-    backgroundColor: screenAccents.announcements.secondary,
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: palette.mustard,
     borderWidth: 3,
     borderColor: palette.border,
-    marginBottom: 8,
-    marginTop: 2,
-    ...brutalShadow(),
-    position: 'relative',
-  },
-  bellPlusIconContainer: {
-    width: 36,
-    height: 36,
     alignItems: 'center',
     justifyContent: 'center',
-    zIndex: 2,
+    ...brutalShadow(),
   },
-  bellIcon: {
-    zIndex: 3,
-    textShadowColor: 'rgba(0,0,0,0.12)',
-    textShadowOffset: { width: 0, height: 2 },
-    textShadowRadius: 6,
+  headerCopy: {
+    flex: 1,
+    justifyContent: 'center',
   },
-  plusIconOverlay: {
-    position: 'absolute',
-    bottom: -6,
-    right: -8,
-    backgroundColor: palette.mustard,
-    borderRadius: 12,
-    padding: 1,
-    borderWidth: 2,
-    borderColor: palette.border,
-    zIndex: 4,
-  },
-  screenTitle: {
+  headerTitle: {
     fontSize: 24,
     fontFamily: 'Inter_600SemiBold',
     color: palette.text,
-    marginTop: 8,
-    marginBottom: 8,
-    letterSpacing: 0.2,
-    textAlign: 'center',
-    zIndex: 2,
-  },
-  floatingBackButton: {
-    position: 'absolute',
-    top: Platform.OS === 'ios' ? 50 : 32,
-    left: 18,
-    width: 44,
-    height: 44,
-    borderRadius: 16,
-    backgroundColor: screenAccents.announcements.secondary,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 3,
-    borderColor: palette.border,
-    ...brutalShadow(),
-    zIndex: 100,
-  },
-  cardModernPolished: {
-    ...brutalCard(screenAccents.announcements.tertiary),
-    borderRadius: 28,
-    borderLeftWidth: 7,
-    marginBottom: 16,
-    marginTop: 4,
-    elevation: 10,
-    width: '100%',
-    maxWidth: 480,
-    alignSelf: 'center',
-    overflow: 'hidden',
-    padding: 20,
-    paddingTop: 32,
-    paddingBottom: 24,
-  },
-  header: {
-    paddingHorizontal: 0,
-    paddingTop: 36,
-    paddingBottom: 0,
-    backgroundColor: 'transparent',
-    borderBottomLeftRadius: 0,
-    borderBottomRightRadius: 0,
-    shadowColor: 'transparent',
-    marginTop: 18, // move header down for visual appeal
-  },
-  headerTop: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 0,
-    backgroundColor: 'transparent',
-    borderRadius: 0,
-    marginHorizontal: 0,
-    paddingVertical: 0,
-    paddingLeft: 16, // add left padding for back button
-    paddingRight: 0,
-    shadowColor: 'transparent',
-  },
-  backButton: {
-    padding: 8,
-    marginRight: 12,
-    borderRadius: 10,
-    backgroundColor: '#232429',
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.07)',
-    shadowColor: 'transparent',
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: 38,
-    height: 38,
-    marginLeft: 0, // ensure not flush to border
-  },
-  headerTitle: {
-    fontSize: 26,
-    fontFamily: 'Inter_600SemiBold',
-    color: '#FFFFFF',
-    flex: 1,
-    marginLeft: 0,
-    letterSpacing: 0.2,
-    textShadowColor: 'transparent',
-    textAlignVertical: 'center',
-  },
-  headerBottom: {
-    alignItems: 'flex-end',
-    backgroundColor: 'transparent',
-    borderRadius: 0,
-    marginHorizontal: 0,
-    marginTop: 24, // move publish button down for visual appeal
-    paddingTop: 0,
-    paddingBottom: 0,
-    paddingRight: 0,
-    shadowColor: 'transparent',
-  },
-  publishButton: {
-    paddingHorizontal: 22,
-    paddingVertical: 7,
-    borderRadius: 16,
-    borderWidth: 1.5,
-    borderColor: '#007AFF',
-    backgroundColor: 'rgba(0,0,0,0.08)',
-    shadowColor: 'transparent',
-    alignSelf: 'flex-end',
-  },
-  publishButtonDisabled: {
-    borderColor: '#4A4A4A',
-    backgroundColor: 'transparent',
-    opacity: 0.6,
-  },
-  publishButtonText: {
-    fontSize: 15,
-    fontFamily: 'Inter_600SemiBold',
-    color: '#007AFF',
-    letterSpacing: 0.2,
-  },
-  content: {
-    flex: 1,
-    marginTop: 18,
-  },
-  scrollContent: {
-    marginTop: 40,
-    paddingHorizontal: 8,
-    paddingBottom: 5,
-  },
-  card: {
-    backgroundColor: 'rgba(30, 32, 40, 0.55)',
-    borderRadius: 14,
-    padding: 18,
-    borderWidth: 1.2,
-    borderColor: 'rgba(255, 255, 255, 0.10)',
-    marginHorizontal: 0,
-    marginTop: 32, // move input fields down for visual appeal
-    shadowColor: 'transparent',
-    maxWidth: 400, // limit width for web/large screens
-    alignSelf: 'center', // center horizontally
-    width: '90%', // responsive for mobile
-  },
-  inputGroup: {
-    marginBottom: 20,
-  },
-  label: {
-    fontSize: 15,
-    fontFamily: 'Inter_500Medium',
-    color: palette.text,
-    marginBottom: 8,
-    letterSpacing: 0.1,
-    opacity: 0.92,
-  },
-  input: {
-    height: 50,
-    ...brutalInput(palette.white),
-    paddingHorizontal: 16,
-    fontSize: 16,
-    fontFamily: 'Inter_400Regular',
-    color: palette.text,
-    marginBottom: 2,
-  },
-  textArea: {
-    minHeight: 120,
-    maxHeight: 200,
-    paddingTop: 16,
-    paddingBottom: 16,
-    backgroundColor: 'rgba(30, 32, 40, 0.55)',
-    borderRadius: 14,
-    paddingHorizontal: 16,
-    fontSize: 16,
-    fontFamily: 'Inter_400Regular',
-    color: '#FFFFFF',
-    borderWidth: 1.2,
-    borderColor: 'rgba(255, 255, 255, 0.13)',
-    marginBottom: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 4,
-    elevation: 1,
-    textAlignVertical: 'top',
-  },
-  nextButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 13,
-    backgroundColor: 'transparent', // ghost style
-    borderRadius: 16,
-    gap: 8,
-    marginTop: 8,
-    borderWidth: 1.5,
-    borderColor: '#007AFF',
-    shadowColor: 'transparent',
-  },
-  nextButtonDisabled: {
-    backgroundColor: 'transparent',
-    borderColor: '#4A4A4A',
-    opacity: 0.6,
-  },
-  nextButtonText: {
-    fontSize: 16,
-    fontFamily: 'Inter_500Medium',
-    color: '#007AFF',
-  },
-  twitterContainer: {
-    flex: 1,
-    paddingHorizontal: 0,
-    backgroundColor: 'transparent',
-    marginTop: 32, // add space below header/publish button
-  },
-  twitterHeader: {
-    flexDirection: 'column',
-    alignItems: 'flex-start',
-    paddingTop: 18,
-    paddingBottom: 16,
-    borderBottomWidth: 3,
-    borderBottomColor: palette.border,
-    marginBottom: 24, // increase space below preview card
-    borderRadius: 24,
-    borderWidth: 0,
-    width: '92%',
-    minWidth: 0,
-    overflow: 'hidden',
-    backgroundColor: palette.surface,
-    marginHorizontal: '4%',
-    borderWidth: 3,
-    borderColor: palette.border,
-  },
-  twitterTitle: {
-    fontSize: 22,
-    fontFamily: 'Inter_600SemiBold',
-    color: palette.text,
-    marginBottom: 8,
-    flexWrap: 'wrap',
-    width: '100%',
-    minWidth: 0,
-    lineHeight: 28,
-    flexShrink: 1,
-    wordBreak: 'break-word',
-    marginLeft: 8, // ensure not covered by back button
-  },
-  twitterMeta: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    marginBottom: 4,
-    marginLeft: 8,
-  },
-  twitterTypeChip: {
-    paddingHorizontal: 12,
-    paddingVertical: 4,
-    borderRadius: 10,
-    marginRight: 8,
-    backgroundColor: palette.surfaceAlt,
-    borderWidth: 2,
-    borderColor: palette.border,
-  },
-  twitterTypeText: {
-    fontSize: 12,
-    fontFamily: 'Inter_500Medium',
     textTransform: 'uppercase',
-    letterSpacing: 1,
+    marginBottom: 4,
   },
-  twitterExpiry: {
-    fontSize: 12,
+  headerSubtext: {
+    fontSize: 14,
+    lineHeight: 20,
     fontFamily: 'Inter_400Regular',
     color: palette.textMuted,
   },
-  twitterTextArea: {
+  scrollView: {
     flex: 1,
-    fontSize: 18,
-    lineHeight: 28,
-    fontFamily: 'Inter_400Regular',
-    color: palette.text,
-    textAlignVertical: 'top',
-    padding: 22,
+  },
+  scrollContent: {
+    paddingHorizontal: 18,
+    paddingBottom: 42,
+    gap: 16,
+  },
+  previewCard: {
+    borderWidth: 3,
+    borderColor: palette.border,
+    borderRadius: 30,
+    overflow: 'hidden',
+    ...brutalShadow(),
+  },
+  previewAccent: {
+    height: 14,
+    borderBottomWidth: 3,
+    borderBottomColor: palette.border,
+  },
+  previewBody: {
+    padding: 20,
+  },
+  previewHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 14,
+  },
+  typeBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
     borderRadius: 18,
     borderWidth: 3,
-    marginTop: 0, // remove extra top margin
-    marginBottom: 12,
-    minHeight: 260,
-    maxHeight: 400,
-    backgroundColor: palette.white,
     borderColor: palette.border,
-    marginHorizontal: 0,
-    transition: 'all 0.2s',
-    width: '100%',
-    boxSizing: 'border-box',
   },
-  loadingContainer: {
-    flex: 1,
+  typeBadgeText: {
+    fontSize: 12,
+    fontFamily: 'Inter_600SemiBold',
+    color: palette.text,
+    textTransform: 'uppercase',
+    letterSpacing: 0.8,
+  },
+  previewPin: {
+    width: 38,
+    height: 38,
+    borderRadius: 14,
+    backgroundColor: palette.white,
+    borderWidth: 3,
+    borderColor: palette.border,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  loadingText: {
+  previewEyebrow: {
+    fontSize: 12,
+    fontFamily: 'Inter_600SemiBold',
+    color: palette.textMuted,
+    textTransform: 'uppercase',
+    letterSpacing: 0.8,
+    marginBottom: 8,
+  },
+  previewTitle: {
+    fontSize: 26,
+    lineHeight: 32,
+    fontFamily: 'Inter_600SemiBold',
     color: palette.text,
-    fontSize: 18,
+    marginBottom: 10,
+  },
+  previewContent: {
+    fontSize: 16,
+    lineHeight: 24,
+    fontFamily: 'Inter_400Regular',
+    color: palette.text,
+  },
+  previewFooter: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 10,
+    marginTop: 18,
+  },
+  previewPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    borderWidth: 3,
+    borderColor: palette.border,
+    borderRadius: 18,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    backgroundColor: palette.white,
+  },
+  previewPillCompact: {
+    backgroundColor: palette.surface,
+  },
+  previewPillText: {
+    fontSize: 13,
+    fontFamily: 'Inter_500Medium',
+    color: palette.text,
+  },
+  formCard: {
+    ...brutalCard('#F7EFE7'),
+    borderRadius: 30,
+    padding: 20,
+  },
+  optionsCard: {
+    ...brutalCard('#F6EEE6'),
+    borderRadius: 30,
+    padding: 20,
+  },
+  sectionTitle: {
+    fontSize: 14,
+    fontFamily: 'Inter_600SemiBold',
+    color: palette.text,
+    textTransform: 'uppercase',
+    letterSpacing: 0.8,
+    marginBottom: 10,
+  },
+  titleInput: {
+    ...brutalInput(palette.white),
+    minHeight: 54,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    fontSize: 16,
+    fontFamily: 'Inter_500Medium',
+    color: palette.text,
+    marginBottom: 18,
+  },
+  contentInput: {
+    ...brutalInput(palette.white),
+    minHeight: 170,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    fontSize: 16,
+    lineHeight: 24,
+    fontFamily: 'Inter_400Regular',
+    color: palette.text,
+  },
+  helperRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    gap: 12,
+    marginTop: 8,
+    marginBottom: 18,
+  },
+  helperText: {
+    flex: 1,
+    fontSize: 13,
+    lineHeight: 18,
+    fontFamily: 'Inter_400Regular',
+    color: palette.textMuted,
+  },
+  helperCount: {
+    fontSize: 13,
+    fontFamily: 'Inter_500Medium',
+    color: palette.textMuted,
   },
   typeGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: 10,
   },
-  typeCard: {
-    flex: 1,
-    minWidth: '45%',
-    paddingVertical: 10,
-    paddingHorizontal: 14,
-    borderRadius: 12,
-    borderWidth: 2,
-    alignItems: 'center',
-  },
-  typeCardSelected: {
-    borderWidth: 2,
-  },
-  typeCardText: {
-    fontSize: 14,
-    fontFamily: 'Inter_500Medium',
-    color: palette.textMuted,
-  },
-  typeCardTextSelected: {
-    color: palette.text,
-  },
-  dateButton: {
-    height: 50,
-    ...brutalInput(palette.white),
-    paddingHorizontal: 16,
+  typeOption: {
+    minWidth: '47%',
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
-  },
-  dateButtonText: {
-    fontSize: 16,
-    fontFamily: 'Inter_400Regular',
-    color: palette.text,
-  },
-  checkboxRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    paddingVertical: 12,
-    marginBottom: 12,
-  },
-  checkbox: {
-    width: 24,
-    height: 24,
-    borderRadius: 6,
+    gap: 8,
     borderWidth: 3,
     borderColor: palette.border,
+    borderRadius: 18,
+    paddingHorizontal: 12,
+    paddingVertical: 12,
+  },
+  typeOptionText: {
+    fontSize: 14,
+    fontFamily: 'Inter_600SemiBold',
+    color: palette.text,
+  },
+  toggleRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 12,
+  },
+  checkbox: {
+    width: 26,
+    height: 26,
+    marginTop: 2,
+    borderWidth: 3,
+    borderColor: palette.border,
+    borderRadius: 8,
     backgroundColor: palette.white,
     alignItems: 'center',
     justifyContent: 'center',
   },
   checkboxChecked: {
-    backgroundColor: screenAccents.announcements.primary,
-    borderColor: palette.border,
+    backgroundColor: palette.mustard,
   },
-  checkboxLabel: {
+  toggleCopy: {
+    flex: 1,
+  },
+  toggleTitle: {
+    fontSize: 15,
+    fontFamily: 'Inter_600SemiBold',
+    color: palette.text,
+    marginBottom: 4,
+  },
+  toggleBody: {
+    fontSize: 14,
+    lineHeight: 20,
+    fontFamily: 'Inter_400Regular',
+    color: palette.textMuted,
+  },
+  dateButton: {
+    marginTop: 14,
+    ...brutalInput(palette.white),
+    minHeight: 54,
+    paddingHorizontal: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  dateButtonLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  dateButtonText: {
     fontSize: 15,
     fontFamily: 'Inter_500Medium',
     color: palette.text,
   },
-  cardWithMargin: {
-    marginHorizontal: 18,
-    marginTop: 0,
-    marginBottom: 0,
-    width: '95%',
-    maxWidth: 420,
-  },
-  iconTitleWrapperCard: {
-    alignItems: 'center',
-    marginTop: 0,
-    marginBottom: 16,
-    zIndex: 2,
-  },
-  actionButtonGlow: {
+  publishButton: {
+    ...brutalButton(palette.coral),
+    minHeight: 56,
+    marginBottom: 8,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 8,
-    ...brutalButton(screenAccents.announcements.primary),
-    paddingHorizontal: 0,
-    paddingVertical: 13,
-    marginHorizontal: 4,
-    marginTop: 12,
-    width: '100%',
-    minWidth: 0,
-    maxWidth: '100%',
+    gap: 10,
+    paddingHorizontal: 16,
   },
-  actionButtonGlowDisabled: {
-    backgroundColor: palette.textMuted,
-    borderColor: palette.border,
-    opacity: 0.6,
+  publishButtonDisabled: {
+    opacity: 0.65,
   },
-  actionButtonTextGlow: {
-    fontSize: 16,
+  publishButtonText: {
+    fontSize: 15,
     fontFamily: 'Inter_600SemiBold',
     color: palette.text,
-    letterSpacing: 0.2,
     textTransform: 'uppercase',
   },
-  cardFinalizeStep: {
-    minHeight: 700,
-    marginTop: 32,
+  centerState: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  loadingText: {
+    fontSize: 18,
+    fontFamily: 'Inter_500Medium',
+    color: palette.text,
+  },
+  shape: {
+    position: 'absolute',
+    borderWidth: 3,
+    borderColor: palette.border,
+    zIndex: -1,
+  },
+  shapeTop: {
+    width: 104,
+    height: 104,
+    borderRadius: 26,
+    backgroundColor: '#F0C7B5',
+    top: 118,
+    right: -16,
+    transform: [{ rotate: '12deg' }],
+  },
+  shapeBottom: {
+    width: 120,
+    height: 56,
+    borderRadius: 20,
+    backgroundColor: '#D7C3EF',
+    bottom: 110,
+    left: -18,
+    transform: [{ rotate: '-12deg' }],
   },
 });

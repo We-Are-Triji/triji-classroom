@@ -13,6 +13,7 @@ import {
 } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+import { FeedbackModal } from '../components';
 import { brutalButton, brutalCard, brutalInput, brutalShadow, palette, screenAccents } from '../theme/neoBrutal';
 
 const { width, height } = Dimensions.get('window');
@@ -22,6 +23,7 @@ export default function GradeCalculatorScreen({ navigation }) {
   const [subjects, setSubjects] = useState([{ units: '', grade: '' }]);
   const [gwa, setGwa] = useState(null);
   const [selectedSubjectIdx, setSelectedSubjectIdx] = useState(null);
+  const [showResultModal, setShowResultModal] = useState(false);
 
   const handleInputChange = (index, field, value) => {
     const updatedSubjects = [...subjects];
@@ -98,7 +100,7 @@ export default function GradeCalculatorScreen({ navigation }) {
       } else {
         const calculatedGwa = (weightedSum / totalUnits).toFixed(2);
         setGwa(calculatedGwa);
-        Alert.alert('Success', `Your GWA is ${calculatedGwa}`);
+        setShowResultModal(true);
       }
     } catch (error) {
       console.error('Error calculating GWA:', error);
@@ -213,6 +215,14 @@ export default function GradeCalculatorScreen({ navigation }) {
           </View>
         </View>
       </ScrollView>
+      <FeedbackModal
+        visible={showResultModal}
+        title="GWA calculated"
+        message={`Your current GWA is ${gwa}. Nice work keeping your grades tracked.`}
+        tone="success"
+        actionLabel="Sweet"
+        onClose={() => setShowResultModal(false)}
+      />
     </View>
   );
 }
