@@ -34,6 +34,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { LinearGradient } from 'expo-linear-gradient';
 import { FeedbackModal } from '../components';
 import { getUserMessage } from '../utils/errorHandler';
+import { sanitizeEmailInput } from '../utils/sanitize';
 import { brutalButton, brutalCard, brutalInput, palette, screenAccents } from '../theme/neoBrutal';
 
 const { width, height } = Dimensions.get('window');
@@ -145,7 +146,7 @@ export default function LoginScreen({ navigation }) {
   };
 
   const handleLogin = async () => {
-    const trimmedEmail = email.trim();
+    const trimmedEmail = sanitizeEmailInput(email);
 
     if (!trimmedEmail || !password.trim()) {
       setFeedback({

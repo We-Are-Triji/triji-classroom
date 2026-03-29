@@ -17,9 +17,9 @@ import {
 } from '@expo-google-fonts/inter';
 import { Feather } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import { db, auth } from '../config/firebaseConfig';
-import { doc, updateDoc, arrayUnion, arrayRemove } from 'firebase/firestore';
+import { auth } from '../config/firebaseConfig';
 import { showErrorAlert } from '../utils/errorHandler';
+import { toggleTaskCompletion as toggleTaskCompletionAction } from '../utils/backendActions';
 import { successHaptic, mediumHaptic, lightHaptic } from '../utils/haptics';
 import { brutalButton, brutalCard, brutalShadow, palette, screenAccents } from '../theme/neoBrutal';
 
@@ -161,32 +161,10 @@ export default function TaskDetailScreen({ route, navigation }) {
 
     setIsTogglingCompletion(true);
     try {
-      const taskRef = doc(db, 'tasks', task.id);
+      const result = await toggleTaskCompletionAction(task.id);
+      setIsCompleted(Boolean(result.completed));
 
-      if (isCompleted) {
-        // Remove user from completedBy array
-        await updateDoc(taskRef, {
-          completedBy: arrayRemove(auth.currentUser.uid),
-        });
-        setIsCompleted(false);
-
-        // Animate checkmark out
-        Animated.spring(checkmarkScale, {
-          toValue: 0,
-          tension: 50,
-          friction: 7,
-          useNativeDriver: true,
-        }).start();
-
-        lightHaptic();
-      } else {
-        // Add user to completedBy array
-        await updateDoc(taskRef, {
-          completedBy: arrayUnion(auth.currentUser.uid),
-        });
-        setIsCompleted(true);
-
-        // Animate checkmark in with bounce
+      if (result.completed) {
         Animated.spring(checkmarkScale, {
           toValue: 1,
           tension: 80,
@@ -196,6 +174,15 @@ export default function TaskDetailScreen({ route, navigation }) {
 
         // Success haptic feedback
         successHaptic();
+      } else {
+        Animated.spring(checkmarkScale, {
+          toValue: 0,
+          tension: 50,
+          friction: 7,
+          useNativeDriver: true,
+        }).start();
+
+        lightHaptic();
       }
     } catch (error) {
       showErrorAlert(error, 'Toggle Task Completion', 'Update Failed');

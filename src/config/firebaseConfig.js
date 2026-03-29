@@ -2,6 +2,7 @@
 import { initializeApp, getApps, getApp } from 'firebase/app';
 import { getAuth, initializeAuth, getReactNativePersistence } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
+import { getFunctions } from 'firebase/functions';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // Use environment variables for Firebase config (Expo)
@@ -45,6 +46,7 @@ try {
 
 export { auth };
 export const db = getFirestore(app);
+export const functions = getFunctions(app);
 
 // Enable offline persistence
 try {

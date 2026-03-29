@@ -29,8 +29,6 @@ import {
   query,
   orderBy,
   onSnapshot,
-  addDoc,
-  runTransaction,
   limit,
 } from 'firebase/firestore';
 import { auth } from '../config/firebaseConfig';
@@ -40,6 +38,7 @@ import { useNetwork } from '../context/NetworkContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { LinearGradient } from 'expo-linear-gradient';
 import { logError, showErrorAlert } from '../utils/errorHandler';
+import { createFreedomWallPost, toggleFreedomWallLike as toggleFreedomWallLikeAction } from '../utils/backendActions';
 import { brutalButton, brutalCard, brutalInput, brutalShadow, palette, screenAccents } from '../theme/neoBrutal';
 
 export default function FreedomWallScreen({ navigation }) {
@@ -235,7 +234,7 @@ export default function FreedomWallScreen({ navigation }) {
     for (const pendingPost of pendingPosts) {
       try {
         const { id, status, ...postData } = pendingPost;
-        await addDoc(collection(db, 'freedom-wall-posts'), postData);
+        await createFreedomWallPost(postData);
 
         // Remove from pending posts after successful sync
         setPendingPosts(prev => prev.filter(p => p.id !== pendingPost.id));
@@ -425,7 +424,7 @@ export default function FreedomWallScreen({ navigation }) {
     }
 
     try {
-      await addDoc(collection(db, 'freedom-wall-posts'), postData);
+      await createFreedomWallPost(postData);
 
       // Save timestamp for cooldown
       await AsyncStorage.setItem('lastPostTime', Date.now().toString());
@@ -460,31 +459,18 @@ export default function FreedomWallScreen({ navigation }) {
     }
 
     try {
-      const postRef = doc(db, 'freedom-wall-posts', postId);
-
-      await runTransaction(db, async transaction => {
-        const postDoc = await transaction.get(postRef);
-        if (!postDoc.exists()) return;
-
-        const data = postDoc.data();
-        const likedBy = data.likedBy || [];
-        const currentLikeCount = data.likeCount || 0;
-        const userHasLiked = likedBy.includes(user.uid);
-
-        if (userHasLiked) {
-          // Unlike
-          transaction.update(postRef, {
-            likeCount: Math.max(0, currentLikeCount - 1),
-            likedBy: likedBy.filter(id => id !== user.uid),
-          });
-        } else {
-          // Like
-          transaction.update(postRef, {
-            likeCount: currentLikeCount + 1,
-            likedBy: [...likedBy, user.uid],
-          });
-        }
-      });
+      const result = await toggleFreedomWallLikeAction(postId);
+      setPosts(prev =>
+        prev.map(postItem =>
+          postItem.id === postId
+            ? {
+                ...postItem,
+                likeCount: result.likeCount,
+                likedBy: result.likedBy,
+              }
+            : postItem
+        )
+      );
     } catch (error) {
       showErrorAlert(error, 'Update Like', 'Like Failed');
     }

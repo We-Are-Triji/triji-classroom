@@ -18,8 +18,9 @@ import {
 import { Feather, MaterialCommunityIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { auth, db } from '../config/firebaseConfig';
-import { doc, getDoc, deleteDoc } from 'firebase/firestore';
+import { doc, getDoc } from 'firebase/firestore';
 import { lightHaptic, mediumHaptic, warningHaptic, successHaptic } from '../utils/haptics';
+import { deleteAnnouncement } from '../utils/backendActions';
 import { brutalButton, brutalCard, brutalShadow, palette } from '../theme/neoBrutal';
 
 const typeThemes = {
@@ -236,7 +237,7 @@ export default function AnnouncementDetailScreen({ route, navigation }) {
     setShowDeleteModal(false);
 
     try {
-      await deleteDoc(doc(db, 'announcements', announcementId));
+      await deleteAnnouncement(announcementId);
       successHaptic();
       navigation.navigate('Announcements');
     } catch (deleteError) {

@@ -19,19 +19,11 @@ import {
 } from '@expo-google-fonts/inter';
 import { Feather, MaterialCommunityIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import { db } from '../config/firebaseConfig';
-import {
-  doc,
-  runTransaction,
-  updateDoc,
-  collection,
-  addDoc,
-  serverTimestamp,
-} from 'firebase/firestore';
 import { auth } from '../config/firebaseConfig';
 import * as Clipboard from 'expo-clipboard';
 import { useNetwork } from '../context/NetworkContext';
 import { showErrorAlert, logError } from '../utils/errorHandler';
+import { submitReport, toggleFreedomWallLike as toggleFreedomWallLikeAction } from '../utils/backendActions';
 import { brutalButton, brutalCard, brutalInput, brutalShadow, palette, screenAccents } from '../theme/neoBrutal';
 
 export default function PostDetailScreen({ route, navigation }) {
@@ -148,41 +140,12 @@ export default function PostDetailScreen({ route, navigation }) {
     }
 
     try {
-      const postRef = doc(db, 'freedom-wall-posts', post.id);
-
-      await runTransaction(db, async transaction => {
-        const postDoc = await transaction.get(postRef);
-        if (!postDoc.exists()) return;
-
-        const data = postDoc.data();
-        const likedBy = data.likedBy || [];
-        const currentLikeCount = data.likeCount || 0;
-        const userHasLiked = likedBy.includes(user.uid);
-
-        let newLikedBy, newLikeCount;
-
-        if (userHasLiked) {
-          // Unlike
-          newLikeCount = Math.max(0, currentLikeCount - 1);
-          newLikedBy = likedBy.filter(id => id !== user.uid);
-        } else {
-          // Like
-          newLikeCount = currentLikeCount + 1;
-          newLikedBy = [...likedBy, user.uid];
-        }
-
-        transaction.update(postRef, {
-          likeCount: newLikeCount,
-          likedBy: newLikedBy,
-        });
-
-        // Update local state
-        setCurrentPost(prev => ({
-          ...prev,
-          likeCount: newLikeCount,
-          likedBy: newLikedBy,
-        }));
-      });
+      const result = await toggleFreedomWallLikeAction(post.id);
+      setCurrentPost(prev => ({
+        ...prev,
+        likeCount: result.likeCount,
+        likedBy: result.likedBy,
+      }));
     } catch (error) {
       showErrorAlert(error, 'Update Like', 'Like Failed');
     }
@@ -222,30 +185,16 @@ export default function PostDetailScreen({ route, navigation }) {
 
     setSubmitting(true);
     try {
-      // Add report to reports collection
-      await addDoc(collection(db, 'reports'), {
+      await submitReport({
         postId: post.id,
-        postContent: post.content,
         reason: selectedReason,
-        description: description.trim(),
-        userId: user.uid,
-        reporterId: user.uid,
-        reportedAt: serverTimestamp(),
-      });
-
-      // Update post with reportedBy array
-      const postRef = doc(db, 'freedom-wall-posts', post.id);
-      const reportedBy = currentPost.reportedBy || [];
-      const updatedReportedBy = [...reportedBy, user.uid];
-
-      await updateDoc(postRef, {
-        reportedBy: updatedReportedBy,
+        description,
       });
 
       // Update local state to reflect the change
       setCurrentPost(prev => ({
         ...prev,
-        reportedBy: updatedReportedBy,
+        reportedBy: [...(prev.reportedBy || []), user.uid],
       }));
 
       setShowReportModal(false);

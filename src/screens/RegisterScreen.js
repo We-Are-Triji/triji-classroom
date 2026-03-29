@@ -29,6 +29,7 @@ import { createUserWithEmailAndPassword, sendEmailVerification } from 'firebase/
 import { doc, setDoc } from 'firebase/firestore';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getUserMessage } from '../utils/errorHandler';
+import { sanitizeEmailInput, sanitizeNameInput } from '../utils/sanitize';
 import { brutalButton, brutalCard, brutalInput, palette, screenAccents } from '../theme/neoBrutal';
 
 export default function RegisterScreen({ navigation }) {
@@ -67,14 +68,18 @@ export default function RegisterScreen({ navigation }) {
     setLoading(true);
     setError('');
     try {
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const sanitizedFirstName = sanitizeNameInput(firstName);
+      const sanitizedLastName = sanitizeNameInput(lastName);
+      const sanitizedEmail = sanitizeEmailInput(email);
+
+      const userCredential = await createUserWithEmailAndPassword(auth, sanitizedEmail, password);
       const user = userCredential.user;
 
       // Create user document in Firestore
       await setDoc(doc(db, 'users', user.uid), {
-        firstName: firstName.trim(),
-        lastName: lastName.trim(),
-        email: email.trim(),
+        firstName: sanitizedFirstName,
+        lastName: sanitizedLastName,
+        email: sanitizedEmail,
         createdAt: new Date().toISOString(),
       });
 

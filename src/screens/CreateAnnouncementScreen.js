@@ -19,10 +19,10 @@ import {
 import { Feather, MaterialCommunityIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import { auth, db } from '../config/firebaseConfig';
-import { collection, addDoc, doc, getDoc } from 'firebase/firestore';
+import { auth } from '../config/firebaseConfig';
 import { useNetwork } from '../context/NetworkContext';
-import { showErrorAlert, logError } from '../utils/errorHandler';
+import { showErrorAlert } from '../utils/errorHandler';
+import { saveAnnouncement } from '../utils/backendActions';
 import { brutalButton, brutalCard, brutalInput, brutalShadow, palette } from '../theme/neoBrutal';
 
 const announcementTypes = ['General', 'Reminder', 'Event', 'Critical'];
@@ -113,30 +113,11 @@ export default function CreateAnnouncementScreen({ navigation }) {
     setLoading(true);
 
     try {
-      let authorName = 'Anonymous';
-
-      try {
-        const userDoc = await getDoc(doc(db, 'users', user.uid));
-        if (userDoc.exists()) {
-          const userData = userDoc.data();
-          const fullName = `${userData.firstName || ''} ${userData.lastName || ''}`.trim();
-          if (fullName) {
-            authorName = fullName;
-          }
-        }
-      } catch (userError) {
-        logError(userError, 'Fetch User Data');
-      }
-
-      await addDoc(collection(db, 'announcements'), {
-        title: title.trim(),
-        content: content.trim(),
+      await saveAnnouncement({
+        title,
+        content,
         type: selectedType,
-        authorName,
-        authorId: user.uid,
-        authorPhotoURL: '',
-        createdAt: new Date(),
-        expiresAt: noExpiry ? new Date(Date.now() + 100 * 365 * 24 * 60 * 60 * 1000) : expiresAt,
+        expiresAt: noExpiry ? null : expiresAt.toISOString(),
       });
 
       Alert.alert('Announcement Published', 'Your announcement is now on the board.', [

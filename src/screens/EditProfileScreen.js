@@ -14,6 +14,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { auth, db } from '../config/firebaseConfig';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { showErrorAlert, logError } from '../utils/errorHandler';
+import { sanitizeNameInput } from '../utils/sanitize';
 import { brutalButton, brutalCard, brutalInput, brutalShadow, palette, screenAccents } from '../theme/neoBrutal';
 
 export default function EditProfileScreen({ navigation }) {
@@ -50,8 +51,8 @@ export default function EditProfileScreen({ navigation }) {
       const user = auth.currentUser;
 
       // Trim inputs
-      const trimmedFirst = firstName.trim();
-      const trimmedLast = lastName.trim();
+      const trimmedFirst = sanitizeNameInput(firstName);
+      const trimmedLast = sanitizeNameInput(lastName);
 
       // Validate inputs
       if (!trimmedFirst || !trimmedLast) {

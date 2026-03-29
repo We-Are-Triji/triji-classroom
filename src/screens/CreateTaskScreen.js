@@ -24,12 +24,11 @@ import {
   query,
   orderBy,
   onSnapshot,
-  addDoc,
-  serverTimestamp,
   doc,
   getDoc,
 } from 'firebase/firestore';
 import { showErrorAlert, logError } from '../utils/errorHandler';
+import { saveTask } from '../utils/backendActions';
 import { brutalButton, brutalCard, brutalInput, brutalShadow, palette, screenAccents } from '../theme/neoBrutal';
 
 export default function CreateTaskScreen({ navigation }) {
@@ -140,20 +139,15 @@ export default function CreateTaskScreen({ navigation }) {
 
     setSaving(true);
     try {
-      const user = auth.currentUser;
       const selectedSubjectData = subjects.find(s => s.id === selectedSubject);
 
-      await addDoc(collection(db, 'tasks'), {
-        title: title.trim(),
-        details: details.trim(),
+      await saveTask({
+        title,
+        details,
         deadline: deadline.toISOString(),
         subjectId: selectedSubject,
-        subjectName: selectedSubjectData?.subjectName || '',
-        subjectCode: selectedSubjectData?.subjectCode || '',
-        status: 'To Do',
-        userId: user.uid,
-        completedBy: [],
-        createdAt: serverTimestamp(),
+        subjectName: selectedSubjectData?.subjectName || selectedSubjectData?.name || '',
+        subjectCode: selectedSubjectData?.subjectCode || selectedSubjectData?.code || '',
       });
 
       Alert.alert('Success', 'Task created successfully!', [

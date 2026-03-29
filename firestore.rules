@@ -3,112 +3,153 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // Helper function to check if the user is an admin
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function currentUserDoc() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid));
+    }
+
+    function hasCurrentUserDoc() {
+      return exists(/databases/$(database)/documents/users/$(request.auth.uid));
+    }
+
+    function currentUserRole() {
+      return currentUserDoc().data.role;
+    }
+
     function isAdmin() {
-      return request.auth != null && 
-             exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
-             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+      return isSignedIn() &&
+        hasCurrentUserDoc() &&
+        currentUserRole() == 'admin';
     }
 
-    // Rule for the 'users' collection
-    match /users/{userId} {
-      // Users can read and update their own profile data
-      allow read, update: if request.auth != null && request.auth.uid == userId;
-      
-      // Allow users to create their own profile during registration
-      allow create: if request.auth != null && request.auth.uid == userId;
-      
-      // Admins can read all users
-      allow read: if isAdmin();
+    function validName(value) {
+      return value is string &&
+        value.size() >= 2 &&
+        value.size() <= 50 &&
+        value.matches("^[A-Za-z\\s'-]+$");
     }
 
-    // Rule for 'tasks' collection
-    match /tasks/{taskId} {
-      // Everyone can read tasks
-      allow read: if request.auth != null;
-      
-      // Only admins can create or delete tasks
-      allow create, delete: if isAdmin();
-      
-      // Admins can update everything
-      // Regular users can only update completedBy array (add/remove their own UID)
-      allow update: if request.auth != null && (
-        isAdmin() || 
-        (request.resource.data.keys().hasAll(resource.data.keys()) &&
-         request.resource.data.diff(resource.data).affectedKeys().hasOnly(['completedBy']))
+    function validEmail(value) {
+      return value is string &&
+        value.size() >= 5 &&
+        value.size() <= 120 &&
+        value.matches('^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$');
+    }
+
+    function validPreferences(value) {
+      return value == null || (
+        value is map &&
+        value.keys().hasOnly(['tasks', 'announcements', 'freedom_wall']) &&
+        (value.tasks == null || value.tasks is bool) &&
+        (value.announcements == null || value.announcements is bool) &&
+        (value.freedom_wall == null || value.freedom_wall is bool)
       );
     }
 
-    // Rule for the 'subjects' collection
-    match /subjects/{subjectId} {
-      // Everyone signed in can read subject metadata
-      allow read: if request.auth != null;
+    function validPinnedList(value) {
+      return value == null || (value is list && value.size() <= 50);
+    }
 
-      // Only admins can manage subjects
+    function canReadUser(userId) {
+      return isSignedIn() && (request.auth.uid == userId || isAdmin());
+    }
+
+    match /users/{userId} {
+      allow read: if canReadUser(userId);
+
+      allow create: if isSignedIn() &&
+        request.auth.uid == userId &&
+        request.resource.data.keys().hasOnly(['firstName', 'lastName', 'email', 'createdAt']) &&
+        validName(request.resource.data.firstName) &&
+        validName(request.resource.data.lastName) &&
+        validEmail(request.resource.data.email) &&
+        request.resource.data.email == request.auth.token.email &&
+        request.resource.data.createdAt is string;
+
+      allow update: if isSignedIn() &&
+        request.auth.uid == userId &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          'firstName',
+          'lastName',
+          'expoPushToken',
+          'notificationPermissionStatus',
+          'notificationTokenUpdatedAt',
+          'notificationPreferences',
+          'pinnedTaskIds',
+          'pinnedAnnouncementIds'
+        ]) &&
+        (
+          !request.resource.data.diff(resource.data).affectedKeys().hasAny(['firstName']) ||
+          validName(request.resource.data.firstName)
+        ) &&
+        (
+          !request.resource.data.diff(resource.data).affectedKeys().hasAny(['lastName']) ||
+          validName(request.resource.data.lastName)
+        ) &&
+        (
+          !request.resource.data.diff(resource.data).affectedKeys().hasAny(['expoPushToken']) ||
+          (
+            request.resource.data.expoPushToken is string &&
+            request.resource.data.expoPushToken.size() <= 255
+          )
+        ) &&
+        (
+          !request.resource.data.diff(resource.data).affectedKeys().hasAny(['notificationPermissionStatus']) ||
+          (
+            request.resource.data.notificationPermissionStatus == 'granted' ||
+            request.resource.data.notificationPermissionStatus == 'denied' ||
+            request.resource.data.notificationPermissionStatus == 'undetermined'
+          )
+        ) &&
+        (
+          !request.resource.data.diff(resource.data).affectedKeys().hasAny(['notificationTokenUpdatedAt']) ||
+          request.resource.data.notificationTokenUpdatedAt is string
+        ) &&
+        (
+          !request.resource.data.diff(resource.data).affectedKeys().hasAny(['notificationPreferences']) ||
+          validPreferences(request.resource.data.notificationPreferences)
+        ) &&
+        (
+          !request.resource.data.diff(resource.data).affectedKeys().hasAny(['pinnedTaskIds']) ||
+          validPinnedList(request.resource.data.pinnedTaskIds)
+        ) &&
+        (
+          !request.resource.data.diff(resource.data).affectedKeys().hasAny(['pinnedAnnouncementIds']) ||
+          validPinnedList(request.resource.data.pinnedAnnouncementIds)
+        );
+    }
+
+    match /tasks/{taskId} {
+      allow read: if isSignedIn();
+      allow create, update, delete: if false;
+    }
+
+    match /subjects/{subjectId} {
+      allow read: if isSignedIn();
       allow create, update, delete: if isAdmin();
     }
 
-    // Rule for the 'announcements' collection
     match /announcements/{announcementId} {
-      // Everyone can read announcements
-      allow read: if request.auth != null;
-
-      // Users can create announcements (must include their authorId)
-      allow create: if request.auth != null &&
-                      request.resource.data.authorId == request.auth.uid;
-                      
-      // Only the author can update their own announcement
-      allow update: if request.auth != null && 
-                      request.auth.uid == resource.data.authorId;
-
-      // Author or admin can delete
-      allow delete: if request.auth != null &&
-                      (request.auth.uid == resource.data.authorId || isAdmin());
+      allow read: if isSignedIn();
+      allow create, update, delete: if false;
     }
 
-    // Rule for Freedom Wall Posts
     match /freedom-wall-posts/{postId} {
-      // Everyone can read posts
-      allow read: if request.auth != null;
-      
-      // Users can create posts (must include their authorId)
-      allow create: if request.auth != null &&
-                      request.resource.data.authorId == request.auth.uid;
-      
-      // Author can update their own post content
-      // Any authenticated user can update likeCount and likedBy arrays (for liking/unliking)
-      // Any authenticated user can update reportedBy array (for reporting)
-      allow update: if request.auth != null && (
-        // Author can update everything
-        request.auth.uid == resource.data.authorId ||
-        // Anyone can update only likeCount and likedBy (for liking)
-        (request.resource.data.keys().hasAll(resource.data.keys()) &&
-         request.resource.data.diff(resource.data).affectedKeys().hasOnly(['likeCount', 'likedBy'])) ||
-        // Anyone can update only reportedBy (for reporting)
-        (request.resource.data.keys().hasAll(resource.data.keys()) &&
-         request.resource.data.diff(resource.data).affectedKeys().hasOnly(['reportedBy']))
-      );
-
-      // Author or admin can delete
-      allow delete: if request.auth != null &&
-                      (request.auth.uid == resource.data.authorId || isAdmin());
+      allow read: if isSignedIn();
+      allow create, update, delete: if false;
     }
 
-    // Rule for the 'reports' collection
     match /reports/{reportId} {
-      // Users can read their own reports, admins can read all
-      allow read: if request.auth != null &&
-                    (request.auth.uid == resource.data.userId ||
-                     request.auth.uid == resource.data.reporterId ||
-                     isAdmin());
-
-      // Users can create reports for themselves
-      allow create: if request.auth != null &&
-                      (request.resource.data.userId == request.auth.uid ||
-                       request.resource.data.reporterId == request.auth.uid);
-      
-      // Only admins can update/delete reports
-      allow update, delete: if isAdmin();
+      allow read: if isSignedIn() &&
+        (
+          request.auth.uid == resource.data.userId ||
+          request.auth.uid == resource.data.reporterId ||
+          isAdmin()
+        );
+      allow create, update, delete: if false;
     }
   }
 }
