@@ -24,16 +24,6 @@ import { auth, db } from '../config/firebaseConfig';
 import { doc, getDoc } from 'firebase/firestore';
 import { ProfileSection, InfoRow } from '../components';
 
-// Prevent zooming on web
-/* eslint-disable no-undef */
-if (Platform.OS === 'web' && typeof document !== 'undefined') {
-  const meta = document.createElement('meta');
-  meta.name = 'viewport';
-  meta.content = 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no';
-  document.getElementsByTagName('head')[0].appendChild(meta);
-}
-/* eslint-enable no-undef */
-
 const { width, height } = Dimensions.get('window');
 
 export default function ProfileScreen({ navigation }) {

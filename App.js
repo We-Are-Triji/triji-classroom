@@ -23,43 +23,13 @@ import {
 import TabNavigator from './src/navigation/TabNavigator';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { NetworkProvider } from './src/context/NetworkContext';
-import { ErrorBoundary, OfflineBanner, OfflineScreen } from './src/components';
-import {
-  setupNotificationListeners,
-  registerForPushNotifications,
-} from './src/utils/notifications';
-import { startAllListeners, stopAllListeners } from './src/utils/firestoreListeners';
+import { ErrorBoundary, OfflineBanner } from './src/components';
+import { setupNotificationListeners, registerForPushNotifications } from './src/utils/notifications';
+import { stopAllListeners } from './src/utils/firestoreListeners';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from './src/config/firebaseConfig';
 // Import Firebase to ensure it's initialized before the app starts
 import './src/config/firebaseConfig';
-import * as Sentry from '@sentry/react-native';
-
-// Initialize Sentry only if DSN is configured
-if (process.env.EXPO_PUBLIC_SENTRY_DSN) {
-  Sentry.init({
-    dsn: process.env.EXPO_PUBLIC_SENTRY_DSN,
-    debug: __DEV__,
-    environment: __DEV__ ? 'development' : Updates?.channel || 'production',
-    tracesSampleRate: __DEV__ ? 1.0 : 0.2,
-    // Adds more context data to events (IP address, cookies, user, etc.)
-    sendDefaultPii: true,
-    // Enable Logs in development
-    enableLogs: __DEV__,
-    // Session Replay (optional - can be resource intensive)
-    _experiments: {
-      replaysSessionSampleRate: 0.1,
-      replaysOnErrorSampleRate: 1.0,
-    },
-    // Mobile replay and feedback integrations
-    integrations: [Sentry.mobileReplayIntegration(), Sentry.feedbackIntegration()],
-    // Uncomment the line below to enable Spotlight (https://spotlightjs.com)
-    // spotlight: __DEV__,
-  });
-  console.log('Sentry initialized');
-} else {
-  console.log('Sentry DSN not configured - error tracking disabled');
-}
 
 const Stack = createStackNavigator();
 
@@ -116,7 +86,7 @@ export default function App() {
     };
   }, []);
 
-  // Global error handler for unhandled promise rejections and errors
+  // Global error handler for unexpected runtime errors
   useEffect(() => {
     const logErrorToStorage = async (error, context) => {
       try {
@@ -135,35 +105,10 @@ export default function App() {
       }
     };
 
-    // Handle unhandled promise rejections
-    const handleUnhandledRejection = event => {
-      const error = event.reason || event;
-      console.error('Unhandled promise rejection:', error);
-      logErrorToStorage(error, 'Unhandled Promise Rejection');
-      if (process.env.EXPO_PUBLIC_SENTRY_DSN) {
-        try {
-          Sentry.captureException(error);
-        } catch (e) {
-          console.error('Sentry error:', e);
-        }
-      }
-
-      if (__DEV__) {
-        Alert.alert('Unhandled Error', error.message || String(error));
-      }
-    };
-
     // Handle global errors
     const handleGlobalError = (error, isFatal) => {
       console.error('Global error caught:', error, 'isFatal:', isFatal);
       logErrorToStorage(error, isFatal ? 'Fatal Error' : 'Non-Fatal Error');
-      if (process.env.EXPO_PUBLIC_SENTRY_DSN) {
-        try {
-          Sentry.captureException(error);
-        } catch (e) {
-          console.error('Sentry error:', e);
-        }
-      }
 
       if (isFatal && !__DEV__) {
         // In production, log but don't crash the app
@@ -176,8 +121,6 @@ export default function App() {
       ErrorUtils.setGlobalHandler(handleGlobalError);
     }
 
-    // Note: window.addEventListener for unhandledrejection only works on web
-    // React Native doesn't have window.addEventListener for Promise rejections
     // ErrorUtils.setGlobalHandler will catch most errors in React Native
   }, []);
 
@@ -261,13 +204,6 @@ export default function App() {
           } catch (error) {
             console.error('Update check failed:', error);
             // Log but continue - don't block app startup
-            if (process.env.EXPO_PUBLIC_SENTRY_DSN) {
-              try {
-                Sentry.captureException(error, {
-                  tags: { context: 'OTA Update Check' },
-                });
-              } catch (e) { }
-            }
           }
         }
 

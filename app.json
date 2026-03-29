@@ -32,9 +32,6 @@
         "ACCESS_NETWORK_STATE"
       ]
     },
-    "web": {
-      "favicon": "./assets/favicon.png"
-    },
     "plugins": [
       "expo-font",
       [
@@ -60,12 +57,6 @@
     "assetBundlePatterns": [
       "assets/**/*"
     ],
-    "packagerOpts": {
-      "assetExts": [
-        "png",
-        "jpg"
-      ]
-    },
     "updates": {
       "enabled": true,
       "checkAutomatically": "ON_LOAD",

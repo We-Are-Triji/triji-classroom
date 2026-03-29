@@ -1,6 +1,5 @@
 import { Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import * as Sentry from '@sentry/react-native';
 
 /**
  * Comprehensive error handling utility
@@ -102,20 +101,6 @@ export function logError(error, context = 'Unknown') {
   saveErrorLog(details).catch(e => {
     console.error('Failed to save error log:', e);
   });
-
-  // Send to Sentry if configured
-  if (process.env.EXPO_PUBLIC_SENTRY_DSN) {
-    try {
-      Sentry.captureException(error, {
-        tags: {
-          context,
-        },
-        extra: details,
-      });
-    } catch (e) {
-      console.error('Failed to send error to Sentry:', e);
-    }
-  }
 }
 
 /**

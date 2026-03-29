@@ -1,5 +1,8 @@
 node_modules/
 .expo/
+.expo-shared/
+.firebase/
+.codex
 dist/
 npm-debug.*
 *.jks
@@ -8,7 +11,6 @@ npm-debug.*
 *.key
 *.mobileprovision
 *.orig.*
-web-build/
 
 # Environment variables
 .env
