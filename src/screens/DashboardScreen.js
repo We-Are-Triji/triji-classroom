@@ -23,7 +23,11 @@ import { db, auth } from '../config/firebaseConfig';
 import { collection, query, orderBy, limit, getDocs, doc, getDoc } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
 import { RecentUpdatesSkeleton } from '../components';
-import { getNotificationInbox, markInboxAsRead } from '../utils/notificationInbox';
+import {
+  clearNotificationInbox,
+  getNotificationInbox,
+  markInboxAsRead,
+} from '../utils/notificationInbox';
 import { brutalCard, brutalShadow, palette, screenAccents } from '../theme/neoBrutal';
 
 const { width, height } = Dimensions.get('window');
@@ -386,6 +390,12 @@ export default function DashboardScreen({ navigation }) {
     setShowInbox(true);
   };
 
+  const clearInbox = async () => {
+    await clearNotificationInbox();
+    setNotificationInbox([]);
+    setUnreadInboxCount(0);
+  };
+
   const renderUpdateItem = item => {
     if (!item) return null;
 
@@ -571,9 +581,16 @@ export default function DashboardScreen({ navigation }) {
           <View style={styles.inboxModal}>
             <View style={styles.inboxHeader}>
               <Text style={styles.inboxTitle}>Alert Inbox</Text>
-              <TouchableOpacity style={styles.inboxClose} onPress={() => setShowInbox(false)}>
-                <Feather name="x" size={20} color={palette.text} />
-              </TouchableOpacity>
+              <View style={styles.inboxActions}>
+                {notificationInbox.length > 0 ? (
+                  <TouchableOpacity style={styles.clearInboxButton} onPress={clearInbox}>
+                    <Text style={styles.clearInboxButtonText}>Clear all</Text>
+                  </TouchableOpacity>
+                ) : null}
+                <TouchableOpacity style={styles.inboxClose} onPress={() => setShowInbox(false)}>
+                  <Feather name="x" size={20} color={palette.text} />
+                </TouchableOpacity>
+              </View>
             </View>
 
             <ScrollView showsVerticalScrollIndicator={false}>
@@ -868,8 +885,27 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     marginBottom: 14,
   },
+  inboxActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
   inboxTitle: {
     fontSize: 20,
+    fontFamily: 'Inter_600SemiBold',
+    color: palette.text,
+    textTransform: 'uppercase',
+  },
+  clearInboxButton: {
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+    borderRadius: 12,
+    borderWidth: 3,
+    borderColor: palette.border,
+    backgroundColor: palette.mustard,
+  },
+  clearInboxButtonText: {
+    fontSize: 11,
     fontFamily: 'Inter_600SemiBold',
     color: palette.text,
     textTransform: 'uppercase',

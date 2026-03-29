@@ -48,3 +48,13 @@ export async function markInboxAsRead() {
     return [];
   }
 }
+
+export async function clearNotificationInbox() {
+  try {
+    await AsyncStorage.removeItem(INBOX_KEY);
+    return [];
+  } catch (error) {
+    console.log('Failed to clear notification inbox:', error);
+    return [];
+  }
+}

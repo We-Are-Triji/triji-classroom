@@ -311,10 +311,6 @@ export default function AnnouncementsScreen({ navigation }) {
             {item.title}
           </Text>
 
-          <Text style={styles.cardPreview} numberOfLines={3}>
-            {item.content}
-          </Text>
-
           <View style={styles.cardFooter}>
             <View style={[styles.metaPill, { backgroundColor: theme.pillBackground }]}>
               <Feather name="user" size={14} color={palette.text} />
@@ -372,10 +368,6 @@ export default function AnnouncementsScreen({ navigation }) {
             <Text style={styles.headerTitle}>Announcements</Text>
             <Text style={styles.headerSubtext}>Fresh reminders, events, and urgent updates</Text>
             <Text style={styles.syncLabel}>{formatSyncLabel(lastSyncedAt)}</Text>
-          </View>
-          <View style={styles.heroCount}>
-            <Text style={styles.heroCountNumber}>{orderedAnnouncements.length}</Text>
-            <Text style={styles.heroCountLabel}>Live</Text>
           </View>
         </View>
 
@@ -532,49 +524,28 @@ const styles = StyleSheet.create({
   },
   heroText: {
     flex: 1,
+    minWidth: 0,
   },
   headerTitle: {
-    fontSize: 22,
+    fontSize: 20,
     fontFamily: 'Inter_600SemiBold',
     color: palette.text,
     textTransform: 'uppercase',
     marginBottom: 4,
+    flexShrink: 1,
   },
   headerSubtext: {
     fontSize: 13,
     fontFamily: 'Inter_400Regular',
     color: palette.textMuted,
+    lineHeight: 18,
+    flexShrink: 1,
   },
   syncLabel: {
     marginTop: 4,
     fontSize: 11,
     fontFamily: 'Inter_500Medium',
     color: palette.textMuted,
-  },
-  heroCount: {
-    minWidth: 70,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 8,
-    paddingHorizontal: 10,
-    borderRadius: 18,
-    borderWidth: 3,
-    borderColor: palette.border,
-    backgroundColor: palette.mustard,
-    ...brutalShadow(3, 3),
-  },
-  heroCountNumber: {
-    fontSize: 22,
-    lineHeight: 24,
-    fontFamily: 'Inter_600SemiBold',
-    color: palette.text,
-  },
-  heroCountLabel: {
-    fontSize: 11,
-    fontFamily: 'Inter_600SemiBold',
-    color: palette.text,
-    textTransform: 'uppercase',
-    letterSpacing: 0.8,
   },
   toolbar: {
     gap: 10,
@@ -631,60 +602,61 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     borderWidth: 3,
     borderColor: palette.border,
-    borderRadius: 28,
+    borderRadius: 20,
     overflow: 'hidden',
-    marginBottom: 16,
+    marginBottom: 10,
     ...brutalShadow(),
   },
   accentRail: {
-    width: 14,
+    width: 10,
     borderRightWidth: 3,
     borderRightColor: palette.border,
   },
   cardBody: {
     flex: 1,
-    padding: 18,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
   },
   cardHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    flexWrap: 'wrap',
-    gap: 12,
-    alignItems: 'flex-start',
-    marginBottom: 14,
+    gap: 10,
+    alignItems: 'center',
+    marginBottom: 6,
   },
   cardHeaderRight: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
+    flexShrink: 0,
   },
   typeBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 16,
+    gap: 6,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 14,
     borderWidth: 3,
     borderColor: palette.border,
+    maxWidth: '58%',
   },
   typeBadgeText: {
-    fontSize: 12,
+    fontSize: 11,
     fontFamily: 'Inter_600SemiBold',
     color: palette.text,
     textTransform: 'uppercase',
-    letterSpacing: 0.8,
+    letterSpacing: 0.4,
   },
   cardTimestamp: {
-    fontSize: 12,
+    fontSize: 11,
     fontFamily: 'Inter_500Medium',
     color: palette.textMuted,
-    marginTop: 4,
   },
   pinButton: {
-    width: 34,
-    height: 34,
-    borderRadius: 12,
+    width: 30,
+    height: 30,
+    borderRadius: 10,
     borderWidth: 3,
     borderColor: palette.border,
     backgroundColor: palette.white,
@@ -695,36 +667,28 @@ const styles = StyleSheet.create({
     backgroundColor: palette.mustard,
   },
   cardTitle: {
-    fontSize: 20,
-    lineHeight: 27,
+    fontSize: 15,
+    lineHeight: 20,
     fontFamily: 'Inter_600SemiBold',
     color: palette.text,
-    marginBottom: 10,
-  },
-  cardPreview: {
-    fontSize: 15,
-    lineHeight: 22,
-    fontFamily: 'Inter_400Regular',
-    color: palette.text,
+    marginBottom: 8,
   },
   cardFooter: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    justifyContent: 'space-between',
-    gap: 10,
-    marginTop: 16,
+    gap: 8,
   },
   metaPill: {
     maxWidth: '100%',
-    minHeight: 34,
+    minHeight: 30,
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: 6,
     borderWidth: 3,
     borderColor: palette.border,
-    borderRadius: 17,
-    paddingHorizontal: 12,
-    paddingVertical: 7,
+    borderRadius: 15,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
     backgroundColor: '#F7EFE7',
   },
   expiryPill: {
@@ -733,7 +697,7 @@ const styles = StyleSheet.create({
   },
   metaPillText: {
     flexShrink: 1,
-    fontSize: 13,
+    fontSize: 11,
     fontFamily: 'Inter_500Medium',
     color: palette.text,
   },

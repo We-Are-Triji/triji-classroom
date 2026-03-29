@@ -313,12 +313,6 @@ export default function TaskboardScreen({ navigation }) {
 
         <Text style={styles.taskTitle}>{task.title || 'Untitled Task'}</Text>
 
-        {(task.description || task.details) && (
-          <Text style={styles.taskDescription} numberOfLines={2}>
-            {task.description || task.details}
-          </Text>
-        )}
-
         <View style={styles.taskFooter}>
           <View style={styles.dateContainer}>
             <Feather name="calendar" size={14} color="#8E8E93" />
@@ -588,8 +582,9 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
   },
   taskCard: {
-    padding: 12,
-    marginBottom: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    marginBottom: 8,
     ...brutalCard(screenAccents.tasks.tertiary),
   },
   taskCardCompleted: {
@@ -601,17 +596,17 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 8,
+    marginBottom: 6,
     gap: 8,
   },
   taskCardBadges: {
     flexDirection: 'row',
-    gap: 8,
+    gap: 6,
     flexShrink: 0,
   },
   pinButton: {
-    width: 26,
-    height: 26,
+    width: 24,
+    height: 24,
     borderRadius: 10,
     borderWidth: 2,
     borderColor: palette.border,
@@ -626,8 +621,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#DDEDE9',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
+    paddingHorizontal: 7,
+    paddingVertical: 3,
     borderRadius: 12,
     gap: 4,
     borderWidth: 2,
@@ -635,15 +630,15 @@ const styles = StyleSheet.create({
   },
   completedText: {
     fontFamily: 'Inter_600SemiBold',
-    fontSize: 11,
+    fontSize: 10,
     color: palette.success,
   },
   pendingBadge: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#F9EDC3',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
+    paddingHorizontal: 7,
+    paddingVertical: 3,
     borderRadius: 12,
     gap: 4,
     borderWidth: 2,
@@ -651,13 +646,13 @@ const styles = StyleSheet.create({
   },
   pendingText: {
     fontFamily: 'Inter_600SemiBold',
-    fontSize: 11,
+    fontSize: 10,
     color: palette.warning,
   },
   subjectBadge: {
     backgroundColor: screenAccents.tasks.primary,
-    paddingHorizontal: 10,
-    paddingVertical: 5,
+    paddingHorizontal: 9,
+    paddingVertical: 4,
     borderRadius: 10,
     borderWidth: 2,
     borderColor: palette.border,
@@ -665,7 +660,7 @@ const styles = StyleSheet.create({
     maxWidth: '65%',
   },
   subjectBadgeText: {
-    fontSize: 11,
+    fontSize: 10,
     fontFamily: 'Inter_600SemiBold',
     color: palette.text,
   },
@@ -679,27 +674,19 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   overdueText: {
-    fontSize: 11,
+    fontSize: 10,
     fontFamily: 'Inter_500Medium',
     color: palette.error,
   },
   taskTitle: {
-    fontSize: 16,
+    fontSize: 14,
     fontFamily: 'Inter_600SemiBold',
     color: palette.text,
     marginBottom: 6,
-    lineHeight: 22,
-  },
-  taskDescription: {
-    fontSize: 13,
-    fontFamily: 'Inter_400Regular',
-    color: palette.textMuted,
-    lineHeight: 18,
-    marginBottom: 8,
+    lineHeight: 19,
   },
   taskFooter: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
   },
   dateContainer: {
@@ -708,7 +695,7 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   taskDate: {
-    fontSize: 12,
+    fontSize: 11,
     fontFamily: 'Inter_500Medium',
     color: palette.textMuted,
   },
