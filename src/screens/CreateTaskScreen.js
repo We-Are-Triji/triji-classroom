@@ -26,6 +26,8 @@ import {
   onSnapshot,
   addDoc,
   serverTimestamp,
+  doc,
+  getDoc,
 } from 'firebase/firestore';
 import { showErrorAlert, logError } from '../utils/errorHandler';
 import { brutalButton, brutalCard, brutalInput, brutalShadow, palette, screenAccents } from '../theme/neoBrutal';
@@ -40,6 +42,7 @@ export default function CreateTaskScreen({ navigation }) {
   const [subjects, setSubjects] = useState([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(null);
 
   let [fontsLoaded] = useFonts({
     Inter_400Regular,
@@ -48,8 +51,35 @@ export default function CreateTaskScreen({ navigation }) {
   });
 
   useEffect(() => {
-    fetchSubjects();
+    checkAccessAndFetchSubjects();
   }, []);
+
+  const checkAccessAndFetchSubjects = async () => {
+    try {
+      const user = auth.currentUser;
+      if (!user) {
+        setIsAdmin(false);
+        setLoading(false);
+        return;
+      }
+
+      const userDoc = await getDoc(doc(db, 'users', user.uid));
+      const hasAdminAccess = userDoc.exists() && userDoc.data()?.role === 'admin';
+
+      setIsAdmin(hasAdminAccess);
+
+      if (!hasAdminAccess) {
+        setLoading(false);
+        return;
+      }
+
+      fetchSubjects();
+    } catch (error) {
+      logError(error, 'Check Task Create Access');
+      Alert.alert('Error', 'Failed to verify your permissions. Please try again.');
+      setLoading(false);
+    }
+  };
 
   const fetchSubjects = () => {
     try {
@@ -93,6 +123,11 @@ export default function CreateTaskScreen({ navigation }) {
   };
 
   const handleSaveTask = async () => {
+    if (!isAdmin) {
+      Alert.alert('Access Denied', 'Only administrators can create tasks.');
+      return;
+    }
+
     if (!title.trim()) {
       Alert.alert('Error', 'Please enter a task title.');
       return;
@@ -137,6 +172,24 @@ export default function CreateTaskScreen({ navigation }) {
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color={palette.teal} />
           <Text style={styles.loadingText}>Loading...</Text>
+        </View>
+      </View>
+    );
+  }
+
+  if (isAdmin === false) {
+    return (
+      <View style={styles.container}>
+        <View style={styles.header}>
+          <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+            <Feather name="arrow-left" size={24} color={palette.text} />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>Create Task</Text>
+        </View>
+
+        <View style={styles.loadingContainer}>
+          <Feather name="lock" size={40} color={palette.textMuted} />
+          <Text style={styles.loadingText}>Only administrators can create tasks.</Text>
         </View>
       </View>
     );

@@ -228,13 +228,14 @@ export default function PostDetailScreen({ route, navigation }) {
         postContent: post.content,
         reason: selectedReason,
         description: description.trim(),
+        userId: user.uid,
         reporterId: user.uid,
         reportedAt: serverTimestamp(),
       });
 
       // Update post with reportedBy array
       const postRef = doc(db, 'freedom-wall-posts', post.id);
-      const reportedBy = post.reportedBy || [];
+      const reportedBy = currentPost.reportedBy || [];
       const updatedReportedBy = [...reportedBy, user.uid];
 
       await updateDoc(postRef, {

@@ -1,4 +1,5 @@
 import * as Notifications from 'expo-notifications';
+import Constants from 'expo-constants';
 import { Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -17,6 +18,7 @@ Notifications.setNotificationHandler({
  */
 export async function registerForPushNotifications() {
   let token = null;
+  const isExpoGo = Constants.executionEnvironment === 'storeClient';
 
   try {
     const { status: existingStatus } = await Notifications.getPermissionsAsync();
@@ -34,22 +36,18 @@ export async function registerForPushNotifications() {
 
     // Only try to get push token in production/development builds
     // Skip in Expo Go which doesn't support remote notifications in SDK 53+
-    if (finalStatus === 'granted') {
+    if (finalStatus === 'granted' && !isExpoGo) {
       try {
-        // Attempt to get push token - will fail gracefully in Expo Go
         const tokenData = await Notifications.getExpoPushTokenAsync();
         token = tokenData.data;
         console.log('Push notification token:', token);
       } catch (error) {
-        // Expected error in Expo Go SDK 53+ - just log it
-        if (error.message.includes('Expo Go')) {
-          console.log(
-            'Skipping remote push notifications - not supported in Expo Go (use development build for full functionality)'
-          );
-        } else {
-          console.log('Could not get push token:', error.message);
-        }
+        console.log('Could not get push token:', error.message);
       }
+    } else if (finalStatus === 'granted' && isExpoGo) {
+      console.log(
+        'Skipping remote push notifications in Expo Go. Use a development build for Android remote notifications.'
+      );
     }
   } catch (error) {
     // Catch any permission-related errors

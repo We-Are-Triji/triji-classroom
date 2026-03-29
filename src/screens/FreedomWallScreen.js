@@ -30,9 +30,7 @@ import {
   orderBy,
   onSnapshot,
   addDoc,
-  doc,
   runTransaction,
-  deleteDoc,
   limit,
 } from 'firebase/firestore';
 import { auth } from '../config/firebaseConfig';
@@ -65,6 +63,7 @@ export default function FreedomWallScreen({ navigation }) {
   const [numColumns, setNumColumns] = useState(3);
   const [refreshing, setRefreshing] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
+  const [successMessage, setSuccessMessage] = useState('');
   const ITEMS_PER_PAGE = 30;
 
   const combinedPosts = useMemo(() => {
@@ -145,7 +144,6 @@ export default function FreedomWallScreen({ navigation }) {
         q,
         querySnapshot => {
           const postsList = [];
-          const postsToDelete = [];
           const now = new Date();
           const twentyFourHoursAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
 
@@ -172,9 +170,6 @@ export default function FreedomWallScreen({ navigation }) {
                 likedBy: Array.isArray(data.likedBy) ? data.likedBy : [],
                 reportedBy: Array.isArray(data.reportedBy) ? data.reportedBy : [],
               });
-            } else {
-              // Collect expired posts for batch deletion
-              postsToDelete.push(docSnapshot.id);
             }
           });
 
@@ -182,14 +177,6 @@ export default function FreedomWallScreen({ navigation }) {
           setLoading(false);
           setIsInitialLoading(false);
 
-          // Batch delete expired posts after snapshot processing
-          if (postsToDelete.length > 0) {
-            Promise.all(
-              postsToDelete.map(id => deleteDoc(doc(db, 'freedom-wall-posts', id)))
-            ).catch(error => {
-              logError(error, 'Batch Delete Expired Posts');
-            });
-          }
         },
         error => {
           logError(error, 'Fetch Posts');
@@ -281,6 +268,16 @@ export default function FreedomWallScreen({ navigation }) {
       return () => clearTimeout(timer);
     }
   }, [cooldownSeconds]);
+
+  useEffect(() => {
+    if (!successMessage) return undefined;
+
+    const timer = setTimeout(() => {
+      setSuccessMessage('');
+    }, 2500);
+
+    return () => clearTimeout(timer);
+  }, [successMessage]);
 
   const checkCooldown = async () => {
     try {
@@ -399,6 +396,13 @@ export default function FreedomWallScreen({ navigation }) {
       likedBy: [],
     };
 
+    const resetComposer = () => {
+      setPostContent('');
+      setCustomNickname('');
+      setSelectedColor('#FFFACD');
+      setShowModal(false);
+    };
+
     if (!isConnected) {
       // Add to pending posts for offline
       const pendingPost = {
@@ -411,25 +415,25 @@ export default function FreedomWallScreen({ navigation }) {
       // Save timestamp for cooldown (offline posts)
       await AsyncStorage.setItem('lastPostTime', Date.now().toString());
 
-      setPostContent('');
-      setCustomNickname('');
-      setSelectedColor('#FFFACD');
-      setShowModal(false);
+      resetComposer();
+      setSortBy('Newest to Oldest');
+      setCurrentPage(1);
+      setSuccessMessage("Your post is queued and will publish when you're back online.");
       setPosting(false);
       Alert.alert('Posted Offline', "Your post will be published when you're back online.");
       return;
     }
 
     try {
-      const docRef = await addDoc(collection(db, 'freedom-wall-posts'), postData);
+      await addDoc(collection(db, 'freedom-wall-posts'), postData);
 
       // Save timestamp for cooldown
       await AsyncStorage.setItem('lastPostTime', Date.now().toString());
 
-      setPostContent('');
-      setCustomNickname('');
-      setSelectedColor('#FFFACD');
-      setShowModal(false);
+      resetComposer();
+      setSortBy('Newest to Oldest');
+      setCurrentPage(1);
+      setSuccessMessage('Your post is now live on the Freedom Wall.');
     } catch (error) {
       logError(error, 'Create Post');
 
@@ -547,6 +551,12 @@ export default function FreedomWallScreen({ navigation }) {
       )}
 
       <View style={styles.cardContent}>
+        {!!successMessage && (
+          <View style={styles.successBanner}>
+            <Feather name="check-circle" size={18} color={palette.text} />
+            <Text style={styles.successBannerText}>{successMessage}</Text>
+          </View>
+        )}
         {/* Posts list or empty state */}
         {isInitialLoading ? (
           <View style={styles.loadingContainer}>
@@ -878,6 +888,25 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: 40,
+  },
+  successBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    marginHorizontal: 16,
+    marginBottom: 12,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    backgroundColor: screenAccents.freedomWall.secondary,
+    borderWidth: 3,
+    borderColor: palette.border,
+    borderRadius: 14,
+  },
+  successBannerText: {
+    flex: 1,
+    color: palette.text,
+    fontSize: 14,
+    fontFamily: 'Inter_500Medium',
   },
   errorText: {
     color: '#FFFFFF',

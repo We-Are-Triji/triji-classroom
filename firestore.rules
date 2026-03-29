@@ -39,6 +39,15 @@ service cloud.firestore {
       );
     }
 
+    // Rule for the 'subjects' collection
+    match /subjects/{subjectId} {
+      // Everyone signed in can read subject metadata
+      allow read: if request.auth != null;
+
+      // Only admins can manage subjects
+      allow create, update, delete: if isAdmin();
+    }
+
     // Rule for the 'announcements' collection
     match /announcements/{announcementId} {
       // Everyone can read announcements
@@ -89,11 +98,14 @@ service cloud.firestore {
     match /reports/{reportId} {
       // Users can read their own reports, admins can read all
       allow read: if request.auth != null &&
-                    (request.auth.uid == resource.data.userId || isAdmin());
+                    (request.auth.uid == resource.data.userId ||
+                     request.auth.uid == resource.data.reporterId ||
+                     isAdmin());
 
       // Users can create reports for themselves
       allow create: if request.auth != null &&
-                      request.resource.data.userId == request.auth.uid;
+                      (request.resource.data.userId == request.auth.uid ||
+                       request.resource.data.reporterId == request.auth.uid);
       
       // Only admins can update/delete reports
       allow update, delete: if isAdmin();

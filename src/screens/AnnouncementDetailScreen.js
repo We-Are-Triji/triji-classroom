@@ -28,6 +28,7 @@ export default function AnnouncementDetailScreen({ route, navigation }) {
   const [loading, setLoading] = useState(true);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [error, setError] = useState(null);
+  const [canDelete, setCanDelete] = useState(false);
 
   // Safety check
   useEffect(() => {
@@ -50,13 +51,24 @@ export default function AnnouncementDetailScreen({ route, navigation }) {
     try {
       // Fetch announcement
       const docRef = doc(db, 'announcements', announcementId);
-      const docSnap = await getDoc(docRef);
+      const [docSnap, userSnap] = await Promise.all([
+        getDoc(docRef),
+        auth.currentUser ? getDoc(doc(db, 'users', auth.currentUser.uid)) : Promise.resolve(null),
+      ]);
+
+      const isAdmin = userSnap?.exists() && userSnap.data()?.role === 'admin';
 
       if (docSnap.exists()) {
-        setAnnouncement({
+        const announcementData = {
           id: docSnap.id,
           ...docSnap.data(),
-        });
+        };
+
+        setAnnouncement(announcementData);
+        setCanDelete(
+          !!auth.currentUser &&
+            (announcementData.authorId === auth.currentUser.uid || isAdmin)
+        );
       } else {
         setError('Announcement not found.');
       }
@@ -191,7 +203,7 @@ export default function AnnouncementDetailScreen({ route, navigation }) {
                   {announcement.authorName || announcement.author || 'Admin'}
                 </Text>
               </View>
-              {auth.currentUser && announcement.authorId === auth.currentUser.uid && (
+              {canDelete && (
                 <TouchableOpacity style={styles.deleteButtonCompact} onPress={handleDelete}>
                   <Feather name="trash-2" size={18} color={palette.text} />
                 </TouchableOpacity>
